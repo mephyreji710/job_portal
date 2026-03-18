@@ -1,0 +1,419 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Admin Dashboard — TalentBridge{% endblock %}
+
+{% block extra_css %}
+.main-content { padding: 32px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+/* Stat card */
+.adm-stat {
+  background: var(--white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow); padding: 20px 22px;
+  border-top: 3px solid var(--gray-200);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.adm-stat-val   { font-size: 1.9rem; font-weight: 900; line-height: 1; }
+.adm-stat-label { font-size: .75rem; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: .05em; }
+.adm-stat-sub   { font-size: .72rem; color: var(--gray-300); margin-top: 2px; }
+
+/* Pipeline bar */
+.pipe-wrap { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 22px 24px; margin-bottom: 24px; }
+.pipe-title { font-size: .8rem; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 16px; }
+.pipe-row   { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.pipe-label { width: 100px; font-size: .8rem; font-weight: 600; color: var(--gray-600); flex-shrink: 0; }
+.pipe-track { flex: 1; height: 10px; background: var(--gray-100); border-radius: 999px; overflow: hidden; }
+.pipe-fill  { height: 100%; border-radius: 999px; transition: width .3s; }
+.pipe-count { width: 40px; text-align: right; font-size: .8rem; font-weight: 700; color: var(--gray-700); flex-shrink: 0; }
+
+/* Section card */
+.adm-card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow); overflow: hidden; }
+.adm-card-hd { display: flex; align-items: center; justify-content: space-between;
+               padding: 14px 20px; border-bottom: 1px solid var(--gray-100); }
+.adm-card-title { font-size: .875rem; font-weight: 800; color: var(--gray-800); }
+
+/* Table */
+.adm-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.adm-table th { padding: 8px 16px; text-align: left; font-size: .7rem; font-weight: 700; text-transform: uppercase;
+                color: var(--gray-400); letter-spacing: .05em; background: var(--gray-50); border-bottom: 1px solid var(--gray-200); }
+.adm-table td { padding: 10px 16px; border-bottom: 1px solid var(--gray-100); color: var(--gray-700); vertical-align: middle; }
+.adm-table tr:last-child td { border-bottom: none; }
+.adm-table tr:hover td { background: var(--gray-50); }
+
+/* Badges */
+.role-badge { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: .7rem; font-weight: 700; }
+.role-admin      { background: #fef3c7; color: #92400e; }
+.role-recruiter  { background: #d1fae5; color: #065f46; }
+.role-job_seeker { background: #e0f2fe; color: #075985; }
+
+.jb-pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: .7rem; font-weight: 700; }
+.jb-active   { background: #d1fae5; color: #065f46; }
+.jb-closed   { background: var(--gray-100); color: var(--gray-500); }
+.jb-draft    { background: #fef3c7; color: #92400e; }
+
+/* Delete button in table */
+.adm-del-btn {
+  padding: 3px 10px; border: 1.5px solid #fca5a5; border-radius: 6px;
+  background: #fef2f2; color: #dc2626; font-size: .75rem; cursor: pointer;
+  font-family: var(--font); transition: all .15s;
+}
+.adm-del-btn:hover { background: #dc2626; color: #fff; border-color: #dc2626; }
+
+/* Confirm modal */
+.modal-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.45); z-index: 1000;
+  align-items: center; justify-content: center;
+}
+.modal-backdrop.open { display: flex; }
+.modal-box {
+  background: var(--white); border-radius: var(--radius-xl);
+  padding: 28px 32px; max-width: 400px; width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25); text-align: center;
+}
+
+/* Quick actions */
+.qa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 16px; }
+.qa-btn {
+  display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+  border-radius: var(--radius); background: var(--gray-50);
+  border: 1.5px solid var(--gray-200); text-decoration: none;
+  color: var(--gray-700); font-weight: 600; font-size: .8rem;
+  transition: all .15s;
+}
+.qa-btn:hover { background: var(--blue-pale); border-color: var(--blue); color: var(--blue); text-decoration: none; }
+.qa-icon { font-size: 1.1rem; }
+
+/* Overview welcome bar */
+.ov-bar { display: flex; gap: 24px; flex-wrap: wrap; align-items: center; margin-top: 20px; }
+.ov-item { text-align: center; }
+.ov-val  { font-size: 1.9rem; font-weight: 900; color: #fff; line-height: 1; }
+.ov-lbl  { font-size: .72rem; color: rgba(255,255,255,.65); font-weight: 600; margin-top: 2px; }
+.ov-div  { width: 1px; height: 44px; background: rgba(255,255,255,.2); }
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="flex items-center gap-4">
+      <div class="avatar" style="width:52px;height:52px;font-size:1.3rem;">
+        {{ request.user.first_name|slice:":1"|upper }}{{ request.user.last_name|slice:":1"|upper }}
+      </div>
+      <div>
+        <h1>Admin Dashboard</h1>
+        <p>Welcome, {{ request.user.get_full_name|default:request.user.username }}. Platform-wide overview.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- WELCOME BANNER -->
+  <div class="welcome-card" style="margin-bottom:28px;">
+    <h2>&#128736; Platform Overview</h2>
+    <p>Real-time snapshot of TalentBridge activity.</p>
+    <div class="ov-bar">
+      <div class="ov-item">
+        <div class="ov-val">{{ stats.total_users }}</div>
+        <div class="ov-lbl">Total Users</div>
+      </div>
+      <div class="ov-div"></div>
+      <div class="ov-item">
+        <div class="ov-val" style="color:#6ee7b7;">{{ stats.active_recruiters }}</div>
+        <div class="ov-lbl">Active Recruiters</div>
+      </div>
+      <div class="ov-div"></div>
+      <div class="ov-item">
+        <div class="ov-val" style="color:#93c5fd;">{{ stats.active_jobs }}</div>
+        <div class="ov-lbl">Live Jobs</div>
+      </div>
+      <div class="ov-div"></div>
+      <div class="ov-item">
+        <div class="ov-val" style="color:#fcd34d;">{{ stats.total_apps }}</div>
+        <div class="ov-lbl">Applications</div>
+      </div>
+      <div class="ov-div"></div>
+      <div class="ov-item">
+        <div class="ov-val" style="color:#a78bfa;">{{ stats.hired }}</div>
+        <div class="ov-lbl">Hired</div>
+      </div>
+      <div class="ov-div"></div>
+      <div class="ov-item">
+        <div class="ov-val" style="color:#fca5a5;">{{ stats.new_this_week }}</div>
+        <div class="ov-lbl">New This Week</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 1: USER STATS -->
+  <div style="font-size:.72rem;font-weight:800;color:var(--gray-400);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">&#128100; Users</div>
+  <div class="grid-4">
+    <div class="adm-stat" style="border-top-color:var(--blue);">
+      <div class="adm-stat-val" style="color:var(--blue);">{{ stats.total_users }}</div>
+      <div class="adm-stat-label">Total Users</div>
+      <div class="adm-stat-sub">+{{ stats.new_this_month }} this month</div>
+    </div>
+    <div class="adm-stat" style="border-top-color:var(--green);">
+      <div class="adm-stat-val" style="color:var(--green);">{{ stats.recruiters }}</div>
+      <div class="adm-stat-label">Recruiters</div>
+      <div class="adm-stat-sub">{{ stats.active_recruiters }} actively hiring</div>
+    </div>
+    <div class="adm-stat" style="border-top-color:var(--indigo);">
+      <div class="adm-stat-val" style="color:var(--indigo);">{{ stats.job_seekers }}</div>
+      <div class="adm-stat-label">Job Seekers</div>
+      <div class="adm-stat-sub">+{{ stats.new_this_week }} this week</div>
+    </div>
+    <div class="adm-stat" style="border-top-color:var(--orange);">
+      <div class="adm-stat-val" style="color:var(--orange);">{{ stats.new_this_month }}</div>
+      <div class="adm-stat-label">New This Month</div>
+      <div class="adm-stat-sub">{{ stats.new_this_week }} in last 7 days</div>
+    </div>
+  </div>
+
+  <!-- ROW 2: JOB + INTERVIEW STATS -->
+  <div style="font-size:.72rem;font-weight:800;color:var(--gray-400);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">&#128188; Jobs &amp; Interviews</div>
+  <div class="grid-4">
+    <div class="adm-stat" style="border-top-color:#0891b2;">
+      <div class="adm-stat-val" style="color:#0891b2;">{{ stats.total_jobs }}</div>
+      <div class="adm-stat-label">Total Jobs Posted</div>
+      <div class="adm-stat-sub">{{ stats.jobs_this_month }} this month</div>
+    </div>
+    <div class="adm-stat" style="border-top-color:var(--green);">
+      <div class="adm-stat-val" style="color:var(--green);">{{ stats.active_jobs }}</div>
+      <div class="adm-stat-label">Active Listings</div>
+      <div class="adm-stat-sub">Open to applications</div>
+    </div>
+    <div class="adm-stat" style="border-top-color:var(--indigo);">
+      <div class="adm-stat-val" style="color:var(--indigo);">{{ stats.total_interviews }}</div>
+      <div class="adm-stat-label">Interviews Scheduled</div>
+      <div class="adm-stat-sub">{{ stats.upcoming_interviews }} upcoming</div>
+    </div>
+    <div class="adm-stat" style="border-top-color:#8b5cf6;">
+      <div class="adm-stat-val" style="color:#8b5cf6;">{{ stats.confirmed_interviews }}</div>
+      <div class="adm-stat-label">Confirmed Interviews</div>
+      <div class="adm-stat-sub">Candidate confirmed</div>
+    </div>
+  </div>
+
+  <!-- HIRING PIPELINE -->
+  <div style="font-size:.72rem;font-weight:800;color:var(--gray-400);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">&#128640; Hiring Pipeline</div>
+  <div class="pipe-wrap">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;">
+      <div>
+        {% with total=stats.total_apps|default:1 %}
+        <div class="pipe-row">
+          <div class="pipe-label">Total Applied</div>
+          <div class="pipe-track"><div class="pipe-fill" style="width:100%;background:var(--gray-300);"></div></div>
+          <div class="pipe-count">{{ stats.total_apps }}</div>
+        </div>
+        <div class="pipe-row">
+          <div class="pipe-label">Pending</div>
+          <div class="pipe-track"><div class="pipe-fill" style="width:{% widthratio stats.pending_apps total 100 %}%;background:#94a3b8;"></div></div>
+          <div class="pipe-count">{{ stats.pending_apps }}</div>
+        </div>
+        <div class="pipe-row">
+          <div class="pipe-label">Reviewed</div>
+          <div class="pipe-track"><div class="pipe-fill" style="width:{% widthratio stats.reviewed_apps total 100 %}%;background:var(--blue);"></div></div>
+          <div class="pipe-count">{{ stats.reviewed_apps }}</div>
+        </div>
+        <div class="pipe-row">
+          <div class="pipe-label">Shortlisted</div>
+          <div class="pipe-track"><div class="pipe-fill" style="width:{% widthratio stats.shortlisted total 100 %}%;background:var(--green);"></div></div>
+          <div class="pipe-count">{{ stats.shortlisted }}</div>
+        </div>
+        <div class="pipe-row">
+          <div class="pipe-label">Rejected</div>
+          <div class="pipe-track"><div class="pipe-fill" style="width:{% widthratio stats.rejected total 100 %}%;background:#ef4444;"></div></div>
+          <div class="pipe-count">{{ stats.rejected }}</div>
+        </div>
+        <div class="pipe-row">
+          <div class="pipe-label">&#127881; Hired</div>
+          <div class="pipe-track"><div class="pipe-fill" style="width:{% widthratio stats.hired total 100 %}%;background:#8b5cf6;"></div></div>
+          <div class="pipe-count">{{ stats.hired }}</div>
+        </div>
+        {% endwith %}
+      </div>
+
+      <!-- Hire rate summary -->
+      <div style="display:flex;flex-direction:column;justify-content:center;gap:16px;padding-left:16px;border-left:1px solid var(--gray-100);">
+        <div>
+          <div style="font-size:.72rem;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Conversion Rates</div>
+          {% if stats.total_apps %}
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem;">
+              <span style="color:var(--gray-600);">Shortlist rate</span>
+              <span style="font-weight:800;color:var(--green);">{% widthratio stats.shortlisted stats.total_apps 100 %}%</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem;">
+              <span style="color:var(--gray-600);">Hire rate</span>
+              <span style="font-weight:800;color:#8b5cf6;">{% widthratio stats.hired stats.total_apps 100 %}%</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem;">
+              <span style="color:var(--gray-600);">Interview rate</span>
+              <span style="font-weight:800;color:var(--indigo);">{% widthratio stats.total_interviews stats.total_apps 100 %}%</span>
+            </div>
+          </div>
+          {% else %}
+          <div style="color:var(--gray-300);font-size:.82rem;">No applications yet</div>
+          {% endif %}
+        </div>
+        <div style="background:var(--gray-50);border-radius:var(--radius);padding:14px 16px;">
+          <div style="font-size:.72rem;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">&#127942; Total Hired</div>
+          <div style="font-size:2.4rem;font-weight:900;color:#8b5cf6;line-height:1;">{{ stats.hired }}</div>
+          <div style="font-size:.75rem;color:var(--gray-400);margin-top:2px;">successful placements</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM: TABLES + QUICK ACTIONS -->
+  <div class="grid-2">
+
+    <!-- RECENT USERS -->
+    <div class="adm-card">
+      <div class="adm-card-hd">
+        <span class="adm-card-title">&#128100; Recent Registrations</span>
+        <a href="{% url 'accounts:admin_user_list' %}" class="btn btn-outline btn-sm">Manage All Users</a>
+      </div>
+      <table class="adm-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Role</th>
+            <th>Joined</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in stats.recent_users %}
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div class="avatar" style="width:30px;height:30px;font-size:.7rem;">
+                  {{ u.first_name|slice:":1"|upper }}{{ u.last_name|slice:":1"|upper }}
+                </div>
+                <div>
+                  <div style="font-weight:600;">{{ u.get_full_name|default:u.username }}</div>
+                  <div style="font-size:.72rem;color:var(--gray-400);">{{ u.email }}</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="role-badge role-{{ u.role }}">{{ u.get_role_display }}</span></td>
+            <td style="color:var(--gray-400);">{{ u.date_joined|date:"M d, Y" }}</td>
+            <td>
+              {% if u.pk == request.user.pk or u.role == 'admin' %}
+              <span style="font-size:.7rem;color:var(--gray-300);">—</span>
+              {% else %}
+              <button class="adm-del-btn"
+                      onclick="openDel({{ u.pk }}, '{{ u.get_full_name|default:u.email|escapejs }}')">
+                &#128465;
+              </button>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:24px;">No users yet</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- RIGHT: RECENT JOBS + QUICK ACTIONS -->
+    <div style="display:flex;flex-direction:column;gap:20px;">
+
+      <!-- RECENT JOBS -->
+      <div class="adm-card">
+        <div class="adm-card-hd">
+          <span class="adm-card-title">&#128188; Recent Job Posts</span>
+          <a href="/admin/jobs/jobpost/" class="btn btn-outline btn-sm">View All</a>
+        </div>
+        <table class="adm-table">
+          <thead>
+            <tr><th>Title</th><th>Company</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            {% for job in stats.recent_jobs %}
+            <tr>
+              <td style="font-weight:600;">{{ job.title|truncatechars:30 }}</td>
+              <td style="color:var(--gray-500);">{{ job.recruiter.company_name|truncatechars:20 }}</td>
+              <td>
+                <span class="jb-pill jb-{{ job.status }}">{{ job.get_status_display }}</span>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" style="text-align:center;color:var(--gray-400);padding:20px;">No jobs yet</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- QUICK ACTIONS -->
+      <div class="adm-card">
+        <div class="adm-card-hd">
+          <span class="adm-card-title">&#9889; Quick Actions</span>
+        </div>
+        <div class="qa-grid">
+          <a href="{% url 'accounts:admin_user_list' %}" class="qa-btn">
+            <span class="qa-icon">&#128100;</span><span>Manage Users</span>
+          </a>
+          <a href="/admin/jobs/jobpost/" class="qa-btn">
+            <span class="qa-icon">&#128188;</span><span>All Jobs</span>
+          </a>
+          <a href="/admin/applications/application/" class="qa-btn">
+            <span class="qa-icon">&#128640;</span><span>Applications</span>
+          </a>
+          <a href="/admin/interviews/interview/" class="qa-btn">
+            <span class="qa-icon">&#128197;</span><span>Interviews</span>
+          </a>
+          <a href="/admin/recruiter/recruiterprofile/" class="qa-btn">
+            <span class="qa-icon">&#127970;</span><span>Recruiters</span>
+          </a>
+          <a href="{% url 'analytics:dashboard' %}" class="qa-btn" style="border-color:var(--indigo);background:#eef2ff;color:var(--indigo);">
+            <span class="qa-icon">&#128200;</span><span>Analytics</span>
+          </a>
+          <a href="/admin/" class="qa-btn">
+            <span class="qa-icon">&#128736;</span><span>Django Admin</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal-backdrop" id="delModal">
+  <div class="modal-box">
+    <div style="font-size:2.2rem;margin-bottom:10px;">&#9888;&#65039;</div>
+    <div style="font-size:1rem;font-weight:800;color:var(--gray-900);margin-bottom:6px;">Delete User?</div>
+    <div style="font-size:.875rem;color:var(--gray-500);margin-bottom:20px;">
+      Permanently delete <strong id="delName"></strong>?<br>This cannot be undone.
+    </div>
+    <form method="post" id="delForm">
+      {% csrf_token %}
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button type="button" class="btn btn-gray" onclick="closeDel()">Cancel</button>
+        <button type="submit" class="btn" style="background:#dc2626;color:#fff;border-color:#dc2626;">
+          &#128465; Delete
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openDel(pk, name) {
+  document.getElementById('delName').textContent = name;
+  document.getElementById('delForm').action = '/accounts/admin/users/' + pk + '/delete/';
+  document.getElementById('delModal').classList.add('open');
+}
+function closeDel() {
+  document.getElementById('delModal').classList.remove('open');
+}
+document.getElementById('delModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDel();
+});
+</script>
+{% endblock %}

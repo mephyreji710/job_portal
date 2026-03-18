@@ -1,0 +1,217 @@
+{% extends 'recruiter/base_recruiter.html' %}
+{% block title %}{% if is_edit %}Edit Job{% else %}Post a Job{% endif %}{% endblock %}
+{% block nav_jobs %}active{% endblock %}
+
+{% block extra_css %}
+.section-divider {
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--gray-400);
+  padding: 4px 0 12px; border-bottom: 1.5px solid var(--gray-100);
+  margin-bottom: 18px; margin-top: 8px;
+}
+.checkbox-row {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 0.875rem; color: var(--gray-700); cursor: pointer;
+}
+.checkbox-input { width: 17px; height: 17px; accent-color: var(--green); cursor: pointer; }
+.skills-hint {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+}
+.skill-suggest {
+  padding: 3px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 600;
+  background: var(--green-pale); color: var(--green-dark);
+  border: 1px solid #a7f3d0; cursor: pointer; transition: background 0.15s;
+}
+.skill-suggest:hover { background: #bbf7d0; }
+{% endblock %}
+
+{% block main_content %}
+
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--green-pale);">&#128196;</div>
+      <div>
+        <div class="section-title">{% if is_edit %}Edit Job Posting{% else %}Post a New Job{% endif %}</div>
+        <div class="section-sub">{% if is_edit %}Update the details of "{{ job.title }}"{% else %}Fill in the details to create a new listing{% endif %}</div>
+      </div>
+    </div>
+    <a href="{% url 'jobs:manage' %}" class="btn btn-gray btn-sm">&#8592; My Jobs</a>
+  </div>
+
+  <div class="section-body">
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <!-- BASIC INFO -->
+      <div class="section-divider">Basic Information</div>
+      <div class="form-grid-2">
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">{{ form.title.label }}</label>
+          {{ form.title }}
+          {% for e in form.title.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.job_type.label }}</label>
+          {{ form.job_type }}
+          {% for e in form.job_type.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.status.label }}</label>
+          {{ form.status }}
+          <span class="field-hint">Set to <strong>Active</strong> to publish immediately, or <strong>Draft</strong> to save without publishing.</span>
+          {% for e in form.status.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+      </div>
+
+      <!-- LOCATION -->
+      <div class="section-divider">Location</div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">{{ form.location.label }} <span class="opt">(optional)</span></label>
+          {{ form.location }}
+          {% for e in form.location.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:18px;">
+          <label class="checkbox-row">
+            {{ form.is_remote }}
+            <span>{{ form.is_remote.label }}</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- REQUIREMENTS -->
+      <div class="section-divider">Requirements</div>
+
+      <div class="form-group">
+        <label class="form-label">{{ form.required_skills.label }}</label>
+        {{ form.required_skills }}
+        <span class="field-hint">Separate skills with commas. Click a suggestion to copy it.</span>
+        {% for e in form.required_skills.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        <div class="skills-hint">
+          <span class="skill-suggest" onclick="addSkill('Python')">Python</span>
+          <span class="skill-suggest" onclick="addSkill('Django')">Django</span>
+          <span class="skill-suggest" onclick="addSkill('JavaScript')">JavaScript</span>
+          <span class="skill-suggest" onclick="addSkill('React')">React</span>
+          <span class="skill-suggest" onclick="addSkill('PostgreSQL')">PostgreSQL</span>
+          <span class="skill-suggest" onclick="addSkill('REST API')">REST API</span>
+          <span class="skill-suggest" onclick="addSkill('Docker')">Docker</span>
+          <span class="skill-suggest" onclick="addSkill('AWS')">AWS</span>
+          <span class="skill-suggest" onclick="addSkill('Git')">Git</span>
+          <span class="skill-suggest" onclick="addSkill('Node.js')">Node.js</span>
+          <span class="skill-suggest" onclick="addSkill('TypeScript')">TypeScript</span>
+          <span class="skill-suggest" onclick="addSkill('Vue.js')">Vue.js</span>
+          <span class="skill-suggest" onclick="addSkill('MySQL')">MySQL</span>
+          <span class="skill-suggest" onclick="addSkill('Redis')">Redis</span>
+          <span class="skill-suggest" onclick="addSkill('Linux')">Linux</span>
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">{{ form.experience_level.label }}</label>
+          {{ form.experience_level }}
+          {% for e in form.experience_level.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.education_required.label }}</label>
+          {{ form.education_required }}
+          {% for e in form.education_required.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.experience_years_min.label }}</label>
+          {{ form.experience_years_min }}
+          {% for e in form.experience_years_min.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.experience_years_max.label }} <span class="opt">(optional)</span></label>
+          {{ form.experience_years_max }}
+          {% for e in form.experience_years_max.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+      </div>
+
+      <!-- CONTENT -->
+      <div class="section-divider">Job Content</div>
+      <div class="form-group">
+        <label class="form-label">{{ form.description.label }}</label>
+        {{ form.description }}
+        {% for e in form.description.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+      </div>
+      <div class="form-group">
+        <label class="form-label">{{ form.responsibilities.label }} <span class="opt">(optional)</span></label>
+        {{ form.responsibilities }}
+        {% for e in form.responsibilities.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+      </div>
+      <div class="form-group">
+        <label class="form-label">{{ form.requirements.label }} <span class="opt">(optional)</span></label>
+        {{ form.requirements }}
+        {% for e in form.requirements.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+      </div>
+
+      <!-- SALARY -->
+      <div class="section-divider">Compensation</div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">{{ form.salary_min.label }} <span class="opt">(optional)</span></label>
+          {{ form.salary_min }}
+          {% for e in form.salary_min.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.salary_max.label }} <span class="opt">(optional)</span></label>
+          {{ form.salary_max }}
+          {% for e in form.salary_max.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.salary_currency.label }}</label>
+          {{ form.salary_currency }}
+          {% for e in form.salary_currency.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.salary_period.label }}</label>
+          {{ form.salary_period }}
+          {% for e in form.salary_period.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="checkbox-row">
+            {{ form.is_salary_visible }}
+            <span>{{ form.is_salary_visible.label }}</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- DEADLINE -->
+      <div class="section-divider">Publishing</div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">{{ form.deadline.label }} <span class="opt">(optional)</span></label>
+          {{ form.deadline }}
+          <span class="field-hint">Leave blank for no deadline.</span>
+          {% for e in form.deadline.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+      </div>
+
+      <!-- SUBMIT -->
+      <div style="display:flex;gap:12px;margin-top:8px;padding-top:16px;border-top:1px solid var(--gray-100);">
+        <button type="submit" class="btn btn-primary">
+          {% if is_edit %}&#10003; Save Changes{% else %}&#128640; Post Job{% endif %}
+        </button>
+        <a href="{% url 'jobs:manage' %}" class="btn btn-gray">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function addSkill(name) {
+  const input = document.querySelector('input[name="required_skills"]');
+  if (!input) return;
+  const current = input.value.trim();
+  const skills = current ? current.split(',').map(s => s.trim()).filter(Boolean) : [];
+  if (!skills.map(s => s.toLowerCase()).includes(name.toLowerCase())) {
+    skills.push(name);
+    input.value = skills.join(', ');
+  }
+}
+</script>
+
+{% endblock %}

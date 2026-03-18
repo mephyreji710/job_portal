@@ -1,0 +1,210 @@
+{% extends 'recruiter/base_recruiter.html' %}
+{% block title %}Applicants — {{ job.title }}{% endblock %}
+{% block nav_jobs %}active{% endblock %}
+
+{% block extra_css %}
+.appl-header {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #0891b2 100%);
+  border-radius: var(--radius-xl); padding: 24px 28px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.appl-row {
+  display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px;
+  border: 1.5px solid var(--gray-200); border-radius: var(--radius-lg);
+  transition: border-color .2s; margin-bottom: 10px;
+}
+.appl-row:hover { border-color: var(--green); }
+
+.av { width: 44px; height: 44px; border-radius: 50%; background: var(--indigo-pale);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; font-weight: 800; color: var(--indigo); flex-shrink: 0; }
+
+.appl-info { flex: 1; min-width: 0; }
+.appl-name  { font-size: .9rem; font-weight: 700; color: var(--gray-900); }
+.appl-email { font-size: .75rem; color: var(--gray-400); margin-top: 1px; }
+.appl-meta  { font-size: .75rem; color: var(--gray-500); margin-top: 5px; display: flex; flex-wrap: wrap; gap: 10px; }
+
+.cover-preview { margin-top: 8px; font-size: .8rem; color: var(--gray-600); font-style: italic;
+                  background: var(--gray-50); padding: 8px 12px; border-radius: 8px;
+                  border-left: 3px solid var(--gray-200); }
+
+/* Status badges */
+.st-pill { display: inline-flex; align-items: center; gap: 3px; padding: 2px 9px; border-radius: 999px; font-size: .72rem; font-weight: 700; }
+.sp-pending     { background: var(--gray-100);  color: var(--gray-600); }
+.sp-reviewed    { background: #dbeafe;           color: #1e40af; }
+.sp-shortlisted { background: #d1fae5;           color: #065f46; }
+.sp-rejected    { background: #fee2e2;           color: #991b1b; }
+.sp-hired       { background: #ede9fe;           color: #5b21b6; }
+
+.status-select {
+  padding: 5px 8px; border: 1.5px solid var(--gray-200); border-radius: 8px;
+  font-size: .78rem; font-family: var(--font); color: var(--gray-700);
+  background: var(--white); cursor: pointer; outline: none;
+}
+.status-select:focus { border-color: var(--green); }
+
+.score-link { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px;
+              border-radius: 999px; font-size: .72rem; font-weight: 700;
+              text-decoration: none; }
+{% endblock %}
+
+{% block main_content %}
+
+<!-- HEADER -->
+<div class="appl-header">
+  <div>
+    <h2 style="color:#fff;font-size:1.2rem;font-weight:800;margin-bottom:4px;">&#128640; Applicants</h2>
+    <p style="color:rgba(255,255,255,.65);font-size:.875rem;">{{ job.title }} &bull; {{ counts.total }} applicant{{ counts.total|pluralize }}</p>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <a href="{% url 'screening:candidates' job.pk %}" class="btn btn-primary btn-sm">&#127942; AI Rankings ({{ job.match_scores.count }})</a>
+    <a href="{% url 'jobs:preview' job.pk %}" class="btn btn-gray btn-sm" style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.8);">&#128269; Job Preview</a>
+    <a href="{% url 'jobs:manage' %}" class="btn btn-gray btn-sm" style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.8);">&#8592; All Jobs</a>
+  </div>
+</div>
+
+<!-- STATS STRIP -->
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
+  <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:12px 16px;text-align:center;">
+    <div style="font-size:1.4rem;font-weight:800;color:var(--green);">{{ counts.total }}</div>
+    <div style="font-size:.72rem;color:var(--gray-400);font-weight:600;margin-top:2px;">Total</div>
+  </div>
+  <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:12px 16px;text-align:center;">
+    <div style="font-size:1.4rem;font-weight:800;color:var(--gray-500);">{{ counts.pending }}</div>
+    <div style="font-size:.72rem;color:var(--gray-400);font-weight:600;margin-top:2px;">Pending</div>
+  </div>
+  <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:12px 16px;text-align:center;">
+    <div style="font-size:1.4rem;font-weight:800;color:var(--blue);">{{ counts.reviewed }}</div>
+    <div style="font-size:.72rem;color:var(--gray-400);font-weight:600;margin-top:2px;">Reviewed</div>
+  </div>
+  <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:12px 16px;text-align:center;">
+    <div style="font-size:1.4rem;font-weight:800;color:var(--green);">{{ counts.shortlisted }}</div>
+    <div style="font-size:.72rem;color:var(--gray-400);font-weight:600;margin-top:2px;">Shortlisted</div>
+  </div>
+  <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:12px 16px;text-align:center;">
+    <div style="font-size:1.4rem;font-weight:800;color:#8b5cf6;">{{ counts.hired }}</div>
+    <div style="font-size:.72rem;color:var(--gray-400);font-weight:600;margin-top:2px;">Hired</div>
+  </div>
+</div>
+
+<!-- APPLICANTS LIST -->
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--green-pale);">&#128640;</div>
+      <div>
+        <div class="section-title">All Applicants</div>
+        <div class="section-sub">Newest applications first — change status via dropdown</div>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+
+    {% if applications %}
+    {% for app in applications %}
+    <div class="appl-row">
+
+      <!-- Avatar initials -->
+      <div class="av">
+        {% if app.applicant.get_full_name %}{{ app.applicant.get_full_name|slice:":1"|upper }}{% else %}{{ app.applicant.email|slice:":1"|upper }}{% endif %}
+      </div>
+
+      <div class="appl-info">
+        <div class="appl-name">
+          {% if app.applicant.get_full_name %}{{ app.applicant.get_full_name }}{% else %}{{ app.applicant.email }}{% endif %}
+          <span class="st-pill sp-{{ app.status }}" style="margin-left:6px;">&#9679; {{ app.get_status_display }}</span>
+        </div>
+        <div class="appl-email">{{ app.applicant.email }}</div>
+        <div class="appl-meta">
+          <span>&#128197; Applied {{ app.applied_at|date:"M d, Y" }}</span>
+          {% if app.resume %}
+          <a href="{{ app.resume.file.url }}" target="_blank"
+             style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;
+                    background:#eff6ff;color:#1d4ed8;border-radius:999px;
+                    font-size:.72rem;font-weight:700;text-decoration:none;border:1px solid #bfdbfe;">
+            &#128196; View Resume
+          </a>
+          {% else %}
+          <span style="color:var(--gray-300);font-size:.72rem;">&#128196; No resume attached</span>
+          {% endif %}
+          {% if app.interview and app.interview.status != 'cancelled' %}
+          <span style="color:var(--indigo);font-weight:700;">&#128222; Interview: {{ app.interview.get_status_display }}</span>
+          {% endif %}
+          {% if app.match_score %}
+          <a href="{% url 'screening:result' app.match_score.pk %}"
+             class="score-link" style="background:{{ app.match_score.score_color }};color:#fff;">
+            &#128202; AI Score: {{ app.match_score.total_score|floatformat:0 }}%
+          </a>
+          {% else %}
+          <span style="color:var(--gray-300);">&#128202; No AI score yet</span>
+          {% endif %}
+        </div>
+        {% if app.cover_letter %}
+        <div class="cover-preview">{{ app.cover_letter|truncatechars:200 }}</div>
+        {% endif %}
+        {% if app.recruiter_notes %}
+        <div style="margin-top:6px;font-size:.75rem;color:var(--gray-500);font-style:italic;">
+          &#128203; {{ app.recruiter_notes }}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Status + interview actions -->
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
+        <form method="post" action="{% url 'applications:update_status' app.pk %}"
+              style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+          {% csrf_token %}
+          <select name="status" class="status-select" onchange="this.form.submit()">
+            <option value="pending"     {% if app.status == 'pending' %}selected{% endif %}>Pending</option>
+            <option value="reviewed"    {% if app.status == 'reviewed' %}selected{% endif %}>Reviewed</option>
+            <option value="shortlisted" {% if app.status == 'shortlisted' %}selected{% endif %}>&#11088; Shortlist</option>
+            <option value="rejected"    {% if app.status == 'rejected' %}selected{% endif %}>&#10007; Reject</option>
+            <option value="hired"       {% if app.status == 'hired' %}selected{% endif %}>&#127881; Hired!</option>
+          </select>
+        </form>
+
+        {# Interview action #}
+        {% with iv=app.interview %}
+        {% if iv %}
+          {% if iv.status == 'cancelled' %}
+          <a href="{% url 'interviews:schedule' app.pk %}"
+             class="btn btn-outline btn-sm" style="font-size:.72rem;">&#128197; Reschedule</a>
+          {% else %}
+          <span style="font-size:.72rem;font-weight:700;color:var(--green);">&#128197; {{ iv.get_interview_type_display }} — {{ iv.scheduled_at|date:"M d, H:i" }}</span>
+          <form method="post" action="{% url 'interviews:cancel' iv.pk %}"
+                onsubmit="return confirm('Cancel this interview?');" style="margin:0;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm" style="font-size:.72rem;">&#10005; Cancel Interview</button>
+          </form>
+          {% endif %}
+        {% else %}
+        <a href="{% url 'interviews:schedule' app.pk %}"
+           class="btn btn-primary btn-sm" style="background:var(--indigo);font-size:.72rem;">&#128197; Schedule Interview</a>
+        {% endif %}
+        {% endwith %}
+
+        {# Rate candidate #}
+        {% if app.status != 'pending' %}
+          {% if app.pk in rated_candidate_ids %}
+          <span style="font-size:.72rem;color:#d97706;font-weight:700;">&#9733; Rated</span>
+          {% else %}
+          <a href="{% url 'feedback:give' app.pk %}" class="btn btn-outline btn-sm" style="border-color:#f59e0b;color:#d97706;font-size:.72rem;">&#11088; Rate</a>
+          {% endif %}
+        {% endif %}
+      </div>
+
+    </div>
+    {% endfor %}
+
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">&#128640;</div>
+      <div class="empty-title">No applicants yet</div>
+      <div class="empty-desc">Job seekers who click "Apply Now" will appear here.</div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}

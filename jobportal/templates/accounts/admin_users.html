@@ -1,0 +1,247 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Manage Users — TalentBridge{% endblock %}
+
+{% block extra_css %}
+.main-content { padding: 32px; max-width: 1100px; }
+
+.page-banner {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%);
+  border-radius: var(--radius-xl); padding: 24px 28px; margin-bottom: 24px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+}
+
+/* Filters */
+.filter-bar {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center;
+}
+.filter-bar input[type="text"] {
+  padding: 8px 14px; border: 1.5px solid var(--gray-200); border-radius: var(--radius);
+  font-size: .875rem; font-family: var(--font); flex: 1; min-width: 200px;
+  outline: none;
+}
+.filter-bar input[type="text"]:focus { border-color: var(--indigo); }
+.filter-bar select {
+  padding: 8px 14px; border: 1.5px solid var(--gray-200); border-radius: var(--radius);
+  font-size: .875rem; font-family: var(--font); background: var(--white);
+  cursor: pointer; outline: none;
+}
+.filter-bar select:focus { border-color: var(--indigo); }
+
+/* Table card */
+.users-card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow); overflow: hidden; }
+.users-card-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; border-bottom: 1px solid var(--gray-100);
+}
+.users-card-title { font-size: .875rem; font-weight: 800; color: var(--gray-800); }
+
+.usr-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.usr-table th {
+  padding: 9px 16px; text-align: left; font-size: .7rem; font-weight: 700;
+  text-transform: uppercase; color: var(--gray-400); letter-spacing: .05em;
+  background: var(--gray-50); border-bottom: 1px solid var(--gray-200);
+}
+.usr-table td { padding: 11px 16px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; }
+.usr-table tr:last-child td { border-bottom: none; }
+.usr-table tr:hover td { background: var(--gray-50); }
+
+.role-badge { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: .7rem; font-weight: 700; }
+.role-admin      { background: #fef3c7; color: #92400e; }
+.role-recruiter  { background: #d1fae5; color: #065f46; }
+.role-job_seeker { background: #e0f2fe; color: #075985; }
+
+/* Delete button */
+.del-btn {
+  padding: 4px 12px; border: 1.5px solid #fca5a5; border-radius: 6px;
+  background: #fef2f2; color: #dc2626; font-size: .72rem; font-weight: 700;
+  cursor: pointer; font-family: var(--font); transition: all .15s;
+}
+.del-btn:hover { background: #dc2626; color: #fff; border-color: #dc2626; }
+.del-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Confirm modal */
+.modal-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.45); z-index: 1000;
+  align-items: center; justify-content: center;
+}
+.modal-backdrop.open { display: flex; }
+.modal-box {
+  background: var(--white); border-radius: var(--radius-xl);
+  padding: 28px 32px; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  text-align: center;
+}
+.modal-icon { font-size: 2.5rem; margin-bottom: 12px; }
+.modal-title { font-size: 1.05rem; font-weight: 800; color: var(--gray-900); margin-bottom: 6px; }
+.modal-sub   { font-size: .875rem; color: var(--gray-500); margin-bottom: 20px; }
+.modal-name  { font-weight: 800; color: var(--gray-800); }
+.modal-btns  { display: flex; gap: 10px; justify-content: center; }
+
+/* Pagination */
+.pagination { display: flex; gap: 6px; align-items: center; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+.pagination a, .pagination span {
+  padding: 5px 12px; border-radius: var(--radius); font-size: .8rem; font-weight: 600;
+  border: 1.5px solid var(--gray-200); color: var(--gray-600); text-decoration: none;
+}
+.pagination a:hover { border-color: var(--indigo); color: var(--indigo); background: #eef2ff; }
+.pagination .current { background: var(--indigo); color: #fff; border-color: var(--indigo); }
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+
+  <!-- Banner -->
+  <div class="page-banner">
+    <div>
+      <h2 style="color:#fff;font-size:1.2rem;font-weight:800;margin-bottom:4px;">&#128100; Manage Users</h2>
+      <p style="color:rgba(255,255,255,.65);font-size:.875rem;">{{ total }} user{{ total|pluralize }} total</p>
+    </div>
+    <a href="{% url 'accounts:admin_dashboard' %}" class="btn btn-gray btn-sm"
+       style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.85);background:rgba(255,255,255,.1);">
+      &#8592; Dashboard
+    </a>
+  </div>
+
+  <!-- Filter bar -->
+  <form method="get" class="filter-bar">
+    <input type="text" name="q" value="{{ search }}" placeholder="Search by name or email…">
+    <select name="role">
+      <option value="">All Roles</option>
+      <option value="admin"      {% if role == 'admin' %}selected{% endif %}>Admin</option>
+      <option value="recruiter"  {% if role == 'recruiter' %}selected{% endif %}>Recruiter</option>
+      <option value="job_seeker" {% if role == 'job_seeker' %}selected{% endif %}>Job Seeker</option>
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+    {% if search or role %}
+    <a href="{% url 'accounts:admin_user_list' %}" class="btn btn-gray btn-sm">Clear</a>
+    {% endif %}
+  </form>
+
+  <!-- Messages -->
+  {% for msg in messages %}
+  <div style="padding:10px 16px;border-radius:8px;margin-bottom:12px;font-size:.875rem;font-weight:600;
+    {% if msg.tags == 'success' %}background:#ecfdf5;color:#065f46;border-left:4px solid #10b981;
+    {% else %}background:#fef2f2;color:#991b1b;border-left:4px solid #ef4444;{% endif %}">
+    {{ msg }}
+  </div>
+  {% endfor %}
+
+  <!-- Table -->
+  <div class="users-card">
+    <div class="users-card-hd">
+      <span class="users-card-title">&#128100; Users ({{ page_obj.paginator.count }})</span>
+    </div>
+    <table class="usr-table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Role</th>
+          <th>Joined</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in page_obj %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="avatar" style="width:32px;height:32px;font-size:.72rem;">
+                {{ u.first_name|slice:":1"|upper }}{{ u.last_name|slice:":1"|upper }}
+              </div>
+              <div>
+                <div style="font-weight:700;color:var(--gray-900);">{{ u.get_full_name|default:"—" }}</div>
+                <div style="font-size:.72rem;color:var(--gray-400);">{{ u.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="role-badge role-{{ u.role }}">{{ u.get_role_display }}</span></td>
+          <td style="color:var(--gray-500);">{{ u.date_joined|date:"M d, Y" }}</td>
+          <td>
+            {% if u.is_active %}
+            <span style="color:#10b981;font-size:.75rem;font-weight:700;">&#9679; Active</span>
+            {% else %}
+            <span style="color:#ef4444;font-size:.75rem;font-weight:700;">&#9679; Inactive</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if u.pk == request.user.pk %}
+              <span style="font-size:.72rem;color:var(--gray-400);">You</span>
+            {% elif u.role == 'admin' %}
+              <span style="font-size:.72rem;color:var(--gray-400);">Protected</span>
+            {% else %}
+              <button class="del-btn"
+                      onclick="openConfirm({{ u.pk }}, '{{ u.get_full_name|default:u.email|escapejs }}')">
+                &#128465; Delete
+              </button>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" style="text-align:center;padding:32px;color:var(--gray-400);">
+            No users found.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+  <div class="pagination">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}&q={{ search }}&role={{ role }}">&laquo; Prev</a>
+    {% endif %}
+    {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}
+      <span class="current">{{ num }}</span>
+      {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+      <a href="?page={{ num }}&q={{ search }}&role={{ role }}">{{ num }}</a>
+      {% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}&q={{ search }}&role={{ role }}">Next &raquo;</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- Confirm Delete Modal -->
+<div class="modal-backdrop" id="delModal">
+  <div class="modal-box">
+    <div class="modal-icon">&#9888;&#65039;</div>
+    <div class="modal-title">Delete User?</div>
+    <div class="modal-sub">
+      You are about to permanently delete
+      <span class="modal-name" id="delUserName"></span>.
+      This action cannot be undone and will remove all their data.
+    </div>
+    <form method="post" id="delForm">
+      {% csrf_token %}
+      <div class="modal-btns">
+        <button type="button" class="btn btn-gray" onclick="closeConfirm()">Cancel</button>
+        <button type="submit" class="btn" style="background:#dc2626;color:#fff;border-color:#dc2626;">
+          &#128465; Yes, Delete
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openConfirm(pk, name) {
+  document.getElementById('delUserName').textContent = name;
+  document.getElementById('delForm').action = '/accounts/admin/users/' + pk + '/delete/';
+  document.getElementById('delModal').classList.add('open');
+}
+function closeConfirm() {
+  document.getElementById('delModal').classList.remove('open');
+}
+document.getElementById('delModal').addEventListener('click', function(e) {
+  if (e.target === this) closeConfirm();
+});
+</script>
+{% endblock %}

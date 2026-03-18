@@ -1,0 +1,233 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Match Score — {{ job.title }}{% endblock %}
+
+{% block extra_css %}
+.result-wrap { max-width: 860px; margin: 0 auto; padding: 28px 24px 60px; display: flex; flex-direction: column; gap: 20px; }
+
+/* Hero */
+.score-hero {
+  background: linear-gradient(135deg, var(--navy) 0%, #1e3a5f 100%);
+  border-radius: var(--radius-xl); padding: 32px 36px;
+  display: flex; align-items: center; gap: 32px; flex-wrap: wrap;
+}
+.score-ring-wrap { flex-shrink: 0; text-align: center; }
+.score-ring { position: relative; width: 120px; height: 120px; }
+.score-ring svg { transform: rotate(-90deg); }
+.ring-track { fill: none; stroke: rgba(255,255,255,.15); stroke-width: 10; }
+.ring-fill  { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
+.ring-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+.ring-pct   { font-size: 1.6rem; font-weight: 900; color: #fff; line-height: 1; }
+.ring-sub   { font-size: .72rem; color: rgba(255,255,255,.6); font-weight: 600; margin-top: 2px; }
+.score-hero-info { flex: 1; min-width: 0; }
+.score-tag { display:inline-block; padding:3px 12px; border-radius:999px; font-size:.78rem; font-weight:800;
+             margin-bottom:10px; }
+.tag-excellent { background:rgba(16,185,129,.25); color:#6ee7b7; }
+.tag-good      { background:rgba(59,130,246,.25);  color:#93c5fd; }
+.tag-fair      { background:rgba(245,158,11,.25);  color:#fcd34d; }
+.tag-low       { background:rgba(239,68,68,.25);   color:#fca5a5; }
+.score-job-title { color:#fff; font-size:1.2rem; font-weight:800; margin-bottom:4px; }
+.score-company   { color:rgba(255,255,255,.6); font-size:.875rem; margin-bottom:12px; }
+.score-meta      { color:rgba(255,255,255,.5); font-size:.8rem; }
+
+/* Cards */
+.s-card { background: var(--white); border-radius: var(--radius-xl); box-shadow: var(--shadow); overflow: hidden; }
+.s-header { padding: 16px 22px 12px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; gap: 10px; }
+.s-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .9rem; }
+.s-title { font-size: .9rem; font-weight: 700; color: var(--gray-900); }
+.s-body { padding: 18px 22px; }
+
+/* Component bars */
+.comp-row { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.comp-label { width: 155px; flex-shrink: 0; font-size: .82rem; font-weight: 700; color: var(--gray-700); }
+.comp-bar-wrap { flex: 1; background: var(--gray-100); border-radius: 999px; height: 10px; overflow: hidden; }
+.comp-bar { height: 100%; border-radius: 999px; transition: width .6s ease; }
+.comp-pct { width: 44px; flex-shrink: 0; font-size: .82rem; font-weight: 700; color: var(--gray-700); text-align: right; }
+.comp-weight { width: 36px; flex-shrink: 0; font-size: .72rem; color: var(--gray-400); text-align: right; }
+
+/* Skill chips */
+.chip-row { display: flex; flex-wrap: wrap; gap: 7px; }
+.chip { padding: 4px 13px; border-radius: 999px; font-size: .8rem; font-weight: 600; }
+.chip-match   { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+.chip-missing { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+.chip-kw      { background: var(--blue-pale); color: var(--blue-dark); border: 1px solid #bfdbfe; }
+.chip-neutral { background: var(--gray-100); color: var(--gray-600); }
+
+.empty-note { font-size: .85rem; color: var(--gray-400); font-style: italic; }
+
+/* Action row */
+.action-row { display: flex; gap: 10px; flex-wrap: wrap; }
+{% endblock %}
+
+{% block content %}
+<div class="result-wrap">
+
+  <!-- HERO: overall score -->
+  <div class="score-hero">
+    <div class="score-ring-wrap">
+      <div class="score-ring">
+        {% with r=53 circ=333 fill=score.total_score %}
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle class="ring-track" cx="60" cy="60" r="{{ r }}"/>
+          <circle class="ring-fill"
+            cx="60" cy="60" r="{{ r }}"
+            stroke="{{ score.score_color }}"
+            stroke-dasharray="{{ circ }}"
+            stroke-dashoffset="{% widthratio fill 100 circ %}"/>
+        </svg>
+        {% endwith %}
+        <div class="ring-label">
+          <div class="ring-pct">{{ score.total_score|floatformat:0 }}</div>
+          <div class="ring-sub">/ 100</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="score-hero-info">
+      <div class="score-tag tag-{{ score.score_label|lower }}">&#9733; {{ score.score_label }} Match</div>
+      <div class="score-job-title">{{ job.title }}</div>
+      <div class="score-company">{{ job.recruiter.company_name }}</div>
+      <div class="score-meta">
+        Scored on {{ score.computed_at|date:"M d, Y \a\t H:i" }}
+        &bull; {{ score.matched_skills|length }} of {{ score.matched_skills|length|add:score.missing_skills|length }} skills matched
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPONENT BREAKDOWN -->
+  <div class="s-card">
+    <div class="s-header">
+      <div class="s-icon" style="background:#ede9fe;">&#128202;</div>
+      <div class="s-title">Score Breakdown</div>
+    </div>
+    <div class="s-body">
+      {% for comp in components %}
+      <div class="comp-row">
+        <div class="comp-label">{{ comp.label }}</div>
+        <div class="comp-bar-wrap">
+          <div class="comp-bar" style="width:{{ comp.score }}%;background:{{ comp.color }};"></div>
+        </div>
+        <div class="comp-pct">{{ comp.score|floatformat:0 }}%</div>
+        <div class="comp-weight">×{{ comp.weight }}%</div>
+      </div>
+      {% endfor %}
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--gray-100);display:flex;justify-content:flex-end;align-items:center;gap:12px;">
+        <span style="font-size:.85rem;color:var(--gray-500);">Weighted Total</span>
+        <span style="font-size:1.25rem;font-weight:900;color:{{ score.score_color }};">{{ score.total_score|floatformat:1 }}%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SKILLS -->
+  <div class="s-card">
+    <div class="s-header">
+      <div class="s-icon" style="background:#ede9fe;">&#9889;</div>
+      <div class="s-title">Skills Analysis <span style="font-size:.78rem;font-weight:600;color:var(--gray-400);">(weight 40%)</span></div>
+    </div>
+    <div class="s-body">
+      {% if score.matched_skills %}
+      <div style="margin-bottom:14px;">
+        <div style="font-size:.75rem;font-weight:700;color:var(--green-dark);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">&#10003; Matched Skills ({{ score.matched_skills|length }})</div>
+        <div class="chip-row">
+          {% for s in score.matched_skills %}
+          <span class="chip chip-match">{{ s }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      {% if score.missing_skills %}
+      <div>
+        <div style="font-size:.75rem;font-weight:700;color:#991b1b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">&#10007; Missing Skills ({{ score.missing_skills|length }})</div>
+        <div class="chip-row">
+          {% for s in score.missing_skills %}
+          <span class="chip chip-missing">{{ s }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      {% if not score.matched_skills and not score.missing_skills %}
+      <p class="empty-note">No specific skills required for this job — full score awarded.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- EXPERIENCE + EDUCATION -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="s-card">
+      <div class="s-header">
+        <div class="s-icon" style="background:var(--green-pale);">&#128197;</div>
+        <div class="s-title">Experience <span style="font-size:.78rem;font-weight:600;color:var(--gray-400);">25%</span></div>
+      </div>
+      <div class="s-body">
+        <div style="font-size:2rem;font-weight:900;color:var(--green);margin-bottom:4px;">{{ score.experience_years_found|floatformat:1 }} yrs</div>
+        <div style="font-size:.82rem;color:var(--gray-500);">
+          {% if job.experience_years_min %}Required: {{ job.experience_years_min }}+ yrs{% else %}No minimum required{% endif %}
+        </div>
+        <div style="margin-top:12px;">
+          <div style="background:var(--gray-100);border-radius:999px;height:8px;overflow:hidden;">
+            <div style="width:{{ score.experience_score }}%;background:#10b981;height:100%;border-radius:999px;"></div>
+          </div>
+          <div style="font-size:.78rem;color:var(--gray-400);margin-top:4px;">Score: {{ score.experience_score|floatformat:0 }}%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="s-card">
+      <div class="s-header">
+        <div class="s-icon" style="background:var(--orange-pale);">&#127979;</div>
+        <div class="s-title">Education <span style="font-size:.78rem;font-weight:600;color:var(--gray-400);">15%</span></div>
+      </div>
+      <div class="s-body">
+        {% with edu_labels="Not detected,High School,Diploma,Bachelor's,Master's,Ph.D" %}
+        {% with parts=edu_labels|split:"," %}
+        <div style="font-size:1.05rem;font-weight:800;color:var(--orange);margin-bottom:4px;">
+          {% for p in parts %}{% if forloop.counter0 == score.education_rank_found %}{{ p }}{% endif %}{% endfor %}
+        </div>
+        {% endwith %}{% endwith %}
+        <div style="font-size:.82rem;color:var(--gray-500);">Required: {{ job.get_education_required_display }}</div>
+        <div style="margin-top:12px;">
+          <div style="background:var(--gray-100);border-radius:999px;height:8px;overflow:hidden;">
+            <div style="width:{{ score.education_score }}%;background:#f59e0b;height:100%;border-radius:999px;"></div>
+          </div>
+          <div style="font-size:.78rem;color:var(--gray-400);margin-top:4px;">Score: {{ score.education_score|floatformat:0 }}%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEYWORD RELEVANCE -->
+  <div class="s-card">
+    <div class="s-header">
+      <div class="s-icon" style="background:var(--blue-pale);">&#128270;</div>
+      <div class="s-title">Keyword Relevance <span style="font-size:.78rem;font-weight:600;color:var(--gray-400);">(weight 20%)</span></div>
+    </div>
+    <div class="s-body">
+      <div style="margin-bottom:12px;">
+        <div style="background:var(--gray-100);border-radius:999px;height:8px;overflow:hidden;">
+          <div style="width:{{ score.keywords_score }}%;background:#3b82f6;height:100%;border-radius:999px;"></div>
+        </div>
+        <div style="font-size:.78rem;color:var(--gray-400);margin-top:4px;">{{ score.matched_keywords|length }} keywords matched &bull; Score: {{ score.keywords_score|floatformat:0 }}%</div>
+      </div>
+      {% if score.matched_keywords %}
+      <div class="chip-row">
+        {% for kw in score.matched_keywords %}
+        <span class="chip chip-kw">{{ kw }}</span>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="empty-note">No resume uploaded or no keywords matched yet. Upload a parsed resume to improve your keyword score.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="action-row">
+    <a href="{% url 'jobs:detail' job.pk %}" class="btn btn-gray">&#8592; Back to Job</a>
+    <form method="post" action="{% url 'screening:check' job.pk %}" style="display:inline;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary">&#8635; Recompute Score</button>
+    </form>
+    <a href="{% url 'screening:my_scores' %}" class="btn btn-outline">&#128203; My Scores History</a>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python manage.py startapp accounts)",
+      "Bash(python manage.py makemigrations accounts)",
+      "Bash(python manage.py migrate)",
+      "Bash(python manage.py check)",
+      "Bash(python -c \"import PIL; print\\(''Pillow OK:'', PIL.__version__\\)\")",
+      "Bash(env/Scripts/pip install Pillow)",
+      "Bash(python manage.py startapp jobseeker)",
+      "Bash(python manage.py makemigrations jobseeker)",
+      "Bash(env/Scripts/pip list)",
+      "Bash(env/Scripts/pip install pdfplumber python-docx)",
+      "Bash(python manage.py startapp resume)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\PRO\\.claude\\projects\\c--Users-PRO-Desktop-job-portal-project"
+    ]
+  }
+}

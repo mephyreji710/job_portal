@@ -1,0 +1,97 @@
+{% extends 'jobseeker/base_profile.html' %}
+{% block title %}My Ratings{% endblock %}
+{% block nav_resume %}{% endblock %}
+
+{% block extra_css %}
+.rat-wrap { max-width: 720px; }
+
+.rat-header {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%);
+  border-radius: var(--radius-xl); padding: 24px 28px; margin-bottom: 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.avg-card {
+  background: var(--white); border-radius: var(--radius-xl); box-shadow: var(--shadow);
+  padding: 22px 24px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px;
+}
+.avg-score { font-size: 3.5rem; font-weight: 900; color: var(--gray-900); line-height: 1; }
+.avg-stars { font-size: 1.4rem; color: #f59e0b; letter-spacing: 2px; margin-top: 4px; }
+
+/* Rating card */
+.rat-card { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: var(--radius-lg);
+            padding: 18px 20px; margin-bottom: 10px; display: flex; gap: 14px; align-items: flex-start; }
+.rat-card:hover { border-color: var(--indigo); }
+.rat-co-logo { width: 44px; height: 44px; border-radius: 8px; overflow: hidden; background: var(--gray-100);
+               display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+.rat-co-logo img { width: 100%; height: 100%; object-fit: cover; }
+.rat-body { flex: 1; min-width: 0; }
+.rat-co   { font-size: .9rem; font-weight: 700; color: var(--gray-900); }
+.rat-job  { font-size: .78rem; color: var(--blue); margin-top: 1px; }
+.rat-meta { font-size: .75rem; color: var(--gray-400); margin-top: 4px; }
+.rat-comment { margin-top: 8px; font-size: .82rem; color: var(--gray-600); font-style: italic;
+               background: var(--gray-50); padding: 8px 12px; border-radius: 8px;
+               border-left: 3px solid #f59e0b; }
+.rat-stars { font-size: 1.2rem; color: #f59e0b; flex-shrink: 0; letter-spacing: 1px; }
+{% endblock %}
+
+{% block main_content %}
+<div class="rat-wrap">
+
+  <div class="rat-header">
+    <div>
+      <h2 style="color:#fff;font-size:1.2rem;font-weight:800;margin-bottom:4px;">&#11088; My Ratings</h2>
+      <p style="color:rgba(255,255,255,.65);font-size:.875rem;">Feedback received from recruiters</p>
+    </div>
+    <a href="{% url 'applications:my_applications' %}" class="btn btn-gray btn-sm"
+       style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.85);background:rgba(255,255,255,.1);">
+      &#128640; My Applications
+    </a>
+  </div>
+
+  {% if avg_rating %}
+  <div class="avg-card">
+    <div>
+      <div class="avg-score">{{ avg_rating }}</div>
+      <div class="avg-stars">
+        {% for i in "12345" %}{% if forloop.counter <= avg_rating|floatformat:"0"|add:"0" %}&#9733;{% else %}&#9734;{% endif %}{% endfor %}
+      </div>
+    </div>
+    <div>
+      <div style="font-size:1rem;font-weight:700;color:var(--gray-800);">Average Rating</div>
+      <div style="font-size:.82rem;color:var(--gray-500);margin-top:4px;">Based on {{ total_ratings }} rating{{ total_ratings|pluralize }} from recruiters</div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if ratings %}
+  {% for rat in ratings %}
+  <div class="rat-card">
+    <div class="rat-co-logo">
+      {% if rat.application.job.recruiter.logo %}
+        <img src="{{ rat.application.job.recruiter.logo.url }}" alt="">
+      {% else %}&#127970;{% endif %}
+    </div>
+    <div class="rat-body">
+      <div class="rat-co">{{ rat.application.job.recruiter.company_name }}</div>
+      <div class="rat-job">{{ rat.application.job.title }}</div>
+      <div class="rat-meta">&#128197; Rated {{ rat.created_at|date:"M d, Y" }}</div>
+      {% if rat.comment %}
+      <div class="rat-comment">{{ rat.comment }}</div>
+      {% endif %}
+    </div>
+    <div class="rat-stars">{{ rat.star_display }}</div>
+  </div>
+  {% endfor %}
+
+  {% else %}
+  <div style="text-align:center;padding:56px 24px;background:var(--white);border-radius:var(--radius-xl);box-shadow:var(--shadow);">
+    <div style="font-size:3rem;margin-bottom:12px;">&#11088;</div>
+    <div style="font-size:1.1rem;font-weight:700;color:var(--gray-700);margin-bottom:6px;">No ratings yet</div>
+    <div style="font-size:.875rem;color:var(--gray-400);margin-bottom:20px;">Recruiters can rate you after reviewing your application.</div>
+    <a href="{% url 'jobs:board' %}" class="btn btn-primary">&#128269; Browse Jobs</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

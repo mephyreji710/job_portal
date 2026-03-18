@@ -1,0 +1,210 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Job Board — TalentBridge{% endblock %}
+
+{% block extra_css %}
+.board-layout { max-width: 1100px; margin: 0 auto; padding: 28px 24px 60px; }
+
+/* Search hero */
+.search-hero {
+  background: linear-gradient(135deg, var(--navy) 0%, #1e3a5f 100%);
+  border-radius: var(--radius-xl); padding: 36px 40px; margin-bottom: 28px;
+  position: relative; overflow: hidden;
+}
+.search-hero::before {
+  content:''; position:absolute; top:-60px; right:-40px;
+  width:240px; height:240px;
+  background:radial-gradient(circle,rgba(79,70,229,.25) 0%,transparent 70%);
+}
+.search-hero h1 { color:#fff; font-size:1.6rem; font-weight:800; margin-bottom:6px; }
+.search-hero p  { color:rgba(255,255,255,.65); font-size:.95rem; margin-bottom:22px; }
+.search-row { display:flex; gap:10px; }
+.search-input {
+  flex:1; padding:11px 16px; border-radius:10px; border:none; font-size:.95rem;
+  font-family:var(--font); outline:none; background:#fff; color:var(--gray-800);
+}
+.search-input::placeholder { color:var(--gray-400); }
+.search-btn {
+  padding:11px 24px; background:var(--indigo); color:#fff; border:none;
+  border-radius:10px; font-size:.9rem; font-weight:700; cursor:pointer;
+  font-family:var(--font); transition:background .2s;
+}
+.search-btn:hover { background:#4338ca; }
+
+/* Filters */
+.filters-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px; align-items:center; }
+.filter-pill {
+  padding:6px 14px; border-radius:999px; font-size:.8rem; font-weight:600;
+  border:1.5px solid var(--gray-200); color:var(--gray-600); background:var(--white);
+  text-decoration:none; transition:all .15s; cursor:pointer;
+}
+.filter-pill:hover { border-color:var(--blue); color:var(--blue); text-decoration:none; }
+.filter-pill.active { background:var(--blue); border-color:var(--blue); color:#fff; }
+.filter-label { font-size:.78rem; font-weight:700; color:var(--gray-400); text-transform:uppercase; letter-spacing:.06em; }
+
+/* Job cards */
+.jobs-grid { display:flex; flex-direction:column; gap:14px; }
+.job-card {
+  background:var(--white); border:1.5px solid var(--gray-200); border-radius:var(--radius-lg);
+  padding:20px 22px; display:flex; gap:16px; align-items:flex-start;
+  transition:border-color .2s, box-shadow .2s; text-decoration:none; color:inherit;
+}
+.job-card:hover { border-color:var(--blue); box-shadow:var(--shadow-md); text-decoration:none; }
+.company-logo {
+  width:52px; height:52px; border-radius:12px; flex-shrink:0;
+  border:1.5px solid var(--gray-200); overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--gray-50); font-size:1.4rem;
+}
+.company-logo img { width:100%; height:100%; object-fit:cover; }
+.job-title { font-size:1rem; font-weight:700; color:var(--gray-900); margin-bottom:3px; }
+.job-company { font-size:.85rem; color:var(--blue); font-weight:600; }
+.job-meta { font-size:.78rem; color:var(--gray-400); margin-top:5px; display:flex; flex-wrap:wrap; gap:10px; }
+.badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 10px; border-radius:999px; font-size:.75rem; font-weight:700;
+}
+.badge-type     { background:var(--blue-pale);    color:var(--blue-dark); }
+.badge-remote   { background:var(--green-pale);   color:var(--green-dark); }
+.badge-salary   { background:var(--orange-pale);  color:#92400e; }
+.badge-exp      { background:var(--indigo-pale);  color:var(--indigo); }
+.skills-row { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
+.skill-tag {
+  padding:2px 9px; border-radius:999px; font-size:.72rem; font-weight:600;
+  background:var(--gray-100); color:var(--gray-600);
+}
+.no-jobs { text-align:center; padding:64px 24px; }
+.no-jobs-icon  { font-size:3rem; margin-bottom:12px; }
+.no-jobs-title { font-size:1.1rem; font-weight:700; color:var(--gray-700); margin-bottom:6px; }
+.no-jobs-desc  { font-size:.875rem; color:var(--gray-400); }
+.result-count  { font-size:.875rem; color:var(--gray-500); margin-bottom:14px; }
+{% endblock %}
+
+{% block content %}
+<div class="board-layout">
+
+  <!-- SEARCH HERO -->
+  <div class="search-hero">
+    <h1>&#128269; Find Your Next Job</h1>
+    <p>Browse {{ total }} open position{{ total|pluralize }} from top companies</p>
+    <form method="get" action="{% url 'jobs:board' %}">
+      <div class="search-row">
+        <input class="search-input" type="text" name="q" value="{{ q }}"
+               placeholder="Search by title, company, or skill…" />
+        {% if filter_type %}<input type="hidden" name="type" value="{{ filter_type }}">{% endif %}
+        {% if filter_location %}<input type="hidden" name="location" value="{{ filter_location }}">{% endif %}
+        {% if filter_exp %}<input type="hidden" name="exp" value="{{ filter_exp }}">{% endif %}
+        <button type="submit" class="search-btn">&#128269; Search</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filters-bar">
+    <span class="filter-label">Type:</span>
+    <a href="{% url 'jobs:board' %}{% if q %}?q={{ q }}{% endif %}"
+       class="filter-pill {% if not filter_type %}active{% endif %}">All</a>
+    {% for val, label in job_type_choices %}
+    <a href="{% url 'jobs:board' %}?type={{ val }}{% if q %}&q={{ q }}{% endif %}"
+       class="filter-pill {% if filter_type == val %}active{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </div>
+
+  <!-- RESULT COUNT -->
+  {% if q or filter_type %}
+  <p class="result-count">
+    Showing <strong>{{ jobs|length }}</strong> result{{ jobs|length|pluralize }}
+    {% if q %} for "<strong>{{ q }}</strong>"{% endif %}
+    {% if filter_type %} · {{ filter_type|title }}{% endif %}
+  </p>
+  {% endif %}
+
+  <!-- JOB CARDS -->
+  {% if jobs %}
+  <div class="jobs-grid">
+    {% for job in jobs %}
+    <a class="job-card" href="{% url 'jobs:detail' job.pk %}">
+      <!-- Company logo -->
+      <div class="company-logo">
+        {% if job.recruiter.logo %}
+          <img src="{{ job.recruiter.logo.url }}" alt="{{ job.recruiter.company_name }}" />
+        {% else %}
+          &#127970;
+        {% endif %}
+      </div>
+
+      <!-- Info -->
+      <div style="flex:1;min-width:0;">
+        <div class="job-title">{{ job.title }}</div>
+        <div class="job-company">{{ job.recruiter.company_name }}</div>
+        <div class="job-meta">
+          {% if job.location %}<span>&#128205; {{ job.location }}</span>{% endif %}
+          <span>&#128197; {{ job.days_since_posted }}</span>
+          {% if job.deadline %}<span>&#9203; Deadline: {{ job.deadline|date:"M d, Y" }}</span>{% endif %}
+        </div>
+
+        <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">
+          <span class="badge badge-type">{{ job.get_job_type_display }}</span>
+          {% if job.is_remote %}<span class="badge badge-remote">&#127760; Remote</span>{% endif %}
+          {% if job.experience_level != 'any' %}
+          <span class="badge badge-exp">{{ job.get_experience_level_display }}</span>
+          {% endif %}
+          {% with sal=job.get_salary_display %}
+          {% if sal and sal != 'Confidential' %}
+          <span class="badge badge-salary">&#128181; {{ sal }}</span>
+          {% endif %}{% endwith %}
+        </div>
+
+        {% if job.required_skills %}
+        <div class="skills-row">
+          {% for skill in job.get_skills_list|slice:":6" %}
+          <span class="skill-tag">{{ skill }}</span>
+          {% endfor %}
+          {% if job.get_skills_list|length > 6 %}
+          <span class="skill-tag">+{{ job.get_skills_list|length|add:"-6" }} more</span>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Right arrow / save button -->
+      {% if request.user.is_authenticated and request.user.is_job_seeker_user %}
+        {# Bookmark shown as separate form wrapping only the icon, outside the card anchor #}
+        <div style="color:var(--gray-300);font-size:1.1rem;align-self:center;flex-shrink:0;">&#8594;</div>
+      {% else %}
+        <div style="color:var(--gray-300);font-size:1.1rem;align-self:center;flex-shrink:0;">&#8594;</div>
+      {% endif %}
+    </a>
+    {% if request.user.is_authenticated and request.user.is_job_seeker_user %}
+    <form method="post" action="{% url 'jobs:save' job.pk %}"
+          style="position:relative;margin-top:-44px;margin-bottom:6px;text-align:right;padding-right:12px;z-index:2;">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.path }}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}">
+      <button type="submit"
+              title="{% if job.pk in saved_ids %}Remove from saved{% else %}Save job{% endif %}"
+              style="padding:6px 10px;border-radius:8px;border:1.5px solid {% if job.pk in saved_ids %}#f59e0b{% else %}var(--gray-200){% endif %};
+                     background:{% if job.pk in saved_ids %}#fffbeb{% else %}var(--white){% endif %};
+                     color:{% if job.pk in saved_ids %}#d97706{% else %}var(--gray-400){% endif %};
+                     cursor:pointer;font-size:.875rem;font-family:var(--font);">
+        {% if job.pk in saved_ids %}&#11088;{% else %}&#9734;{% endif %}
+      </button>
+    </form>
+    {% endif %}
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="no-jobs">
+    <div class="no-jobs-icon">&#128269;</div>
+    <div class="no-jobs-title">No jobs found</div>
+    <div class="no-jobs-desc">
+      {% if q or filter_type %}Try adjusting your search or clearing filters.
+      {% else %}No active jobs right now. Check back soon!{% endif %}
+    </div>
+    {% if q or filter_type %}
+    <a href="{% url 'jobs:board' %}" style="margin-top:16px;display:inline-block;" class="btn btn-primary btn-sm">Clear Filters</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

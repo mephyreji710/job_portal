@@ -1,0 +1,267 @@
+{% extends 'recruiter/base_recruiter.html' %}
+{% block title %}AI Resume Screening{% endblock %}
+{% block nav_screening %}active{% endblock %}
+
+{% block extra_css %}
+.screen-header {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4f46e5 100%);
+  border-radius: var(--radius-xl); padding: 28px 32px;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+}
+.kpi-strip {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  margin-bottom: 24px;
+}
+.kpi-card {
+  background: var(--white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow); padding: 18px 22px;
+  display: flex; align-items: center; gap: 16px;
+}
+.kpi-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+.kpi-val  { font-size: 1.6rem; font-weight: 900; line-height: 1; }
+.kpi-lbl  { font-size: .75rem; color: var(--gray-400); font-weight: 600; margin-top: 3px; }
+
+/* Job screening card */
+.job-screen-card {
+  background: var(--white); border-radius: var(--radius-xl);
+  box-shadow: var(--shadow); overflow: hidden; margin-bottom: 16px;
+}
+.jsc-header {
+  padding: 18px 22px; border-bottom: 1.5px solid var(--gray-100);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.jsc-title { font-size: 1rem; font-weight: 800; color: var(--gray-900); margin-bottom: 3px; }
+.jsc-meta  { font-size: .78rem; color: var(--gray-400); display: flex; flex-wrap: wrap; gap: 10px; }
+.jsc-badge { padding: 2px 10px; border-radius: 999px; font-size: .72rem; font-weight: 700; }
+.badge-active   { background: #d1fae5; color: #065f46; }
+.badge-inactive { background: var(--gray-100); color: var(--gray-500); }
+.badge-draft    { background: #fef3c7; color: #92400e; }
+
+.jsc-body { padding: 18px 22px; }
+
+/* Tier pills strip */
+.tier-strip { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.tier-pill  { padding: 4px 12px; border-radius: 999px; font-size: .75rem; font-weight: 700; }
+.tp-excellent { background: #d1fae5; color: #065f46; }
+.tp-good      { background: #dbeafe; color: #1e40af; }
+.tp-fair      { background: #fef3c7; color: #92400e; }
+.tp-low       { background: #fee2e2; color: #991b1b; }
+
+/* Top candidates mini list */
+.top-cands { display: flex; flex-direction: column; gap: 8px; }
+.tc-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border: 1.5px solid var(--gray-100);
+  border-radius: var(--radius); transition: border-color .2s;
+}
+.tc-row:hover { border-color: var(--indigo); }
+.tc-rank  { width: 24px; font-size: .78rem; font-weight: 700; color: var(--gray-400); text-align: center; flex-shrink: 0; }
+.tc-score-circle {
+  width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .85rem; font-weight: 900; color: #fff;
+}
+.tc-info  { flex: 1; min-width: 0; }
+.tc-name  { font-size: .85rem; font-weight: 700; color: var(--gray-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tc-email { font-size: .72rem; color: var(--gray-400); }
+
+/* Score bar */
+.score-bar-wrap { width: 100px; flex-shrink: 0; }
+.score-bar-bg   { height: 6px; background: var(--gray-100); border-radius: 999px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 999px; }
+.score-pct-txt  { font-size: .7rem; color: var(--gray-500); text-align: right; margin-top: 2px; }
+
+/* Empty state per job */
+.no-scores {
+  text-align: center; padding: 28px 16px;
+  background: var(--gray-50); border-radius: var(--radius); border: 1.5px dashed var(--gray-200);
+}
+
+/* Avg score badge */
+.avg-score-badge {
+  display: flex; flex-direction: column; align-items: center;
+  min-width: 64px;
+}
+.avg-num { font-size: 1.5rem; font-weight: 900; line-height: 1; }
+.avg-lbl { font-size: .65rem; color: var(--gray-400); font-weight: 600; text-transform: uppercase; margin-top: 2px; }
+{% endblock %}
+
+{% block main_content %}
+
+<!-- HEADER -->
+<div class="screen-header">
+  <div>
+    <h2 style="color:#fff;font-size:1.3rem;font-weight:800;margin-bottom:6px;">&#129302; AI Resume Screening</h2>
+    <p style="color:rgba(255,255,255,.65);font-size:.875rem;">
+      Ranked candidates for all your job postings — powered by skill, experience &amp; keyword analysis
+    </p>
+  </div>
+  <a href="{% url 'jobs:new' %}" class="btn btn-primary">+ Post New Job</a>
+</div>
+
+<!-- KPI STRIP -->
+<div class="kpi-strip">
+  <div class="kpi-card">
+    <div class="kpi-icon" style="background:#ede9fe;">&#128196;</div>
+    <div>
+      <div class="kpi-val" style="color:var(--indigo);">{{ total_jobs }}</div>
+      <div class="kpi-lbl">Total Job Posts</div>
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon" style="background:#d1fae5;">&#128101;</div>
+    <div>
+      <div class="kpi-val" style="color:var(--green);">{{ total_apps }}</div>
+      <div class="kpi-lbl">Total Applicants</div>
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon" style="background:#dbeafe;">&#129302;</div>
+    <div>
+      <div class="kpi-val" style="color:var(--blue);">{{ total_scored }}</div>
+      <div class="kpi-lbl">Resumes Screened</div>
+    </div>
+  </div>
+</div>
+
+{% if job_data %}
+
+{% for item in job_data %}
+<div class="job-screen-card">
+
+  <!-- Job Header -->
+  <div class="jsc-header">
+    <div style="flex:1;min-width:0;">
+      <div class="jsc-title">{{ item.job.title }}</div>
+      <div class="jsc-meta">
+        <span>&#128205; {{ item.job.location|default:"Remote" }}</span>
+        <span>&#128197; Posted {{ item.job.created_at|date:"M d, Y" }}</span>
+        <span>&#128101; {{ item.apps_count }} applicant{{ item.apps_count|pluralize }}</span>
+        <span>&#129302; {{ item.scored_count }} screened</span>
+      </div>
+    </div>
+
+    <!-- Avg Score Badge -->
+    {% if item.scored_count %}
+    <div class="avg-score-badge">
+      <div class="avg-num"
+        style="color:{% if item.avg_score >= 75 %}var(--green){% elif item.avg_score >= 50 %}var(--blue){% elif item.avg_score >= 35 %}#f59e0b{% else %}var(--red){% endif %};">
+        {{ item.avg_score }}%
+      </div>
+      <div class="avg-lbl">Avg Score</div>
+    </div>
+    {% endif %}
+
+    <!-- Status + Actions -->
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
+      <span class="jsc-badge {% if item.job.status == 'active' %}badge-active{% elif item.job.status == 'draft' %}badge-draft{% else %}badge-inactive{% endif %}">
+        {{ item.job.get_status_display }}
+      </span>
+      <a href="{% url 'screening:candidates' item.job.pk %}" class="btn btn-indigo btn-sm">
+        &#127942; View All Rankings
+      </a>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="jsc-body">
+
+    <!-- Tier breakdown -->
+    {% if item.scored_count %}
+    <div class="tier-strip">
+      {% if item.excellent %}<span class="tier-pill tp-excellent">&#11088; Excellent: {{ item.excellent }}</span>{% endif %}
+      {% if item.good %}<span class="tier-pill tp-good">&#128077; Good: {{ item.good }}</span>{% endif %}
+      {% if item.fair %}<span class="tier-pill tp-fair">&#128528; Fair: {{ item.fair }}</span>{% endif %}
+      {% if item.low %}<span class="tier-pill tp-low">&#128256; Low: {{ item.low }}</span>{% endif %}
+    </div>
+
+    <!-- Top 3 candidates -->
+    <div style="font-size:.75rem;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Top Candidates</div>
+    <div class="top-cands">
+      {% for score in item.top_candidates %}
+      <a class="tc-row" href="{% url 'screening:result' score.pk %}" style="text-decoration:none;color:inherit;">
+        <div class="tc-rank">
+          {% if forloop.counter == 1 %}&#129351;{% elif forloop.counter == 2 %}&#129352;{% else %}&#129353;{% endif %}
+        </div>
+        <div class="tc-score-circle"
+          style="background:{% if score.total_score >= 75 %}#10b981{% elif score.total_score >= 50 %}#3b82f6{% elif score.total_score >= 35 %}#f59e0b{% else %}#ef4444{% endif %};">
+          {{ score.total_score|floatformat:0 }}
+        </div>
+        <div class="tc-info">
+          <div class="tc-name">{{ score.candidate.get_full_name|default:score.candidate.email }}</div>
+          <div class="tc-email">{{ score.candidate.email }}</div>
+        </div>
+        <!-- Component mini-bars -->
+        <div style="display:flex;gap:14px;flex-shrink:0;">
+          <div style="text-align:center;">
+            <div style="font-size:.65rem;color:var(--gray-400);margin-bottom:3px;">Skills</div>
+            <div class="score-bar-wrap">
+              <div class="score-bar-bg"><div class="score-bar-fill" style="width:{{ score.skills_score }}%;background:#6366f1;"></div></div>
+              <div class="score-pct-txt">{{ score.skills_score|floatformat:0 }}%</div>
+            </div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:.65rem;color:var(--gray-400);margin-bottom:3px;">Exp</div>
+            <div class="score-bar-wrap">
+              <div class="score-bar-bg"><div class="score-bar-fill" style="width:{{ score.experience_score }}%;background:#10b981;"></div></div>
+              <div class="score-pct-txt">{{ score.experience_score|floatformat:0 }}%</div>
+            </div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:.65rem;color:var(--gray-400);margin-bottom:3px;">Edu</div>
+            <div class="score-bar-wrap">
+              <div class="score-bar-bg"><div class="score-bar-fill" style="width:{{ score.education_score }}%;background:#f59e0b;"></div></div>
+              <div class="score-pct-txt">{{ score.education_score|floatformat:0 }}%</div>
+            </div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:.65rem;color:var(--gray-400);margin-bottom:3px;">Keywords</div>
+            <div class="score-bar-wrap">
+              <div class="score-bar-bg"><div class="score-bar-fill" style="width:{{ score.keywords_score }}%;background:#3b82f6;"></div></div>
+              <div class="score-pct-txt">{{ score.keywords_score|floatformat:0 }}%</div>
+            </div>
+          </div>
+        </div>
+        <div style="color:var(--gray-300);font-size:1rem;flex-shrink:0;">&#8594;</div>
+      </a>
+      {% endfor %}
+    </div>
+
+    {% if item.scored_count > 3 %}
+    <div style="margin-top:12px;text-align:center;">
+      <a href="{% url 'screening:candidates' item.job.pk %}" style="font-size:.8rem;color:var(--indigo);font-weight:700;">
+        See all {{ item.scored_count }} ranked candidates &rarr;
+      </a>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="no-scores">
+      <div style="font-size:2rem;margin-bottom:8px;">&#129302;</div>
+      <div style="font-size:.875rem;font-weight:700;color:var(--gray-600);margin-bottom:4px;">No candidates screened yet</div>
+      <div style="font-size:.78rem;color:var(--gray-400);">
+        Candidates who apply will be automatically screened by AI.
+        {% if item.apps_count %}
+        {{ item.apps_count }} applicant{{ item.apps_count|pluralize }} — scores compute on first application.
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endfor %}
+
+{% else %}
+<div style="text-align:center;padding:64px 24px;background:var(--white);border-radius:var(--radius-xl);box-shadow:var(--shadow);">
+  <div style="font-size:3rem;margin-bottom:12px;">&#128196;</div>
+  <div style="font-size:1.1rem;font-weight:700;color:var(--gray-700);margin-bottom:6px;">No job posts yet</div>
+  <div style="font-size:.875rem;color:var(--gray-400);margin-bottom:20px;">
+    Post a job to start receiving and screening candidates.
+  </div>
+  <a href="{% url 'jobs:new' %}" class="btn btn-primary">+ Post Your First Job</a>
+</div>
+{% endif %}
+
+{% endblock %}

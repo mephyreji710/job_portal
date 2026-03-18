@@ -1,0 +1,64 @@
+{% extends 'accounts/base.html' %}
+{% block title %}{% if valid %}Email Verified{% else %}Invalid Link{% endif %} — TalentBridge{% endblock %}
+
+{% block extra_css %}
+.verified-wrap {
+  min-height: 80vh; display: flex; align-items: center; justify-content: center;
+  padding: 40px 20px;
+}
+.verified-card {
+  background: var(--white); border-radius: var(--radius-xl);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.10); padding: 52px 48px;
+  max-width: 480px; width: 100%; text-align: center;
+}
+.verified-icon { font-size: 4.5rem; margin-bottom: 20px; }
+.verified-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 10px; }
+.verified-sub   { font-size: .925rem; color: var(--gray-500); line-height: 1.7; margin-bottom: 32px; }
+{% endblock %}
+
+{% block content %}
+<div class="verified-wrap">
+  <div class="verified-card">
+
+    {% if valid %}
+      <div class="verified-icon">&#9989;</div>
+      <div class="verified-title" style="color:#065f46;">Email Verified!</div>
+      <div class="verified-sub">
+        Your account is now active. You've been logged in automatically.<br>
+        Welcome to TalentBridge, <strong>{{ user.first_name|default:user.username }}</strong>!
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+        {% if user.role == 'recruiter' %}
+        <a href="{% url 'accounts:recruiter_dashboard' %}" class="btn btn-primary" style="width:100%;max-width:280px;">
+          &#128188; Go to Recruiter Dashboard
+        </a>
+        {% else %}
+        <a href="{% url 'accounts:jobseeker_dashboard' %}" class="btn btn-primary" style="width:100%;max-width:280px;">
+          &#128640; Go to My Dashboard
+        </a>
+        {% endif %}
+        <a href="{% url 'jobs:board' %}" style="font-size:.875rem;color:var(--gray-400);text-decoration:none;">
+          Browse Jobs &rarr;
+        </a>
+      </div>
+
+    {% else %}
+      <div class="verified-icon">&#10060;</div>
+      <div class="verified-title" style="color:#dc2626;">Invalid or Expired Link</div>
+      <div class="verified-sub">
+        This verification link is invalid or has expired.<br>
+        Links expire after <strong>24 hours</strong>. Please request a new one below.
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+        <a href="{% url 'accounts:registration_pending' %}" class="btn btn-primary" style="width:100%;max-width:280px;">
+          &#128231; Resend Verification Email
+        </a>
+        <a href="{% url 'accounts:login' %}" style="font-size:.875rem;color:var(--gray-400);text-decoration:none;">
+          &#8592; Back to Login
+        </a>
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

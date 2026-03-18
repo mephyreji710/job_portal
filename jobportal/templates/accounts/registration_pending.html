@@ -1,0 +1,101 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Check Your Email — TalentBridge{% endblock %}
+
+{% block extra_css %}
+.pending-wrap {
+  min-height: 80vh; display: flex; align-items: center; justify-content: center;
+  padding: 40px 20px;
+}
+.pending-card {
+  background: var(--white); border-radius: var(--radius-xl);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.10); padding: 52px 48px;
+  max-width: 520px; width: 100%; text-align: center;
+}
+.pending-icon { font-size: 4rem; margin-bottom: 20px; animation: bounce 2s infinite; }
+@keyframes bounce {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+.pending-title { font-size: 1.5rem; font-weight: 800; color: var(--gray-900); margin-bottom: 10px; }
+.pending-sub   { font-size: .925rem; color: var(--gray-500); line-height: 1.7; margin-bottom: 32px; }
+.steps { display: flex; flex-direction: column; gap: 12px; text-align: left; margin-bottom: 32px; }
+.step  { display: flex; align-items: flex-start; gap: 12px; }
+.step-num {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--indigo);
+  color: #fff; font-size: .8rem; font-weight: 800; display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+}
+.step-text { font-size: .875rem; color: var(--gray-600); line-height: 1.5; }
+.divider { border: none; border-top: 1px solid var(--gray-200); margin: 28px 0; }
+.resend-form { margin-top: 8px; }
+.resend-row { display: flex; gap: 8px; }
+.resend-row input {
+  flex: 1; padding: 9px 14px; border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius); font-size: .875rem; font-family: var(--font);
+  outline: none;
+}
+.resend-row input:focus { border-color: var(--indigo); }
+{% endblock %}
+
+{% block content %}
+<div class="pending-wrap">
+  <div class="pending-card">
+
+    <div class="pending-icon">&#128231;</div>
+    <div class="pending-title">Check your email</div>
+    <div class="pending-sub">
+      We've sent a verification link to your email address.<br>
+      Click the link in the email to activate your account.
+    </div>
+
+    {% for msg in messages %}
+    <div style="padding:10px 16px;border-radius:8px;margin-bottom:20px;font-size:.875rem;font-weight:600;
+      {% if msg.tags == 'success' %}background:#ecfdf5;color:#065f46;border-left:4px solid #10b981;
+      {% else %}background:#fffbeb;color:#92400e;border-left:4px solid #f59e0b;{% endif %}">
+      {{ msg }}
+    </div>
+    {% endfor %}
+
+    <!-- Steps -->
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Open your inbox for the email address you registered with.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Find the email from <strong>TalentBridge</strong> with the subject <em>"Verify your TalentBridge email address"</em>.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Click <strong>Verify Email Address</strong> to activate your account and start using TalentBridge.</div>
+      </div>
+    </div>
+
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--radius);padding:12px 16px;font-size:.82rem;color:#1e40af;margin-bottom:24px;text-align:left;">
+      &#128161; <strong>Check your spam folder</strong> if you don't see the email within a few minutes.
+    </div>
+
+    <hr class="divider">
+
+    <!-- Resend -->
+    <div style="font-size:.82rem;color:var(--gray-500);margin-bottom:12px;">
+      Didn't receive the email? Enter your email to resend:
+    </div>
+    <form method="post" action="{% url 'accounts:resend_verification' %}" class="resend-form">
+      {% csrf_token %}
+      <div class="resend-row">
+        <input type="email" name="email" placeholder="your@email.com" required>
+        <button type="submit" class="btn btn-primary btn-sm">Resend</button>
+      </div>
+    </form>
+
+    <div style="margin-top:24px;">
+      <a href="{% url 'accounts:login' %}" style="font-size:.82rem;color:var(--gray-400);text-decoration:none;">
+        &#8592; Back to Login
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

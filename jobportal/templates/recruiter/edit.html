@@ -1,0 +1,148 @@
+{% extends 'recruiter/base_recruiter.html' %}
+{% block title %}Edit Company Profile{% endblock %}
+{% block nav_edit %}active{% endblock %}
+
+{% block extra_css %}
+.logo-preview-wrap {
+  display: flex; align-items: center; gap: 16px; margin-bottom: 8px;
+}
+.logo-preview {
+  width: 72px; height: 72px; border-radius: 14px;
+  border: 2px dashed var(--gray-300); background: var(--gray-50);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; overflow: hidden; flex-shrink: 0;
+}
+.logo-preview img { width: 100%; height: 100%; object-fit: cover; }
+.section-divider {
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--gray-400);
+  padding: 4px 0 12px; border-bottom: 1.5px solid var(--gray-100);
+  margin-bottom: 18px; margin-top: 8px;
+}
+{% endblock %}
+
+{% block main_content %}
+
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--green-pale);">&#9998;</div>
+      <div>
+        <div class="section-title">Edit Company Profile</div>
+        <div class="section-sub">Keep your profile updated to attract the best candidates</div>
+      </div>
+    </div>
+    <a href="{% url 'recruiter:panel' %}" class="btn btn-gray btn-sm">&#8592; Back</a>
+  </div>
+
+  <div class="section-body">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <!-- LOGO -->
+      <div class="section-divider">Company Logo</div>
+      <div class="form-group">
+        <label class="form-label">Logo <span class="opt">(optional)</span></label>
+        <div class="logo-preview-wrap">
+          <div class="logo-preview">
+            {% if profile.logo %}
+              <img src="{{ profile.logo.url }}" alt="Current logo" />
+            {% else %}
+              &#127970;
+            {% endif %}
+          </div>
+          <div style="flex:1;">
+            {{ form.logo }}
+            {% if form.logo.errors %}
+              {% for e in form.logo.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+            {% endif %}
+            <span class="field-hint">JPG, PNG or SVG. Displayed at 80&times;80 px in the sidebar.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BASIC INFO -->
+      <div class="section-divider">Basic Information</div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">{{ form.company_name.label }}</label>
+          {{ form.company_name }}
+          {% for e in form.company_name.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.tagline.label }} <span class="opt">(optional)</span></label>
+          {{ form.tagline }}
+          {% for e in form.tagline.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+      </div>
+
+      <!-- COMPANY DETAILS -->
+      <div class="section-divider">Company Details</div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">{{ form.industry.label }} <span class="opt">(optional)</span></label>
+          {{ form.industry }}
+          {% for e in form.industry.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.company_type.label }} <span class="opt">(optional)</span></label>
+          {{ form.company_type }}
+          {% for e in form.company_type.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.company_size.label }} <span class="opt">(optional)</span></label>
+          {{ form.company_size }}
+          {% for e in form.company_size.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.founded_year.label }} <span class="opt">(optional)</span></label>
+          {{ form.founded_year }}
+          {% for e in form.founded_year.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.location.label }} <span class="opt">(optional)</span></label>
+          {{ form.location }}
+          {% for e in form.location.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.company_website.label }} <span class="opt">(optional)</span></label>
+          {{ form.company_website }}
+          {% for e in form.company_website.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+      </div>
+
+      <!-- ABOUT -->
+      <div class="section-divider">About the Company</div>
+      <div class="form-group">
+        <label class="form-label">{{ form.company_description.label }} <span class="opt">(optional)</span></label>
+        {{ form.company_description }}
+        <span class="field-hint">Describe your company culture, mission, and what makes it a great place to work.</span>
+        {% for e in form.company_description.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+      </div>
+
+      <!-- SOCIAL LINKS -->
+      <div class="section-divider">Social Links</div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">{{ form.linkedin_url.label }} <span class="opt">(optional)</span></label>
+          {{ form.linkedin_url }}
+          {% for e in form.linkedin_url.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.twitter_url.label }} <span class="opt">(optional)</span></label>
+          {{ form.twitter_url }}
+          {% for e in form.twitter_url.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+      </div>
+
+      <!-- SUBMIT -->
+      <div style="display:flex;gap:12px;margin-top:8px;">
+        <button type="submit" class="btn btn-primary">&#10003; Save Changes</button>
+        <a href="{% url 'recruiter:panel' %}" class="btn btn-gray">Cancel</a>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+{% endblock %}

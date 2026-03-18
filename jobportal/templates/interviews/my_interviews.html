@@ -1,0 +1,177 @@
+{% extends 'jobseeker/base_profile.html' %}
+{% block title %}My Interviews{% endblock %}
+{% block nav_resume %}active{% endblock %}
+
+{% block extra_css %}
+.int-wrap { max-width: 860px; }
+
+.page-header {
+  background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%);
+  border-radius: var(--radius-xl); padding: 24px 28px; margin-bottom: 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+/* Interview card */
+.int-card {
+  background: var(--white); border-radius: var(--radius-xl);
+  box-shadow: var(--shadow); overflow: hidden; margin-bottom: 14px;
+}
+.int-card-header {
+  display: flex; align-items: center; gap: 14px; padding: 16px 20px;
+  border-bottom: 1px solid var(--gray-100);
+}
+.int-date-box {
+  width: 54px; height: 54px; border-radius: var(--radius); flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: var(--indigo-pale); border: 1.5px solid #c7d2fe;
+}
+.int-month { font-size: .65rem; font-weight: 800; color: var(--indigo); text-transform: uppercase; letter-spacing: .06em; }
+.int-day   { font-size: 1.3rem; font-weight: 900; color: var(--indigo); line-height: 1; }
+
+.int-meta  { flex: 1; min-width: 0; }
+.int-job   { font-size: .95rem; font-weight: 700; color: var(--gray-900); }
+.int-co    { font-size: .82rem; color: var(--blue); font-weight: 600; margin-top: 1px; }
+.int-time  { font-size: .78rem; color: var(--gray-400); margin-top: 4px; display: flex; flex-wrap: wrap; gap: 10px; }
+
+.int-body { padding: 16px 20px; font-size: .875rem; color: var(--gray-700); }
+.int-detail-row { display: flex; gap: 10px; margin-bottom: 8px; }
+.int-detail-icon { width: 20px; flex-shrink: 0; font-size: .85rem; }
+.int-detail-val  { line-height: 1.5; }
+
+.int-actions { padding: 12px 20px 16px; display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--gray-100); }
+
+/* Status badge */
+.st-pill { padding: 3px 10px; border-radius: 999px; font-size: .72rem; font-weight: 700; }
+
+/* Empty */
+.empty-ints { text-align: center; padding: 48px 24px; background: var(--white); border-radius: var(--radius-xl); box-shadow: var(--shadow); }
+{% endblock %}
+
+{% block main_content %}
+<div class="int-wrap">
+
+  <div class="page-header">
+    <div>
+      <h2 style="color:#fff;font-size:1.2rem;font-weight:800;margin-bottom:4px;">&#128197; My Interviews</h2>
+      <p style="color:rgba(255,255,255,.7);font-size:.875rem;">{{ total }} interview{{ total|pluralize }} scheduled</p>
+    </div>
+    <a href="{% url 'applications:my_applications' %}" class="btn btn-gray btn-sm"
+       style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.9);background:rgba(255,255,255,.1);">
+      &#128640; My Applications
+    </a>
+  </div>
+
+  {# ── Upcoming ── #}
+  {% if upcoming %}
+  <div style="font-size:.78rem;font-weight:800;color:var(--gray-400);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">
+    Upcoming ({{ upcoming.count }})
+  </div>
+  {% for iv in upcoming %}
+  <div class="int-card">
+    <div class="int-card-header">
+      <div class="int-date-box">
+        <div class="int-month">{{ iv.scheduled_at|date:"M" }}</div>
+        <div class="int-day">{{ iv.scheduled_at|date:"d" }}</div>
+      </div>
+      <div class="int-meta">
+        <div class="int-job">{{ iv.application.job.title }}</div>
+        <div class="int-co">{{ iv.application.job.recruiter.company_name }}</div>
+        <div class="int-time">
+          <span>&#128336; {{ iv.scheduled_at|date:"l, F d Y" }} at {{ iv.scheduled_at|date:"H:i" }}</span>
+          <span>&#9200; {{ iv.duration_mins }} min</span>
+          <span>{{ iv.type_icon }} {{ iv.get_interview_type_display }}</span>
+        </div>
+      </div>
+      <span class="st-pill" style="background:{{ iv.status_bg }};color:{{ iv.status_color }};flex-shrink:0;">
+        &#9679; {{ iv.get_status_display }}
+      </span>
+    </div>
+
+    <div class="int-body">
+      {% if iv.location %}
+      <div class="int-detail-row">
+        <span class="int-detail-icon">&#128205;</span>
+        <span class="int-detail-val">{{ iv.location }}</span>
+      </div>
+      {% endif %}
+      {% if iv.meeting_link %}
+      <div class="int-detail-row">
+        <span class="int-detail-icon">&#128279;</span>
+        <span class="int-detail-val">
+          <a href="{{ iv.meeting_link }}" target="_blank" style="color:var(--blue);word-break:break-all;">{{ iv.meeting_link }}</a>
+        </span>
+      </div>
+      {% endif %}
+      {% if iv.notes %}
+      <div style="background:var(--gray-50);border-left:3px solid var(--indigo);padding:10px 14px;border-radius:0 8px 8px 0;margin-top:8px;font-size:.85rem;color:var(--gray-700);">
+        <div style="font-size:.72rem;font-weight:700;color:var(--indigo);margin-bottom:4px;">FROM THE RECRUITER</div>
+        {{ iv.notes }}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="int-actions">
+      {% if iv.status == 'scheduled' %}
+      <form method="post" action="{% url 'interviews:confirm' iv.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary" style="background:var(--green);">&#10003; Confirm</button>
+      </form>
+      <form method="post" action="{% url 'interviews:decline' iv.pk %}"
+            onsubmit="return confirm('Decline this interview?');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">&#10005; Decline</button>
+      </form>
+      {% elif iv.status == 'confirmed' %}
+      <span style="font-size:.82rem;color:var(--green);font-weight:700;">&#10003; You confirmed this interview</span>
+      <form method="post" action="{% url 'interviews:decline' iv.pk %}"
+            onsubmit="return confirm('Cancel this interview?');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-gray btn-sm">Cancel</button>
+      </form>
+      {% endif %}
+      {% if iv.meeting_link %}
+      <a href="{{ iv.meeting_link }}" target="_blank" class="btn btn-outline btn-sm">&#128249; Join Call</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {# ── Past ── #}
+  {% if past %}
+  <div style="font-size:.78rem;font-weight:800;color:var(--gray-400);text-transform:uppercase;letter-spacing:.08em;margin-top:24px;margin-bottom:10px;">
+    Past &amp; Cancelled
+  </div>
+  {% for iv in past %}
+  <div class="int-card" style="opacity:.7;">
+    <div class="int-card-header">
+      <div class="int-date-box" style="background:var(--gray-100);border-color:var(--gray-200);">
+        <div class="int-month" style="color:var(--gray-400);">{{ iv.scheduled_at|date:"M" }}</div>
+        <div class="int-day" style="color:var(--gray-500);">{{ iv.scheduled_at|date:"d" }}</div>
+      </div>
+      <div class="int-meta">
+        <div class="int-job">{{ iv.application.job.title }}</div>
+        <div class="int-co">{{ iv.application.job.recruiter.company_name }}</div>
+        <div class="int-time">
+          <span>{{ iv.scheduled_at|date:"M d, Y" }} at {{ iv.scheduled_at|date:"H:i" }}</span>
+        </div>
+      </div>
+      <span class="st-pill" style="background:{{ iv.status_bg }};color:{{ iv.status_color }};flex-shrink:0;">
+        &#9679; {{ iv.get_status_display }}
+      </span>
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% if not upcoming and not past %}
+  <div class="empty-ints">
+    <div style="font-size:3rem;margin-bottom:12px;">&#128197;</div>
+    <div style="font-size:1.1rem;font-weight:700;color:var(--gray-700);margin-bottom:6px;">No interviews yet</div>
+    <div style="font-size:.875rem;color:var(--gray-400);margin-bottom:20px;">Apply to jobs and recruiters will schedule interviews here.</div>
+    <a href="{% url 'jobs:board' %}" class="btn btn-primary">&#128269; Browse Jobs</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

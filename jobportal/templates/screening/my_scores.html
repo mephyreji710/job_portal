@@ -1,0 +1,100 @@
+{% extends 'jobseeker/base_profile.html' %}
+{% block title %}My Match Scores{% endblock %}
+{% block nav_resume %}active{% endblock %}
+
+{% block extra_css %}
+.scores-wrap { max-width: 860px; }
+
+.score-card {
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-lg); padding: 18px 20px;
+  display: flex; align-items: center; gap: 16px;
+  transition: border-color .2s; text-decoration: none; color: inherit;
+}
+.score-card:hover { border-color: var(--indigo); box-shadow: var(--shadow-md); text-decoration: none; }
+.score-card + .score-card { margin-top: 10px; }
+
+.sc-ring { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center;
+           justify-content: center; flex-shrink: 0; font-size: 1rem; font-weight: 900; color: #fff; }
+.sc-info { flex: 1; min-width: 0; }
+.sc-job  { font-size: .95rem; font-weight: 700; color: var(--gray-900); margin-bottom: 2px; }
+.sc-company { font-size: .82rem; color: var(--blue); font-weight: 600; }
+.sc-meta { font-size: .75rem; color: var(--gray-400); margin-top: 5px; display: flex; flex-wrap: wrap; gap: 10px; }
+
+.sc-bars { width: 160px; flex-shrink: 0; display: flex; flex-direction: column; gap: 4px; }
+.sc-bar-row { font-size: .7rem; color: var(--gray-400); display: flex; justify-content: space-between; align-items: center; }
+.sc-bar-bg { height: 5px; background: var(--gray-100); border-radius: 999px; overflow: hidden; margin-top: 1px; }
+.sc-bar-fill { height: 100%; border-radius: 999px; }
+
+.label-pill { padding:2px 9px; border-radius:999px; font-size:.7rem; font-weight:700; }
+.lp-excellent { background:#d1fae5; color:#065f46; }
+.lp-good      { background:#dbeafe; color:#1e40af; }
+.lp-fair      { background:#fef3c7; color:#92400e; }
+.lp-low       { background:#fee2e2; color:#991b1b; }
+
+.page-header {
+  background: linear-gradient(135deg, var(--indigo) 0%, #4338ca 100%);
+  border-radius: var(--radius-xl); padding: 24px 28px; margin-bottom: 20px;
+}
+{% endblock %}
+
+{% block main_content %}
+<div class="scores-wrap">
+
+  <div class="page-header">
+    <h2 style="color:#fff;font-size:1.2rem;font-weight:800;margin-bottom:4px;">&#128202; My Match Scores</h2>
+    <p style="color:rgba(255,255,255,.65);font-size:.875rem;">
+      {{ scores|length }} job{{ scores|length|pluralize }} scored &bull; AI-powered resume matching
+    </p>
+  </div>
+
+  {% if scores %}
+  <div>
+    {% for score in scores %}
+    <a class="score-card" href="{% url 'screening:result' score.pk %}">
+      <div class="sc-ring" style="background:{{ score.score_color }};">
+        {{ score.total_score|floatformat:0 }}
+      </div>
+
+      <div class="sc-info">
+        <div class="sc-job">
+          {{ score.job.title }}
+          <span class="label-pill lp-{{ score.score_label|lower }}" style="margin-left:6px;">{{ score.score_label }}</span>
+        </div>
+        <div class="sc-company">{{ score.job.recruiter.company_name }}</div>
+        <div class="sc-meta">
+          <span>&#9889; {{ score.matched_skills|length }} skills matched</span>
+          <span>&#128197; {{ score.experience_years_found|floatformat:1 }} yrs exp</span>
+          <span>Scored {{ score.computed_at|date:"M d, Y" }}</span>
+          {% if score.job.status == 'active' %}<span style="color:var(--green);font-weight:700;">&#9679; Active</span>
+          {% else %}<span style="color:var(--gray-400);">&#9675; {{ score.job.get_status_display }}</span>{% endif %}
+        </div>
+      </div>
+
+      <div class="sc-bars">
+        <div class="sc-bar-row"><span>Skills</span><span style="font-weight:700;color:var(--gray-700);">{{ score.skills_score|floatformat:0 }}%</span></div>
+        <div class="sc-bar-bg"><div class="sc-bar-fill" style="width:{{ score.skills_score }}%;background:#6366f1;"></div></div>
+
+        <div class="sc-bar-row"><span>Experience</span><span style="font-weight:700;color:var(--gray-700);">{{ score.experience_score|floatformat:0 }}%</span></div>
+        <div class="sc-bar-bg"><div class="sc-bar-fill" style="width:{{ score.experience_score }}%;background:#10b981;"></div></div>
+
+        <div class="sc-bar-row"><span>Keywords</span><span style="font-weight:700;color:var(--gray-700);">{{ score.keywords_score|floatformat:0 }}%</span></div>
+        <div class="sc-bar-bg"><div class="sc-bar-fill" style="width:{{ score.keywords_score }}%;background:#3b82f6;"></div></div>
+      </div>
+
+      <div style="color:var(--gray-300);font-size:1.1rem;flex-shrink:0;">&#8594;</div>
+    </a>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div style="text-align:center;padding:64px 24px;background:var(--white);border-radius:var(--radius-xl);box-shadow:var(--shadow);">
+    <div style="font-size:3rem;margin-bottom:12px;">&#128202;</div>
+    <div style="font-size:1.1rem;font-weight:700;color:var(--gray-700);margin-bottom:6px;">No scores yet</div>
+    <div style="font-size:.875rem;color:var(--gray-400);margin-bottom:20px;">Browse jobs and click "Check My Match Score" to see how well your profile fits.</div>
+    <a href="{% url 'jobs:board' %}" class="btn btn-primary">&#128269; Browse Jobs</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

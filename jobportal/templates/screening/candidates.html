@@ -1,0 +1,289 @@
+{% extends 'recruiter/base_recruiter.html' %}
+{% block title %}Candidates — {{ job.title }}{% endblock %}
+{% block nav_jobs %}active{% endblock %}
+
+{% block extra_css %}
+.cand-header {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #0891b2 100%);
+  border-radius: var(--radius-xl); padding: 24px 28px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+/* ── Podium (top 3) ── */
+.podium { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.podium-card {
+  background: var(--white); border-radius: var(--radius-xl);
+  box-shadow: var(--shadow); padding: 20px 18px; text-align: center;
+  border: 2px solid transparent; transition: transform .2s;
+  position: relative; overflow: hidden;
+}
+.podium-card:hover { transform: translateY(-2px); }
+.podium-card.gold   { border-color: #f59e0b; }
+.podium-card.silver { border-color: #94a3b8; }
+.podium-card.bronze { border-color: #cd7c3f; }
+.podium-medal  { font-size: 2rem; margin-bottom: 6px; }
+.podium-score  { font-size: 1.6rem; font-weight: 900; line-height: 1; }
+.podium-name   { font-size: .875rem; font-weight: 700; color: var(--gray-900); margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.podium-label  { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .72rem; font-weight: 700; margin-top: 5px; }
+.podium-meta   { font-size: .75rem; color: var(--gray-400); margin-top: 6px; }
+.podium-bar-wrap { height: 6px; background: var(--gray-100); border-radius: 999px; overflow: hidden; margin-top: 10px; }
+.podium-bar    { height: 100%; border-radius: 999px; }
+
+/* ── Tier section headers ── */
+.tier-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0 8px; margin-bottom: 8px;
+  border-bottom: 1.5px solid var(--gray-100);
+}
+.tier-badge { padding: 3px 12px; border-radius: 999px; font-size: .78rem; font-weight: 800; }
+.tier-excellent { background: #d1fae5; color: #065f46; }
+.tier-good      { background: #dbeafe; color: #1e40af; }
+.tier-fair      { background: #fef3c7; color: #92400e; }
+.tier-low       { background: #fee2e2; color: #991b1b; }
+.tier-count     { font-size: .78rem; color: var(--gray-400); }
+
+/* ── Candidate rows ── */
+.cand-row {
+  display: flex; align-items: center; gap: 14px; padding: 14px 18px;
+  border: 1.5px solid var(--gray-200); border-radius: var(--radius-lg);
+  transition: border-color .2s; margin-bottom: 8px;
+}
+.cand-row:hover { border-color: var(--green); }
+.rank-num { width: 26px; flex-shrink: 0; font-size: .85rem; font-weight: 700; color: var(--gray-400); text-align: center; }
+.score-circle {
+  width: 50px; height: 50px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: .95rem; font-weight: 900; color: #fff;
+}
+.cand-info { flex: 1; min-width: 0; }
+.cand-name  { font-size: .9rem; font-weight: 700; color: var(--gray-900); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.cand-email { font-size: .75rem; color: var(--gray-400); margin-top: 1px; }
+.cand-meta  { font-size: .72rem; color: var(--gray-500); margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Mini bars */
+.mini-bars { width: 150px; flex-shrink: 0; display: flex; flex-direction: column; gap: 3px; }
+.mb-row  { display: flex; justify-content: space-between; font-size: .68rem; color: var(--gray-400); }
+.mb-bg   { height: 5px; background: var(--gray-100); border-radius: 999px; overflow: hidden; margin-top: 1px; }
+.mb-fill { height: 100%; border-radius: 999px; }
+
+/* Status badge */
+.st-badge { padding: 2px 9px; border-radius: 999px; font-size: .72rem; font-weight: 700; }
+.st-new         { background: var(--gray-100);  color: var(--gray-600); }
+.st-reviewed    { background: #dbeafe;           color: #1e40af; }
+.st-shortlisted { background: #d1fae5;           color: #065f46; }
+.st-rejected    { background: #fee2e2;           color: #991b1b; }
+
+/* Status form */
+.status-form { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.status-select {
+  padding: 5px 8px; border: 1.5px solid var(--gray-200); border-radius: 8px;
+  font-size: .78rem; font-family: var(--font); color: var(--gray-700);
+  background: var(--white); cursor: pointer; outline: none;
+}
+.status-select:focus { border-color: var(--green); }
+
+/* Notes modal toggle */
+.notes-wrap { margin-top: 6px; display: none; }
+.notes-wrap.open { display: block; }
+.notes-input {
+  width: 100%; padding: 6px 10px; border: 1.5px solid var(--gray-200);
+  border-radius: 8px; font-size: .78rem; font-family: var(--font);
+  resize: vertical; min-height: 48px; max-height: 100px;
+}
+.notes-toggle { font-size: .72rem; color: var(--blue); cursor: pointer; text-decoration: underline; background: none; border: none; padding: 0; font-family: var(--font); }
+{% endblock %}
+
+{% block main_content %}
+
+<!-- HEADER -->
+<div class="cand-header">
+  <div>
+    <h2 style="color:#fff;font-size:1.2rem;font-weight:800;margin-bottom:4px;">&#127942; Candidate Rankings</h2>
+    <p style="color:rgba(255,255,255,.65);font-size:.875rem;">{{ job.title }} &bull; {{ scores|length }} candidate{{ scores|length|pluralize }} scored</p>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <a href="{% url 'jobs:preview' job.pk %}" class="btn btn-gray btn-sm" style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.8);">&#128269; Job Preview</a>
+    <a href="{% url 'jobs:manage' %}" class="btn btn-gray btn-sm" style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.8);">&#8592; All Jobs</a>
+  </div>
+</div>
+
+<!-- STATS STRIP -->
+{% with shortlisted_count=scores|length %}
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+  <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:14px 18px;text-align:center;">
+    <div style="font-size:1.5rem;font-weight:800;color:var(--green);">{{ scores|length }}</div>
+    <div style="font-size:.75rem;color:var(--gray-400);font-weight:600;margin-top:2px;">Total Scored</div>
+  </div>
+  {% if scores %}
+  <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:14px 18px;text-align:center;">
+    <div style="font-size:1.5rem;font-weight:800;color:var(--blue);">{{ scores.0.total_score|floatformat:0 }}%</div>
+    <div style="font-size:.75rem;color:var(--gray-400);font-weight:600;margin-top:2px;">Top Score</div>
+  </div>
+  {% else %}
+  <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:14px 18px;text-align:center;">
+    <div style="font-size:1.5rem;font-weight:800;color:var(--gray-400);">—</div>
+    <div style="font-size:.75rem;color:var(--gray-400);font-weight:600;margin-top:2px;">Top Score</div>
+  </div>
+  {% endif %}
+  <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:14px 18px;text-align:center;">
+    <div style="font-size:1.5rem;font-weight:800;color:var(--green);" id="shortlisted-count">{{ shortlisted_count }}</div>
+    <div style="font-size:.75rem;color:var(--gray-400);font-weight:600;margin-top:2px;">Shortlisted</div>
+  </div>
+  <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:14px 18px;text-align:center;">
+    <div style="font-size:1.5rem;font-weight:800;color:var(--indigo);">{{ job.get_skills_list|length }}</div>
+    <div style="font-size:.75rem;color:var(--gray-400);font-weight:600;margin-top:2px;">Skills Required</div>
+  </div>
+</div>
+{% endwith %}
+
+{% if scores %}
+
+<!-- PODIUM: top 3 -->
+{% if scores|length >= 1 %}
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:#fef9c3;">&#127941;</div>
+      <div>
+        <div class="section-title">Top Candidates</div>
+        <div class="section-sub">Highest scoring applicants</div>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="podium">
+      {% for score in scores|slice:":3" %}
+      {% if forloop.counter == 1 %}
+      <div class="podium-card gold">
+        <div class="podium-medal">&#127947;</div>
+        <div class="podium-score" style="color:#f59e0b;">{{ score.total_score|floatformat:0 }}%</div>
+        <div class="podium-name">
+          {% if score.candidate.get_full_name %}{{ score.candidate.get_full_name }}{% else %}{{ score.candidate.email }}{% endif %}
+        </div>
+        <div><span class="podium-label tier-excellent">{{ score.score_label }}</span></div>
+        <div class="podium-meta">&#9889; {{ score.matched_skills|length }} skills &bull; {{ score.experience_years_found|floatformat:1 }}yrs exp</div>
+        <div class="podium-bar-wrap"><div class="podium-bar" style="width:{{ score.total_score }}%;background:#f59e0b;"></div></div>
+        <div style="margin-top:10px;">
+          <a href="{% url 'screening:result' score.pk %}" class="btn btn-primary btn-sm" style="width:100%;display:block;text-align:center;">&#128202; View Details</a>
+        </div>
+      </div>
+      {% elif forloop.counter == 2 %}
+      <div class="podium-card silver">
+        <div class="podium-medal">&#129352;</div>
+        <div class="podium-score" style="color:#94a3b8;">{{ score.total_score|floatformat:0 }}%</div>
+        <div class="podium-name">
+          {% if score.candidate.get_full_name %}{{ score.candidate.get_full_name }}{% else %}{{ score.candidate.email }}{% endif %}
+        </div>
+        <div><span class="podium-label tier-{{ score.score_label|lower }}">{{ score.score_label }}</span></div>
+        <div class="podium-meta">&#9889; {{ score.matched_skills|length }} skills &bull; {{ score.experience_years_found|floatformat:1 }}yrs exp</div>
+        <div class="podium-bar-wrap"><div class="podium-bar" style="width:{{ score.total_score }}%;background:#94a3b8;"></div></div>
+        <div style="margin-top:10px;">
+          <a href="{% url 'screening:result' score.pk %}" class="btn btn-gray btn-sm" style="width:100%;display:block;text-align:center;">&#128202; View Details</a>
+        </div>
+      </div>
+      {% elif forloop.counter == 3 %}
+      <div class="podium-card bronze">
+        <div class="podium-medal">&#129353;</div>
+        <div class="podium-score" style="color:#cd7c3f;">{{ score.total_score|floatformat:0 }}%</div>
+        <div class="podium-name">
+          {% if score.candidate.get_full_name %}{{ score.candidate.get_full_name }}{% else %}{{ score.candidate.email }}{% endif %}
+        </div>
+        <div><span class="podium-label tier-{{ score.score_label|lower }}">{{ score.score_label }}</span></div>
+        <div class="podium-meta">&#9889; {{ score.matched_skills|length }} skills &bull; {{ score.experience_years_found|floatformat:1 }}yrs exp</div>
+        <div class="podium-bar-wrap"><div class="podium-bar" style="width:{{ score.total_score }}%;background:#cd7c3f;"></div></div>
+        <div style="margin-top:10px;">
+          <a href="{% url 'screening:result' score.pk %}" class="btn btn-gray btn-sm" style="width:100%;display:block;text-align:center;">&#128202; View Details</a>
+        </div>
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- FULL RANKED LIST WITH TIERS -->
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--green-pale);">&#128202;</div>
+      <div>
+        <div class="section-title">All Candidates</div>
+        <div class="section-sub">Ranked by AI match score — update status to shortlist or reject</div>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+
+    {% comment %}Group candidates into tiers{% endcomment %}
+    {% with excellent=scores|length %}
+
+    {# Excellent tier ≥80 #}
+    {% for score in scores %}{% if score.total_score >= 80 %}{% if forloop.first or scores|slice:forloop.counter0|last.total_score < 80 %}
+    <div class="tier-header">
+      <span class="tier-badge tier-excellent">&#11088; Excellent</span>
+      <span class="tier-count">≥ 80%</span>
+    </div>
+    {% endif %}{% endif %}{% endfor %}
+
+    {% for score in scores %}
+    {% if score.total_score >= 80 %}
+    {% include "screening/_cand_row.html" with score=score rank=forloop.counter %}
+    {% endif %}{% endfor %}
+
+    {# Good tier 60–79 #}
+    {% for score in scores %}{% if score.total_score >= 60 and score.total_score < 80 %}{% if forloop.first %}
+    <div class="tier-header" style="margin-top:16px;">
+      <span class="tier-badge tier-good">&#128077; Good</span>
+      <span class="tier-count">60 – 79%</span>
+    </div>
+    {% endif %}{% endif %}{% endfor %}
+
+    {% for score in scores %}
+    {% if score.total_score >= 60 and score.total_score < 80 %}
+    {% include "screening/_cand_row.html" with score=score rank=forloop.counter %}
+    {% endif %}{% endfor %}
+
+    {# Fair tier 40–59 #}
+    {% for score in scores %}{% if score.total_score >= 40 and score.total_score < 60 %}{% if forloop.first %}
+    <div class="tier-header" style="margin-top:16px;">
+      <span class="tier-badge tier-fair">&#128528; Fair</span>
+      <span class="tier-count">40 – 59%</span>
+    </div>
+    {% endif %}{% endif %}{% endfor %}
+
+    {% for score in scores %}
+    {% if score.total_score >= 40 and score.total_score < 60 %}
+    {% include "screening/_cand_row.html" with score=score rank=forloop.counter %}
+    {% endif %}{% endfor %}
+
+    {# Low tier <40 #}
+    {% for score in scores %}{% if score.total_score < 40 %}{% if forloop.first %}
+    <div class="tier-header" style="margin-top:16px;">
+      <span class="tier-badge tier-low">&#128531; Low</span>
+      <span class="tier-count">< 40%</span>
+    </div>
+    {% endif %}{% endif %}{% endfor %}
+
+    {% for score in scores %}
+    {% if score.total_score < 40 %}
+    {% include "screening/_cand_row.html" with score=score rank=forloop.counter %}
+    {% endif %}{% endfor %}
+
+    {% endwith %}
+  </div>
+</div>
+
+{% else %}
+<div class="section-card">
+  <div class="section-body">
+    <div class="empty-state">
+      <div class="empty-icon">&#128202;</div>
+      <div class="empty-title">No candidates yet</div>
+      <div class="empty-desc">Candidates appear here once they check their match score for this job.</div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

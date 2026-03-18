@@ -1,0 +1,141 @@
+{% extends 'jobseeker/base_profile.html' %}
+{% block title %}Saved Jobs{% endblock %}
+{% block nav_resume %}active{% endblock %}
+
+{% block extra_css %}
+.saved-wrap { max-width: 860px; }
+
+.page-header {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border-radius: var(--radius-xl); padding: 24px 28px; margin-bottom: 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.job-card {
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-lg); padding: 18px 20px;
+  display: flex; align-items: flex-start; gap: 14px;
+  transition: border-color .2s, box-shadow .2s; margin-bottom: 10px;
+}
+.job-card:hover { border-color: #f59e0b; box-shadow: 0 2px 12px rgba(245,158,11,.1); }
+
+.co-logo { width: 46px; height: 46px; border-radius: 10px; border: 1.5px solid var(--gray-200);
+           overflow: hidden; display: flex; align-items: center; justify-content: center;
+           background: var(--gray-50); font-size: 1.2rem; flex-shrink: 0; }
+.co-logo img { width: 100%; height: 100%; object-fit: cover; }
+
+.jc-info { flex: 1; min-width: 0; }
+.jc-title { font-size: .95rem; font-weight: 700; color: var(--gray-900); margin-bottom: 2px; }
+.jc-co    { font-size: .82rem; color: var(--blue); font-weight: 600; }
+.jc-meta  { font-size: .75rem; color: var(--gray-400); margin-top: 5px; display: flex; flex-wrap: wrap; gap: 10px; }
+.jc-tags  { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+.jc-tag   { padding: 2px 8px; border-radius: 999px; font-size: .72rem; font-weight: 600;
+             background: var(--blue-pale); color: var(--blue-dark); }
+
+.unsave-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 8px; border: 1.5px solid #fde68a;
+  background: #fffbeb; color: #d97706; font-size: 1rem; cursor: pointer;
+  transition: background .15s; flex-shrink: 0; font-family: var(--font);
+}
+.unsave-btn:hover { background: #fef3c7; border-color: #f59e0b; }
+
+.status-badge { padding: 2px 9px; border-radius: 999px; font-size: .72rem; font-weight: 700; }
+.sb-active { background: #d1fae5; color: #065f46; }
+.sb-other  { background: var(--gray-100); color: var(--gray-500); }
+
+.expired-overlay { opacity: .55; }
+{% endblock %}
+
+{% block main_content %}
+<div class="saved-wrap">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div>
+      <h2 style="color:#fff;font-size:1.2rem;font-weight:800;margin-bottom:4px;">&#11088; Saved Jobs</h2>
+      <p style="color:rgba(255,255,255,.8);font-size:.875rem;">{{ count }} saved job{{ count|pluralize }}</p>
+    </div>
+    <a href="{% url 'jobs:board' %}" class="btn btn-gray btn-sm"
+       style="border-color:rgba(255,255,255,.4);color:#fff;background:rgba(255,255,255,.15);">
+      &#128269; Browse More
+    </a>
+  </div>
+
+  {% if saves %}
+  <div>
+    {% for save in saves %}
+    <div class="job-card {% if save.job.is_expired %}expired-overlay{% endif %}">
+
+      <!-- Company logo -->
+      <div class="co-logo">
+        {% if save.job.recruiter.logo %}
+          <img src="{{ save.job.recruiter.logo.url }}" alt="">
+        {% else %}&#127970;{% endif %}
+      </div>
+
+      <!-- Job info -->
+      <div class="jc-info">
+        <div class="jc-title">
+          <a href="{% url 'jobs:detail' save.job.pk %}" style="color:inherit;text-decoration:none;">
+            {{ save.job.title }}
+          </a>
+        </div>
+        <div class="jc-co">{{ save.job.recruiter.company_name }}</div>
+        <div class="jc-meta">
+          <span>&#128188; {{ save.job.get_job_type_display }}</span>
+          {% if save.job.location %}<span>&#128205; {{ save.job.location }}</span>{% endif %}
+          {% if save.job.is_remote %}<span>&#127760; Remote</span>{% endif %}
+          {% with sal=save.job.get_salary_display %}{% if sal %}<span>&#128181; {{ sal }}</span>{% endif %}{% endwith %}
+          <span style="color:var(--gray-300);">&#11088; Saved {{ save.saved_at|date:"M d, Y" }}</span>
+          {% if save.job.is_expired %}
+            <span style="color:#ef4444;font-weight:700;">&#9203; Expired</span>
+          {% elif save.job.deadline %}
+            <span>&#9203; Deadline {{ save.job.deadline|date:"M d" }}</span>
+          {% endif %}
+        </div>
+        {% with skills=save.job.get_skills_list %}
+        {% if skills %}
+        <div class="jc-tags">
+          {% for s in skills|slice:":5" %}<span class="jc-tag">{{ s }}</span>{% endfor %}
+          {% if skills|length > 5 %}<span class="jc-tag" style="background:var(--gray-100);color:var(--gray-500);">+{{ skills|length|add:"-5" }}</span>{% endif %}
+        </div>
+        {% endif %}
+        {% endwith %}
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
+        {% if save.job.is_active %}
+          <span class="status-badge sb-active">&#9679; Active</span>
+        {% else %}
+          <span class="status-badge sb-other">{{ save.job.get_status_display }}</span>
+        {% endif %}
+
+        <a href="{% url 'jobs:detail' save.job.pk %}" class="btn btn-outline btn-sm">View Job</a>
+
+        <!-- Unsave form -->
+        <form method="post" action="{% url 'jobs:save' save.job.pk %}">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{% url 'jobs:saved' %}">
+          <button type="submit" class="unsave-btn" title="Remove from saved">&#11088;</button>
+        </form>
+      </div>
+
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div style="text-align:center;padding:64px 24px;background:var(--white);border-radius:var(--radius-xl);box-shadow:var(--shadow);">
+    <div style="font-size:3rem;margin-bottom:12px;">&#11088;</div>
+    <div style="font-size:1.1rem;font-weight:700;color:var(--gray-700);margin-bottom:6px;">No saved jobs yet</div>
+    <div style="font-size:.875rem;color:var(--gray-400);margin-bottom:20px;">
+      Click the &#11088; bookmark button on any job to save it here.
+    </div>
+    <a href="{% url 'jobs:board' %}" class="btn btn-primary">&#128269; Browse Jobs</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

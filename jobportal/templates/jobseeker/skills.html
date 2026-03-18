@@ -1,0 +1,139 @@
+{% extends 'jobseeker/base_profile.html' %}
+{% block title %}Skills{% endblock %}
+{% block nav_skills %}active{% endblock %}
+
+{% block extra_css %}
+.skill-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 0; border-bottom: 1px solid var(--gray-100);
+}
+.skill-item:last-child { border-bottom: none; }
+.skill-name-wrap { flex: 1; min-width: 0; }
+.skill-name      { font-size: 0.95rem; font-weight: 700; color: var(--gray-900); }
+.skill-meta      { font-size: 0.78rem; color: var(--gray-400); margin-top: 2px; }
+.skill-bar-outer { flex: 0 0 140px; }
+.skill-bar       { height: 7px; background: var(--gray-100); border-radius: 999px; overflow: hidden; margin-bottom: 3px; }
+.skill-bar-fill  { height: 100%; border-radius: 999px; }
+.skill-bar-label { font-size: 0.7rem; color: var(--gray-400); text-align: right; }
+.proficiency-badge {
+  flex: 0 0 100px; text-align: center;
+  padding: 4px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700;
+}
+.pb-beginner     { background: #e0f2fe; color: #075985; }
+.pb-intermediate { background: var(--indigo-pale); color: var(--indigo); }
+.pb-advanced     { background: var(--green-pale); color: var(--green-dark); }
+.pb-expert       { background: #fdf4ff; color: #7e22ce; }
+.add-skill-card {
+  background: var(--indigo-pale); border: 2px dashed rgba(79,70,229,0.25);
+  border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 4px;
+}
+.add-skill-title { font-size: 0.9rem; font-weight: 700; color: var(--indigo); margin-bottom: 16px; }
+.add-skill-row   { display: grid; grid-template-columns: 2fr 1.5fr 1fr auto; gap: 12px; align-items: end; }
+{% endblock %}
+
+{% block main_content %}
+
+<!-- ADD SKILL FORM -->
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:#fef9c3;">&#9889;</div>
+      <div>
+        <div class="section-title">Skills</div>
+        <div class="section-sub">{{ skills.count }} skill{{ skills.count|pluralize }} listed</div>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+
+    <!-- Add form -->
+    <div class="add-skill-card">
+      <div class="add-skill-title">&#43; Add a New Skill</div>
+      <form method="post" action="{% url 'jobseeker:skills' %}" novalidate>
+        {% csrf_token %}
+        <div class="add-skill-row">
+          <div>
+            <label class="form-label" for="id_name">Skill Name</label>
+            <input type="text" id="id_name" name="name"
+              class="form-control {% if form.name.errors %}error{% endif %}"
+              placeholder="e.g. Python, Django, SQL…"
+              value="{{ form.name.value|default:'' }}" />
+            {% for e in form.name.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+          </div>
+          <div>
+            <label class="form-label" for="id_proficiency">Proficiency Level</label>
+            <select id="id_proficiency" name="proficiency" class="form-control">
+              {% for val, label in form.fields.proficiency.choices %}
+                <option value="{{ val }}" {% if form.proficiency.value == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="id_years_of_experience">Years</label>
+            <input type="number" id="id_years_of_experience" name="years_of_experience"
+              class="form-control" placeholder="0" min="0" max="50"
+              value="{{ form.years_of_experience.value|default:'0' }}" />
+          </div>
+          <div>
+            <button type="submit" class="btn btn-primary" style="height:40px;">Add</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Legend -->
+    <div class="flex gap-2 items-center" style="margin: 16px 0 4px; flex-wrap:wrap;">
+      <span style="font-size:0.75rem;color:var(--gray-400);margin-right:4px;">Proficiency:</span>
+      <span class="proficiency-badge pb-beginner">Beginner</span>
+      <span class="proficiency-badge pb-intermediate">Intermediate</span>
+      <span class="proficiency-badge pb-advanced">Advanced</span>
+      <span class="proficiency-badge pb-expert">Expert</span>
+    </div>
+
+    <!-- Skills List -->
+    {% if skills %}
+      {% for skill in skills %}
+      <div class="skill-item">
+        <div class="skill-name-wrap">
+          <div class="skill-name">{{ skill.name }}</div>
+          <div class="skill-meta">
+            {% if skill.years_of_experience %}{{ skill.years_of_experience }} yr{{ skill.years_of_experience|pluralize }} experience{% endif %}
+          </div>
+        </div>
+        <div class="skill-bar-outer">
+          <div class="skill-bar">
+            <div class="skill-bar-fill" style="width:{{ skill.get_pct }}%;
+              background:{% if skill.proficiency == 'beginner' %}#0ea5e9{% elif skill.proficiency == 'intermediate' %}var(--indigo){% elif skill.proficiency == 'advanced' %}var(--green){% else %}#8b5cf6{% endif %};"></div>
+          </div>
+          <div class="skill-bar-label">{{ skill.get_pct }}%</div>
+        </div>
+        <span class="proficiency-badge pb-{{ skill.proficiency }}">{{ skill.get_proficiency_display }}</span>
+        <form method="post" action="{% url 'jobseeker:skill_delete' skill.pk %}" style="display:inline;" onsubmit="return confirm('Remove {{ skill.name }}?')">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger btn-xs" title="Remove skill">&#10005;</button>
+        </form>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">&#9889;</div>
+        <div class="empty-title">No skills added yet</div>
+        <div class="empty-desc">Use the form above to add your first skill</div>
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<!-- TIPS CARD -->
+<div style="background:var(--blue-pale);border:1px solid #bfdbfe;border-radius:var(--radius-lg);padding:18px 22px;">
+  <div style="font-size:0.85rem;font-weight:700;color:var(--blue-dark);margin-bottom:8px;">&#128161; Skills Tips</div>
+  <ul style="font-size:0.8rem;color:var(--gray-600);padding-left:16px;display:flex;flex-direction:column;gap:5px;">
+    <li>Add both technical skills (Python, SQL) and soft skills (Leadership, Communication)</li>
+    <li>Be honest about proficiency — recruiters may test you</li>
+    <li>Aim for 8-15 relevant skills for the best results</li>
+    <li>Update skills regularly as you grow</li>
+  </ul>
+</div>
+
+{% endblock %}

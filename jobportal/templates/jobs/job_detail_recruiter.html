@@ -1,0 +1,165 @@
+{% extends 'recruiter/base_recruiter.html' %}
+{% block title %}{{ job.title }} — Preview{% endblock %}
+{% block nav_jobs %}active{% endblock %}
+
+{% block extra_css %}
+.preview-banner {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #0891b2 100%);
+  border-radius: var(--radius-xl); padding: 24px 28px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.content-section { background: var(--white); border-radius: var(--radius-xl); box-shadow: var(--shadow); overflow: hidden; }
+.cs-header { padding: 16px 22px 12px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; gap: 10px; }
+.cs-icon  { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .9rem; }
+.cs-title { font-size: .9rem; font-weight: 700; color: var(--gray-900); }
+.cs-body  { padding: 16px 22px; font-size: .875rem; color: var(--gray-700); line-height: 1.8; white-space: pre-line; }
+
+.meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.meta-tile { padding: 12px 14px; background: var(--gray-50); border-radius: var(--radius); }
+.meta-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--gray-400); margin-bottom: 4px; }
+.meta-val   { font-size: .875rem; font-weight: 600; color: var(--gray-800); }
+
+.status-pill { display:inline-flex; align-items:center; gap:4px; padding:3px 11px; border-radius:999px; font-size:.75rem; font-weight:700; }
+.s-active  { background:rgba(16,185,129,.2); color:#6ee7b7; }
+.s-draft   { background:rgba(255,255,255,.15); color:rgba(255,255,255,.7); }
+.s-paused  { background:rgba(245,158,11,.2); color:#fcd34d; }
+.s-closed  { background:rgba(239,68,68,.2); color:#fca5a5; }
+{% endblock %}
+
+{% block main_content %}
+
+<!-- BANNER -->
+<div class="preview-banner">
+  <div>
+    <div style="margin-bottom:6px;">
+      <span class="status-pill s-{{ job.status }}">&#9679; {{ job.get_status_display }}</span>
+      {% if job.is_remote %}<span style="margin-left:6px;background:rgba(255,255,255,.15);color:rgba(255,255,255,.9);font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:999px;">&#127760; Remote</span>{% endif %}
+    </div>
+    <h2 style="color:#fff;font-size:1.3rem;font-weight:800;">{{ job.title }}</h2>
+    <p style="color:rgba(255,255,255,.6);font-size:.82rem;margin-top:4px;">
+      Posted {{ job.days_since_posted }} &bull; &#128065; {{ job.views_count }} view{{ job.views_count|pluralize }}
+      {% if job.deadline %}&bull; &#9203; Deadline {{ job.deadline|date:"M d, Y" }}{% endif %}
+    </p>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a href="{% url 'jobs:edit' job.pk %}" class="btn btn-gray btn-sm" style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.8);">&#9998; Edit</a>
+    {% if job.status != 'active' %}
+    <form method="post" action="{% url 'jobs:toggle_status' job.pk %}" style="display:inline;">
+      {% csrf_token %}<input type="hidden" name="action" value="activate">
+      <button type="submit" class="btn btn-primary btn-sm">&#9654; Activate</button>
+    </form>
+    {% elif job.status == 'active' %}
+    <form method="post" action="{% url 'jobs:toggle_status' job.pk %}" style="display:inline;">
+      {% csrf_token %}<input type="hidden" name="action" value="pause">
+      <button type="submit" class="btn btn-gray btn-sm" style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.8);">&#9646;&#9646; Pause</button>
+    </form>
+    {% endif %}
+    <a href="{% url 'applications:applicants' job.pk %}" class="btn btn-primary btn-sm" style="background:#8b5cf6;">&#128640; Applicants ({{ job.applications.count }})</a>
+    <a href="{% url 'screening:candidates' job.pk %}" class="btn btn-primary btn-sm">&#127942; AI Rank ({{ job.match_scores.count }})</a>
+    <a href="{% url 'jobs:manage' %}" class="btn btn-gray btn-sm" style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.8);">&#8592; All Jobs</a>
+  </div>
+</div>
+
+<!-- META GRID -->
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--green-pale);">&#128202;</div>
+      <div><div class="section-title">Job Overview</div></div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="meta-grid">
+      <div class="meta-tile">
+        <div class="meta-label">Job Type</div>
+        <div class="meta-val">{{ job.get_job_type_display }}</div>
+      </div>
+      <div class="meta-tile">
+        <div class="meta-label">Experience</div>
+        <div class="meta-val">{{ job.get_experience_level_display }}</div>
+      </div>
+      <div class="meta-tile">
+        <div class="meta-label">Location</div>
+        <div class="meta-val">
+          {% if job.is_remote and job.location %}{{ job.location }} / Remote
+          {% elif job.is_remote %}Remote
+          {% elif job.location %}{{ job.location }}
+          {% else %}Not set{% endif %}
+        </div>
+      </div>
+      <div class="meta-tile">
+        <div class="meta-label">Education</div>
+        <div class="meta-val">{{ job.get_education_required_display }}</div>
+      </div>
+      {% with sal=job.get_salary_display %}{% if sal %}
+      <div class="meta-tile">
+        <div class="meta-label">Salary</div>
+        <div class="meta-val">{{ sal }}</div>
+      </div>
+      {% endif %}{% endwith %}
+      <div class="meta-tile">
+        <div class="meta-label">Years Exp.</div>
+        <div class="meta-val">{{ job.experience_years_min }}{% if job.experience_years_max %}–{{ job.experience_years_max }}{% endif %}+ yrs</div>
+      </div>
+    </div>
+
+    {% if skills %}
+    <div style="margin-top:16px;">
+      <div style="font-size:.75rem;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Required Skills</div>
+      <div style="display:flex;flex-wrap:wrap;gap:7px;">
+        {% for skill in skills %}
+        <span style="background:var(--green-pale);color:var(--green-dark);font-size:.8rem;font-weight:600;padding:4px 12px;border-radius:999px;border:1px solid #a7f3d0;">{{ skill }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- DESCRIPTION -->
+<div class="content-section">
+  <div class="cs-header">
+    <div class="cs-icon" style="background:var(--blue-pale);">&#128196;</div>
+    <div class="cs-title">Job Description</div>
+  </div>
+  <div class="cs-body">{{ job.description }}</div>
+</div>
+
+{% if job.responsibilities %}
+<div class="content-section">
+  <div class="cs-header">
+    <div class="cs-icon" style="background:var(--green-pale);">&#128203;</div>
+    <div class="cs-title">Responsibilities</div>
+  </div>
+  <div class="cs-body">{{ job.responsibilities }}</div>
+</div>
+{% endif %}
+
+{% if job.requirements %}
+<div class="content-section">
+  <div class="cs-header">
+    <div class="cs-icon" style="background:var(--orange-pale);">&#10003;</div>
+    <div class="cs-title">Requirements</div>
+  </div>
+  <div class="cs-body">{{ job.requirements }}</div>
+</div>
+{% endif %}
+
+<!-- DANGER ZONE -->
+<div class="section-card" style="border:1.5px solid #fca5a5;">
+  <div class="section-header" style="border-bottom-color:#fee2e2;">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--red-pale);">&#128465;</div>
+      <div><div class="section-title" style="color:var(--red);">Danger Zone</div></div>
+    </div>
+  </div>
+  <div class="section-body">
+    <form method="post" action="{% url 'jobs:delete' job.pk %}"
+          onsubmit="return confirm('Delete this job posting? This cannot be undone.')">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger btn-sm">&#128465; Delete This Job</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

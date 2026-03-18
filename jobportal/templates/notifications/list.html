@@ -1,0 +1,117 @@
+{% extends base_template %}
+{% block title %}Notifications{% endblock %}
+{% block nav_resume %}{% endblock %}
+
+{% block extra_css %}
+.notif-wrap { max-width: 720px; }
+
+.notif-header {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%);
+  border-radius: var(--radius-xl); padding: 24px 28px; margin-bottom: 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.notif-item {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px 18px; border-radius: var(--radius-lg);
+  border: 1.5px solid var(--gray-200); background: var(--white);
+  margin-bottom: 8px; transition: border-color .15s;
+}
+.notif-item.unread { border-left: 4px solid var(--indigo); background: #fafbff; }
+.notif-item:hover { border-color: var(--indigo); }
+
+.notif-icon {
+  width: 42px; height: 42px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0; overflow: hidden;
+  border: 2px solid var(--gray-200);
+}
+.notif-icon img {
+  width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+}
+.notif-initials {
+  width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .875rem; font-weight: 800; color: #fff;
+  border: 2px solid rgba(255,255,255,.4);
+}
+.notif-body  { flex: 1; min-width: 0; }
+.notif-title { font-size: .9rem; font-weight: 700; color: var(--gray-900); }
+.notif-msg   { font-size: .8rem; color: var(--gray-500); margin-top: 2px; line-height: 1.5; }
+.notif-time  { font-size: .72rem; color: var(--gray-300); margin-top: 4px; }
+
+.unread-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--indigo); flex-shrink: 0; margin-top: 6px;
+}
+{% endblock %}
+
+{% block main_content %}
+<div class="notif-wrap">
+
+  <div class="notif-header">
+    <div>
+      <h2 style="color:#fff;font-size:1.2rem;font-weight:800;margin-bottom:4px;">&#128276; Notifications</h2>
+      <p style="color:rgba(255,255,255,.65);font-size:.875rem;">{{ notifications|length }} notification{{ notifications|length|pluralize }}</p>
+    </div>
+    {% if notifications %}
+    <form method="post" action="{% url 'notifications:mark_all_read' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-gray btn-sm"
+              style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.85);background:rgba(255,255,255,.1);">
+        &#10003; Mark all read
+      </button>
+    </form>
+    {% endif %}
+  </div>
+
+  {% if notifications %}
+  <div>
+    {% for n in notifications %}
+    <div class="notif-item {% if not n.is_read %}unread{% endif %}">
+      {% if n.from_user %}
+        {% if n.from_user.role == 'recruiter' and n.from_user.recruiter_profile.logo %}
+          <div class="notif-icon" style="background:var(--gray-100);">
+            <img src="{{ n.from_user.recruiter_profile.logo.url }}" alt="{{ n.from_user.recruiter_profile.company_name }}">
+          </div>
+        {% elif n.from_user.role == 'job_seeker' and n.from_user.js_profile.profile_picture %}
+          <div class="notif-icon" style="background:var(--gray-100);">
+            <img src="{{ n.from_user.js_profile.profile_picture.url }}" alt="{{ n.from_user.get_full_name }}">
+          </div>
+        {% else %}
+          {% with initials=n.from_user.get_full_name|default:n.from_user.email %}
+          <div class="notif-initials" style="background:{{ n.color|default:'#6366f1' }};">
+            {{ initials|slice:":1"|upper }}
+          </div>
+          {% endwith %}
+        {% endif %}
+      {% else %}
+        <div class="notif-icon" style="background:{{ n.bg }};color:{{ n.color }};">
+          {{ n.icon }}
+        </div>
+      {% endif %}
+      <div class="notif-body">
+        <div class="notif-title">{{ n.title }}</div>
+        {% if n.message %}<div class="notif-msg">{{ n.message }}</div>{% endif %}
+        <div class="notif-time">{{ n.created_at|timesince }} ago</div>
+      </div>
+      {% if not n.is_read %}
+      <div class="unread-dot"></div>
+      {% endif %}
+      {% if n.link %}
+      <a href="{{ n.link }}" class="btn btn-outline btn-sm" style="flex-shrink:0;font-size:.72rem;">View</a>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div style="text-align:center;padding:60px 24px;background:var(--white);border-radius:var(--radius-xl);box-shadow:var(--shadow);">
+    <div style="font-size:3rem;margin-bottom:12px;">&#128276;</div>
+    <div style="font-size:1.1rem;font-weight:700;color:var(--gray-700);margin-bottom:6px;">All caught up!</div>
+    <div style="font-size:.875rem;color:var(--gray-400);">You have no notifications yet. Activity will appear here.</div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

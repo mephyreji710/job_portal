@@ -1,0 +1,71 @@
+{% extends 'jobseeker/base_profile.html' %}
+{% block title %}Work Experience{% endblock %}
+{% block nav_experience %}active{% endblock %}
+
+{% block extra_css %}
+.exp-card {
+  border: 1.5px solid var(--gray-200); border-radius: var(--radius-lg);
+  padding: 20px 22px; margin-bottom: 12px;
+  display: flex; gap: 16px; transition: border-color 0.2s;
+}
+.exp-card:hover { border-color: var(--green-pale); border-color: #bbf7d0; }
+.exp-icon { width: 46px; height: 46px; border-radius: 12px; background: var(--green-pale); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+.exp-body { flex: 1; min-width: 0; }
+.exp-title    { font-size: 1rem; font-weight: 700; color: var(--gray-900); }
+.exp-company  { font-size: 0.875rem; color: var(--gray-600); margin-top: 2px; }
+.exp-meta     { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.exp-badge    { background: var(--indigo-pale); color: var(--indigo); font-size: 0.72rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+.exp-period   { font-size: 0.78rem; color: var(--gray-400); }
+.exp-duration { font-size: 0.75rem; color: var(--gray-400); background: var(--gray-100); padding: 2px 8px; border-radius: 999px; }
+.exp-current  { background: var(--green-pale); color: var(--green-dark); font-size: 0.72rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+.exp-desc     { font-size: 0.83rem; color: var(--gray-600); margin-top: 10px; line-height: 1.65; white-space: pre-line; }
+.exp-actions  { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; flex-shrink: 0; }
+{% endblock %}
+
+{% block main_content %}
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--green-pale);">&#128188;</div>
+      <div>
+        <div class="section-title">Work Experience</div>
+        <div class="section-sub">{{ entries.count }} entr{{ entries.count|pluralize:"y,ies" }}</div>
+      </div>
+    </div>
+    <a href="{% url 'jobseeker:experience_add' %}" class="btn btn-primary">&#43; Add Experience</a>
+  </div>
+  <div class="section-body">
+    {% if entries %}
+      {% for exp in entries %}
+      <div class="exp-card">
+        <div class="exp-icon">&#127970;</div>
+        <div class="exp-body">
+          <div class="exp-title">{{ exp.job_title }}</div>
+          <div class="exp-company">{{ exp.company }}{% if exp.location %} &bull; {{ exp.location }}{% endif %}</div>
+          <div class="exp-meta">
+            <span class="exp-badge">{{ exp.get_employment_type_display }}</span>
+            <span class="exp-period">{{ exp.start_date|date:"M Y" }} — {% if exp.is_current %}<span class="exp-current">Present</span>{% else %}{{ exp.end_date|date:"M Y" }}{% endif %}</span>
+            {% if exp.get_duration %}<span class="exp-duration">{{ exp.get_duration }}</span>{% endif %}
+          </div>
+          {% if exp.description %}<div class="exp-desc">{{ exp.description }}</div>{% endif %}
+        </div>
+        <div class="exp-actions">
+          <a href="{% url 'jobseeker:experience_edit' exp.pk %}" class="btn btn-gray btn-sm">&#9998; Edit</a>
+          <form method="post" action="{% url 'jobseeker:experience_delete' exp.pk %}" onsubmit="return confirm('Remove this entry?')">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm">&#128465; Remove</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">&#128188;</div>
+        <div class="empty-title">No work experience added yet</div>
+        <div class="empty-desc">Add your past jobs, internships, and freelance work</div>
+        <a href="{% url 'jobseeker:experience_add' %}" class="btn btn-primary">Add First Entry</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

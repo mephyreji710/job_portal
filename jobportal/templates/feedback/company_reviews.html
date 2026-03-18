@@ -1,0 +1,124 @@
+{% extends 'accounts/base.html' %}
+{% block title %}{{ profile.company_name }} — Reviews{% endblock %}
+
+{% block extra_css %}
+.rev-wrap { max-width: 760px; margin: 0 auto; padding: 32px 16px; }
+
+.rev-hero {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+  border-radius: var(--radius-xl); padding: 28px 32px; margin-bottom: 24px;
+  display: flex; align-items: center; gap: 20px;
+}
+.rev-logo { width: 64px; height: 64px; border-radius: var(--radius); border: 2px solid rgba(255,255,255,.2);
+            overflow: hidden; display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,.1); font-size: 1.8rem; flex-shrink: 0; }
+.rev-logo img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Rating summary */
+.rating-summary { background: var(--white); border-radius: var(--radius-xl); box-shadow: var(--shadow);
+                  padding: 24px; margin-bottom: 20px; display: flex; gap: 32px; align-items: center; flex-wrap: wrap; }
+.big-score { text-align: center; }
+.big-val   { font-size: 4rem; font-weight: 900; color: var(--gray-900); line-height: 1; }
+.big-stars { font-size: 1.5rem; color: #f59e0b; letter-spacing: 2px; }
+.big-count { font-size: .78rem; color: var(--gray-400); margin-top: 2px; }
+
+.breakdown-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.bd-label { font-size: .8rem; color: var(--gray-600); width: 16px; text-align: right; flex-shrink: 0; }
+.bd-track { flex: 1; height: 8px; background: var(--gray-100); border-radius: 999px; overflow: hidden; }
+.bd-fill  { height: 100%; background: #f59e0b; border-radius: 999px; }
+.bd-count { font-size: .75rem; color: var(--gray-400); width: 24px; text-align: right; flex-shrink: 0; }
+
+/* Review card */
+.rev-card { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: var(--radius-lg);
+            padding: 18px 20px; margin-bottom: 12px; transition: border-color .15s; }
+.rev-card:hover { border-color: var(--indigo); }
+.rev-hd   { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+.rev-name { font-size: .875rem; font-weight: 700; color: var(--gray-900); }
+.rev-job  { font-size: .75rem; color: var(--blue); margin-top: 1px; }
+.rev-stars { font-size: 1.1rem; color: #f59e0b; letter-spacing: 1px; flex-shrink: 0; }
+.rev-date  { font-size: .72rem; color: var(--gray-300); margin-top: 3px; text-align: right; }
+.rev-body  { font-size: .85rem; color: var(--gray-700); line-height: 1.6; }
+{% endblock %}
+
+{% block content %}
+<div class="rev-wrap">
+
+  <!-- HERO -->
+  <div class="rev-hero">
+    <div class="rev-logo">
+      {% if profile.logo %}<img src="{{ profile.logo.url }}" alt="">{% else %}&#127970;{% endif %}
+    </div>
+    <div>
+      <h2 style="color:#fff;font-size:1.3rem;font-weight:800;margin-bottom:4px;">{{ profile.company_name }}</h2>
+      <p style="color:rgba(255,255,255,.7);font-size:.875rem;">
+        Candidate Reviews &bull; {{ total_reviews }} review{{ total_reviews|pluralize }}
+        {% if avg_rating %}&bull; &#9733; {{ avg_rating }} / 5{% endif %}
+      </p>
+    </div>
+  </div>
+
+  {% if total_reviews %}
+  <!-- RATING SUMMARY -->
+  <div class="rating-summary">
+    <div class="big-score">
+      <div class="big-val">{{ avg_rating }}</div>
+      <div class="big-stars">
+        {% for i in "12345" %}{% if forloop.counter <= avg_rating|floatformat:"0"|add:"0" %}&#9733;{% else %}&#9734;{% endif %}{% endfor %}
+      </div>
+      <div class="big-count">{{ total_reviews }} review{{ total_reviews|pluralize }}</div>
+    </div>
+
+    <div style="flex:1;min-width:200px;">
+      {% for star in "54321" %}
+      {% with i=star|add:"0" bd=breakdown|get_item:star %}
+      <div class="breakdown-row">
+        <div class="bd-label">{{ star }}</div>
+        <div class="bd-track">
+          <div class="bd-fill" style="width:{{ bd.pct }}%;"></div>
+        </div>
+        <div class="bd-count">{{ bd.count }}</div>
+      </div>
+      {% endwith %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- REVIEWS LIST -->
+  <div style="font-size:.72rem;font-weight:800;color:var(--gray-400);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">
+    Candidate Reviews
+  </div>
+
+  {% if reviews %}
+  {% for rev in reviews %}
+  <div class="rev-card">
+    <div class="rev-hd">
+      <div>
+        <div class="rev-name">
+          {% if rev.is_anonymous %}Anonymous Candidate{% else %}{{ rev.from_user.get_full_name|default:rev.from_user.email }}{% endif %}
+        </div>
+        <div class="rev-job">Applied for: {{ rev.application.job.title }}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="rev-stars">{{ rev.star_display }}</div>
+        <div class="rev-date">{{ rev.created_at|date:"M d, Y" }}</div>
+      </div>
+    </div>
+    {% if rev.comment %}
+    <div class="rev-body">{{ rev.comment }}</div>
+    {% else %}
+    <div style="font-size:.8rem;color:var(--gray-300);font-style:italic;">No written review</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+  {% else %}
+  <div style="text-align:center;padding:56px 24px;background:var(--white);border-radius:var(--radius-xl);box-shadow:var(--shadow);">
+    <div style="font-size:3rem;margin-bottom:12px;">&#11088;</div>
+    <div style="font-size:1.1rem;font-weight:700;color:var(--gray-700);margin-bottom:6px;">No reviews yet</div>
+    <div style="font-size:.875rem;color:var(--gray-400);">Candidates who apply to {{ profile.company_name }} can leave reviews here.</div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

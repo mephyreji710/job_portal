@@ -1,0 +1,146 @@
+{% extends 'recruiter/base_recruiter.html' %}
+{% block title %}Active Jobs{% endblock %}
+{% block nav_jobs %}active{% endblock %}
+
+{% block extra_css %}
+.job-card {
+  border: 1.5px solid var(--gray-200); border-radius: var(--radius-lg);
+  padding: 18px 20px; display: flex; align-items: flex-start; gap: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.job-card:hover { border-color: var(--green); box-shadow: var(--shadow-md); }
+.job-icon {
+  width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
+  background: var(--green-pale); display: flex; align-items: center;
+  justify-content: center; font-size: 1.3rem;
+}
+.job-title    { font-size: 0.95rem; font-weight: 700; color: var(--gray-900); }
+.job-meta     { font-size: 0.78rem; color: var(--gray-400); margin-top: 3px; }
+.job-actions  { display: flex; gap: 6px; margin-top: 10px; }
+.status-pill  {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700;
+}
+.status-active   { background: var(--green-pale); color: var(--green-dark); }
+.status-draft    { background: var(--gray-100);   color: var(--gray-500); }
+.status-closed   { background: var(--red-pale);   color: #b91c1c; }
+.stats-mini { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 6px; }
+.stat-chip  { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--gray-500); }
+
+.info-banner {
+  background: var(--blue-pale); border: 1px solid #bfdbfe;
+  border-radius: var(--radius); padding: 14px 18px;
+  display: flex; gap: 10px; align-items: flex-start;
+  font-size: 0.875rem; color: #1e40af; margin-bottom: 20px;
+}
+{% endblock %}
+
+{% block main_content %}
+
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--green-pale);">&#128196;</div>
+      <div>
+        <div class="section-title">Active Job Listings</div>
+        <div class="section-sub">{% if active_jobs %}{{ active_jobs|length }} job{{ active_jobs|length|pluralize }} posted{% else %}No jobs posted yet{% endif %}</div>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-sm" disabled title="Coming in Module 5">&#43; Post a Job</button>
+  </div>
+  <div class="section-body">
+
+    <div class="info-banner">
+      <span style="font-size:1.1rem;flex-shrink:0;">&#128161;</span>
+      <div>
+        <strong>Module 5 — Job Listings</strong> is coming up next! You'll be able to create job posts with
+        requirements, salary, location, employment type, and let candidates apply directly.
+        AI screening (Module 7) will then auto-rank applicants by resume match score.
+      </div>
+    </div>
+
+    {% if active_jobs %}
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      {% for job in active_jobs %}
+      <div class="job-card">
+        <div class="job-icon">&#128196;</div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span class="job-title">{{ job.title }}</span>
+            <span class="status-pill status-{{ job.status }}">&#9679; {{ job.get_status_display }}</span>
+          </div>
+          <div class="job-meta">
+            &#128205; {{ job.location|default:"Remote" }} &bull;
+            &#128188; {{ job.get_employment_type_display }} &bull;
+            &#128197; Posted {{ job.created_at|date:"M d, Y" }}
+          </div>
+          <div class="stats-mini">
+            <span class="stat-chip">&#128101; {{ job.application_count }} applicants</span>
+            <span class="stat-chip">&#9733; {{ job.shortlisted_count }} shortlisted</span>
+          </div>
+          <div class="job-actions">
+            <a href="#" class="btn btn-outline btn-sm">&#128269; View</a>
+            <a href="#" class="btn btn-gray btn-sm">&#9998; Edit</a>
+            <a href="#" class="btn btn-danger btn-sm">&#215; Close</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">&#128196;</div>
+      <div class="empty-title">No job listings yet</div>
+      <div class="empty-desc">
+        Job posting will be available in Module 5.<br>
+        Make sure your company profile is complete so candidates can find you.
+      </div>
+      <a href="{% url 'recruiter:edit' %}" class="btn btn-primary">&#9998; Complete Company Profile</a>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<!-- Stats placeholder -->
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--orange-pale);">&#128202;</div>
+      <div>
+        <div class="section-title">Hiring Stats</div>
+        <div class="section-sub">Summary across all your job postings</div>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+      {% for label, val, color in stats|default:"" %}
+      <div style="text-align:center;padding:16px;background:var(--gray-50);border-radius:var(--radius);">
+        <div style="font-size:1.8rem;font-weight:800;color:{{ color }};">{{ val }}</div>
+        <div style="font-size:0.75rem;color:var(--gray-400);font-weight:600;margin-top:4px;">{{ label }}</div>
+      </div>
+      {% empty %}
+      <div style="text-align:center;padding:16px;background:var(--gray-50);border-radius:var(--radius);">
+        <div style="font-size:1.8rem;font-weight:800;color:var(--green);">0</div>
+        <div style="font-size:0.75rem;color:var(--gray-400);font-weight:600;margin-top:4px;">Active Jobs</div>
+      </div>
+      <div style="text-align:center;padding:16px;background:var(--gray-50);border-radius:var(--radius);">
+        <div style="font-size:1.8rem;font-weight:800;color:var(--blue);">0</div>
+        <div style="font-size:0.75rem;color:var(--gray-400);font-weight:600;margin-top:4px;">Total Applications</div>
+      </div>
+      <div style="text-align:center;padding:16px;background:var(--gray-50);border-radius:var(--radius);">
+        <div style="font-size:1.8rem;font-weight:800;color:var(--indigo);">0</div>
+        <div style="font-size:0.75rem;color:var(--gray-400);font-weight:600;margin-top:4px;">Shortlisted</div>
+      </div>
+      <div style="text-align:center;padding:16px;background:var(--gray-50);border-radius:var(--radius);">
+        <div style="font-size:1.8rem;font-weight:800;color:var(--orange);">0</div>
+        <div style="font-size:0.75rem;color:var(--gray-400);font-weight:600;margin-top:4px;">Interviews</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends 'jobseeker/base_profile.html' %}
+{% block title %}{{ action }} Education{% endblock %}
+{% block nav_education %}active{% endblock %}
+
+{% block main_content %}
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:#fce7f3;">&#127979;</div>
+      <div>
+        <div class="section-title">{{ action }} Education Entry</div>
+        <div class="section-sub">{% if action == 'Add' %}Add a new academic qualification{% else %}Update this entry{% endif %}</div>
+      </div>
+    </div>
+    <a href="{% url 'jobseeker:education' %}" class="btn btn-gray btn-sm">&#8592; Back</a>
+  </div>
+  <div class="section-body">
+
+    {% if form.errors %}
+    <div style="background:var(--red-pale);border-left:4px solid var(--red);border-radius:8px;padding:12px 16px;margin-bottom:20px;">
+      <p style="color:#991b1b;font-size:0.875rem;font-weight:600;">Please fix the errors below:</p>
+      <ul style="color:#991b1b;font-size:0.82rem;padding-left:18px;margin-top:6px;">
+        {% for field in form %}{% for e in field.errors %}<li>{{ field.label }}: {{ e }}</li>{% endfor %}{% endfor %}
+        {% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="id_degree">Degree / Qualification</label>
+          <select id="id_degree" name="degree" class="form-control {% if form.degree.errors %}error{% endif %}">
+            {% for val, label in form.fields.degree.choices %}
+              <option value="{{ val }}" {% if form.degree.value == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          {% for e in form.degree.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_field_of_study">Field of Study</label>
+          <input type="text" id="id_field_of_study" name="field_of_study"
+            class="form-control {% if form.field_of_study.errors %}error{% endif %}"
+            value="{{ form.field_of_study.value|default:'' }}"
+            placeholder="e.g. Computer Science" />
+          {% for e in form.field_of_study.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="id_institution">Institution / University</label>
+        <input type="text" id="id_institution" name="institution"
+          class="form-control {% if form.institution.errors %}error{% endif %}"
+          value="{{ form.institution.value|default:'' }}"
+          placeholder="e.g. Massachusetts Institute of Technology" />
+        {% for e in form.institution.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="id_start_year">Start Year</label>
+          <select id="id_start_year" name="start_year" class="form-control {% if form.start_year.errors %}error{% endif %}">
+            {% for val, label in form.fields.start_year.choices %}
+              <option value="{{ val }}" {% if form.start_year.value == val|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          {% for e in form.start_year.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_end_year">End Year</label>
+          <select id="id_end_year" name="end_year" class="form-control {% if form.end_year.errors %}error{% endif %}">
+            {% for val, label in form.fields.end_year.choices %}
+              <option value="{{ val }}" {% if form.end_year.value == val|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          {% for e in form.end_year.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-row">
+          <input type="checkbox" name="is_current" id="id_is_current"
+            {% if form.is_current.value %}checked{% endif %} />
+          I am currently studying here
+        </label>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="id_grade">Grade / GPA <span class="opt">(optional)</span></label>
+          <input type="text" id="id_grade" name="grade" class="form-control"
+            value="{{ form.grade.value|default:'' }}"
+            placeholder="e.g. 3.8 GPA, First Class, 85%" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="id_description">Description <span class="opt">(optional)</span></label>
+        <textarea id="id_description" name="description" class="form-control" rows="3"
+          placeholder="Thesis, projects, extracurricular activities, achievements…">{{ form.description.value|default:'' }}</textarea>
+      </div>
+
+      <div class="flex gap-3 mt-4">
+        <button type="submit" class="btn btn-primary">
+          {% if action == 'Add' %}&#43; Add Entry{% else %}&#10003; Save Changes{% endif %}
+        </button>
+        <a href="{% url 'jobseeker:education' %}" class="btn btn-gray">Cancel</a>
+        {% if action == 'Edit' and object %}
+        <form method="post" action="{% url 'jobseeker:education_delete' object.pk %}" style="margin-left:auto;" onsubmit="return confirm('Delete this entry?')">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">&#128465; Delete</button>
+        </form>
+        {% endif %}
+      </div>
+    </form>
+
+  </div>
+</div>
+{% endblock %}

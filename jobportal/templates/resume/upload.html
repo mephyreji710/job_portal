@@ -1,0 +1,255 @@
+{% extends 'jobseeker/base_profile.html' %}
+{% block title %}Upload Resume{% endblock %}
+{% block nav_resume %}active{% endblock %}
+
+{% block extra_css %}
+.upload-wrap { max-width: 680px; }
+
+/* ── Drop zone ── */
+.drop-zone {
+  border: 2.5px dashed var(--gray-300); border-radius: var(--radius-lg);
+  padding: 52px 32px; text-align: center; background: var(--gray-50);
+  cursor: pointer; transition: all 0.2s; position: relative;
+}
+.drop-zone:hover,
+.drop-zone.dragover { border-color: var(--indigo); background: var(--indigo-pale); }
+.drop-zone.has-file  { border-color: var(--green);  background: var(--green-pale); border-style: solid; }
+
+/* Hide real input but keep it accessible */
+.drop-zone input[type="file"] {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  opacity: 0; cursor: pointer; z-index: 2;
+}
+
+.dz-icon  { font-size: 3rem; margin-bottom: 14px; transition: transform .2s; }
+.drop-zone:hover .dz-icon { transform: translateY(-4px); }
+.dz-title { font-size: 1.05rem; font-weight: 700; color: var(--gray-800); margin-bottom: 6px; }
+.dz-sub   { font-size: 0.85rem; color: var(--gray-400); margin-bottom: 18px; }
+
+.choose-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 22px; border-radius: 8px; font-size: .875rem; font-weight: 700;
+  background: var(--indigo); color: #fff; border: none; cursor: pointer;
+  font-family: var(--font); pointer-events: none; /* let the input handle clicks */
+}
+
+.format-pills { display: flex; gap: 8px; justify-content: center; margin-top: 16px; }
+.fp { padding: 3px 12px; border-radius: 999px; font-size: .75rem; font-weight: 700; border: 1.5px solid; }
+.fp-pdf  { background: #fef2f2; color: #dc2626; border-color: #fca5a5; }
+.fp-docx { background: #eff6ff; color: #2563eb; border-color: #93c5fd; }
+
+/* Selected file indicator */
+.file-selected {
+  display: none; margin-top: 16px; padding: 12px 18px;
+  background: #ecfdf5; border: 1.5px solid #6ee7b7; border-radius: var(--radius);
+  align-items: center; gap: 10px; font-size: .875rem;
+}
+.file-selected.show { display: flex; }
+.file-selected-name { font-weight: 700; color: #065f46; flex: 1; min-width: 0; word-break: break-all; }
+.file-selected-size { font-size: .78rem; color: #047857; flex-shrink: 0; }
+
+/* Error box */
+.err-box { margin-top: 12px; }
+.alert { display:flex; align-items:flex-start; gap:10px; padding:12px 16px; border-radius:8px; font-size:.875rem; border-left:4px solid; margin-bottom:8px; }
+.alert-error { background:var(--red-pale); border-color:var(--red); color:#991b1b; }
+
+/* Tips grid */
+.tips-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.tip-row   { display: flex; gap: 10px; align-items: flex-start; }
+.tip-icon  { width: 32px; height: 32px; border-radius: 8px; background: var(--green-pale);
+             display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+.tip-title { font-size: .875rem; font-weight: 700; color: var(--gray-800); margin-bottom: 2px; }
+.tip-desc  { font-size: .78rem; color: var(--gray-500); }
+
+/* Info box */
+.info-box { background: var(--blue-pale); border: 1px solid #bfdbfe; border-radius: var(--radius);
+            padding: 14px 18px; display: flex; gap: 10px; align-items: flex-start;
+            font-size: .85rem; color: #1e40af; margin-bottom: 24px; }
+{% endblock %}
+
+{% block main_content %}
+<div class="upload-wrap">
+
+<!-- Upload Card -->
+<div class="section-card" style="margin-bottom:20px;">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--indigo-pale);">&#128196;</div>
+      <div>
+        <div class="section-title">Upload Resume</div>
+        <div class="section-sub">PDF or DOCX &bull; Max 10 MB &bull; Auto-parsed instantly</div>
+      </div>
+    </div>
+    <a href="{% url 'resume:list' %}" class="btn btn-gray btn-sm">&#8592; My Resumes</a>
+  </div>
+
+  <div class="section-body">
+
+    <div class="info-box">
+      <span style="font-size:1.1rem;flex-shrink:0;margin-top:1px;">&#128161;</span>
+      <div>
+        <strong>Smart Parsing</strong> &mdash; TalentBridge automatically extracts your skills,
+        education, experience, keywords and contact info. Detected skills sync directly to your profile.
+      </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="uploadForm">
+      {% csrf_token %}
+
+      <!-- Drop zone — the <input> sits absolutely inside and handles all clicks -->
+      <div class="drop-zone" id="dropZone">
+        <input type="file" name="file" id="id_file" accept=".pdf,.docx">
+        <div class="dz-icon" id="dzIcon">&#128196;</div>
+        <div class="dz-title" id="dzTitle">Drop your resume here</div>
+        <div class="dz-sub" id="dzSub">or click anywhere to browse files</div>
+        <span class="choose-btn">&#128194; Choose File</span>
+        <div class="format-pills">
+          <span class="fp fp-pdf">PDF</span>
+          <span class="fp fp-docx">DOCX</span>
+        </div>
+      </div>
+
+      <!-- Selected file feedback (shown via JS) -->
+      <div class="file-selected" id="fileSelected">
+        <span style="font-size:1.3rem;">&#128196;</span>
+        <span class="file-selected-name" id="fileName">—</span>
+        <span class="file-selected-size" id="fileSize"></span>
+        <span style="color:#10b981;font-size:1.1rem;">&#10003;</span>
+      </div>
+
+      <!-- Django form errors -->
+      {% if form.file.errors %}
+      <div class="err-box">
+        {% for error in form.file.errors %}
+        <div class="alert alert-error">&#9888; {{ error }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div style="margin-top:24px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <button type="submit" class="btn btn-primary" id="submitBtn" disabled
+                style="opacity:.5;cursor:not-allowed;">
+          &#128640; Upload &amp; Parse Resume
+        </button>
+        <a href="{% url 'resume:list' %}" class="btn btn-gray">Cancel</a>
+        <span id="submitHint" style="font-size:.8rem;color:var(--gray-400);">Select a file to enable upload</span>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Tips -->
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--green-pale);">&#128161;</div>
+      <div>
+        <div class="section-title">Tips for Better Parsing</div>
+        <div class="section-sub">Follow these for the most accurate results</div>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="tips-grid">
+      <div class="tip-row">
+        <div class="tip-icon">&#128196;</div>
+        <div>
+          <div class="tip-title">Use text-based PDFs</div>
+          <div class="tip-desc">Scanned or image-only PDFs cannot be parsed — use a text PDF or DOCX.</div>
+        </div>
+      </div>
+      <div class="tip-row">
+        <div class="tip-icon">&#128203;</div>
+        <div>
+          <div class="tip-title">Clear section headers</div>
+          <div class="tip-desc">Label sections explicitly: Skills, Experience, Education, Projects.</div>
+        </div>
+      </div>
+      <div class="tip-row">
+        <div class="tip-icon">&#9889;</div>
+        <div>
+          <div class="tip-title">List skills by name</div>
+          <div class="tip-desc">Write tech names directly: Python, React, AWS, Docker, PostgreSQL…</div>
+        </div>
+      </div>
+      <div class="tip-row">
+        <div class="tip-icon">&#128197;</div>
+        <div>
+          <div class="tip-title">Include year ranges</div>
+          <div class="tip-desc">e.g. "2020 – 2023" helps the AI estimate your experience accurately.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+(function () {
+  var input    = document.getElementById('id_file');
+  var dropZone = document.getElementById('dropZone');
+  var selected = document.getElementById('fileSelected');
+  var nameEl   = document.getElementById('fileName');
+  var sizeEl   = document.getElementById('fileSize');
+  var submitBtn= document.getElementById('submitBtn');
+  var hint     = document.getElementById('submitHint');
+  var dzTitle  = document.getElementById('dzTitle');
+  var dzSub    = document.getElementById('dzSub');
+  var dzIcon   = document.getElementById('dzIcon');
+
+  function formatBytes(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1048576).toFixed(1) + ' MB';
+  }
+
+  function onFile(file) {
+    if (!file) return;
+    nameEl.textContent = file.name;
+    sizeEl.textContent = formatBytes(file.size);
+    selected.classList.add('show');
+    dropZone.classList.add('has-file');
+    dzIcon.textContent  = '✅';
+    dzTitle.textContent = 'File selected — ready to upload';
+    dzSub.textContent   = file.name;
+    submitBtn.disabled  = false;
+    submitBtn.style.opacity = '1';
+    submitBtn.style.cursor  = 'pointer';
+    hint.textContent = 'Click the button above to start uploading';
+  }
+
+  input.addEventListener('change', function () {
+    if (this.files && this.files[0]) onFile(this.files[0]);
+  });
+
+  // Drag-and-drop support
+  dropZone.addEventListener('dragover', function (e) {
+    e.preventDefault();
+    this.classList.add('dragover');
+  });
+  dropZone.addEventListener('dragleave', function () {
+    this.classList.remove('dragover');
+  });
+  dropZone.addEventListener('drop', function (e) {
+    e.preventDefault();
+    this.classList.remove('dragover');
+    var files = e.dataTransfer.files;
+    if (files && files[0]) {
+      // Transfer dropped file to the input
+      var dt = new DataTransfer();
+      dt.items.add(files[0]);
+      input.files = dt.files;
+      onFile(files[0]);
+    }
+  });
+
+  // Show loading state on submit
+  document.getElementById('uploadForm').addEventListener('submit', function () {
+    submitBtn.textContent = '⏳ Uploading & Parsing…';
+    submitBtn.disabled = true;
+  });
+})();
+</script>
+
+{% endblock %}

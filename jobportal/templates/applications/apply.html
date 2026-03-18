@@ -1,0 +1,195 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Apply — {{ job.title }}{% endblock %}
+
+{% block extra_css %}
+.apply-wrap { max-width: 720px; margin: 0 auto; padding: 28px 24px 60px; display: flex; flex-direction: column; gap: 20px; }
+
+/* Job hero */
+.apply-hero {
+  background: linear-gradient(135deg, var(--navy) 0%, #1e3a5f 100%);
+  border-radius: var(--radius-xl); padding: 24px 28px;
+}
+.hero-co { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.hero-logo { width: 44px; height: 44px; border-radius: 10px; border: 1.5px solid rgba(255,255,255,.2); overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.1); font-size: 1.2rem; }
+.hero-logo img { width: 100%; height: 100%; object-fit: cover; }
+.hero-co-name { color: rgba(255,255,255,.8); font-size: .875rem; font-weight: 700; }
+.hero-title { color: #fff; font-size: 1.2rem; font-weight: 800; margin-bottom: 10px; }
+.hero-badges { display: flex; flex-wrap: wrap; gap: 7px; }
+.hb { padding: 3px 11px; border-radius: 999px; font-size: .75rem; font-weight: 700; background: rgba(255,255,255,.12); color: rgba(255,255,255,.9); }
+
+/* Form card */
+.apply-card { background: var(--white); border-radius: var(--radius-xl); box-shadow: var(--shadow); overflow: hidden; }
+.ac-header { padding: 18px 24px 14px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; gap: 10px; }
+.ac-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+.ac-title { font-size: .95rem; font-weight: 700; color: var(--gray-900); }
+.ac-sub { font-size: .78rem; color: var(--gray-400); margin-top: 1px; }
+.ac-body { padding: 20px 24px; }
+
+.cover-label { font-size: .85rem; font-weight: 700; color: var(--gray-700); margin-bottom: 6px; display: block; }
+.cover-hint { font-size: .78rem; color: var(--gray-400); margin-bottom: 10px; }
+.cover-textarea {
+  width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius); font-size: .9rem; font-family: var(--font);
+  color: var(--gray-800); resize: vertical; min-height: 130px;
+  outline: none; transition: border-color .15s; box-sizing: border-box;
+}
+.cover-textarea:focus { border-color: var(--blue); }
+.cover-char { font-size: .75rem; color: var(--gray-400); margin-top: 4px; text-align: right; }
+
+/* Skills required */
+.skill-tag { padding: 3px 10px; border-radius: 999px; font-size: .75rem; font-weight: 600; background: var(--blue-pale); color: var(--blue-dark); border: 1px solid #bfdbfe; }
+
+.btn-apply {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 28px; background: var(--blue); color: #fff;
+  border: none; border-radius: var(--radius); font-size: .95rem;
+  font-weight: 700; cursor: pointer; font-family: var(--font);
+  transition: background .2s; text-decoration: none;
+}
+.btn-apply:hover { background: var(--blue-dark); color: #fff; }
+{% endblock %}
+
+{% block content %}
+<div class="apply-wrap">
+
+  <!-- JOB SUMMARY HERO -->
+  <div class="apply-hero">
+    <div class="hero-co">
+      <div class="hero-logo">
+        {% if job.recruiter.logo %}<img src="{{ job.recruiter.logo.url }}" alt="">{% else %}&#127970;{% endif %}
+      </div>
+      <span class="hero-co-name">{{ job.recruiter.company_name }}</span>
+    </div>
+    <div class="hero-title">{{ job.title }}</div>
+    <div class="hero-badges">
+      <span class="hb">&#128188; {{ job.get_job_type_display }}</span>
+      {% if job.is_remote %}<span class="hb">&#127760; Remote</span>{% endif %}
+      {% if job.location %}<span class="hb">&#128205; {{ job.location }}</span>{% endif %}
+      {% with sal=job.get_salary_display %}{% if sal %}<span class="hb">&#128181; {{ sal }}</span>{% endif %}{% endwith %}
+    </div>
+  </div>
+
+  <!-- APPLY FORM -->
+  <div class="apply-card">
+    <div class="ac-header">
+      <div class="ac-icon" style="background:var(--blue-pale);">&#128640;</div>
+      <div>
+        <div class="ac-title">Submit Your Application</div>
+        <div class="ac-sub">Cover letter is optional — your profile and resume speak for themselves</div>
+      </div>
+    </div>
+    <div class="ac-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <label class="cover-label" for="{{ form.cover_letter.id_for_label }}">
+          Cover Letter <span style="font-size:.75rem;font-weight:500;color:var(--gray-400);">(optional)</span>
+        </label>
+        <div class="cover-hint">Briefly explain why you are a great fit for this role.</div>
+        <textarea
+          name="cover_letter"
+          id="{{ form.cover_letter.id_for_label }}"
+          class="cover-textarea"
+          placeholder="Optional: Introduce yourself, explain your interest in this role, or highlight any relevant experience..."
+          oninput="document.getElementById('char-count').textContent = this.value.length"
+        >{{ form.cover_letter.value|default:'' }}</textarea>
+        <div class="cover-char"><span id="char-count">0</span> characters</div>
+
+        {% for e in form.cover_letter.errors %}
+        <span style="color:var(--red);font-size:.82rem;">{{ e }}</span>
+        {% endfor %}
+
+        {% if skills %}
+        <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--gray-100);">
+          <div style="font-size:.75rem;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Required Skills</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            {% for skill in skills %}<span class="skill-tag">{{ skill }}</span>{% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- ── RESUME SECTION ── -->
+        <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--gray-100);">
+          <div style="font-size:.85rem;font-weight:700;color:var(--gray-700);margin-bottom:4px;">
+            &#128196; Attach Resume <span style="font-size:.75rem;font-weight:500;color:var(--gray-400);">(strongly recommended)</span>
+          </div>
+          <div style="font-size:.78rem;color:var(--gray-400);margin-bottom:14px;">
+            Select one of your uploaded resumes to send with this application.
+          </div>
+
+          {% if user_resumes %}
+          <div style="display:flex;flex-direction:column;gap:8px;" id="resumeList">
+            {% for r in user_resumes %}
+            <label style="display:flex;align-items:center;gap:12px;padding:12px 14px;
+                          border:1.5px solid var(--gray-200);border-radius:var(--radius);
+                          cursor:pointer;transition:border-color .15s;"
+                   id="rl-{{ r.pk }}">
+              <input type="radio" name="resume_id" value="{{ r.pk }}"
+                     {% if r.is_primary %}checked{% endif %}
+                     style="accent-color:var(--blue);width:16px;height:16px;flex-shrink:0;"
+                     onchange="highlightSelected()">
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:.875rem;font-weight:700;color:var(--gray-800);
+                            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                  {{ r.original_filename }}
+                  {% if r.is_primary %}<span style="margin-left:6px;background:#dbeafe;color:#1e40af;font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:999px;">Primary</span>{% endif %}
+                </div>
+                <div style="font-size:.72rem;color:var(--gray-400);margin-top:2px;">
+                  {{ r.get_file_size_display }} &bull; {{ r.uploaded_at|date:"M d, Y" }}
+                  {% if r.status == 'parsed' %}&bull; <span style="color:var(--green);font-weight:600;">&#10003; Parsed</span>
+                  {% elif r.status == 'failed' %}&bull; <span style="color:var(--red);">&#9888; Parse failed</span>
+                  {% else %}&bull; Pending{% endif %}
+                </div>
+              </div>
+              <span style="font-size:1.2rem;">{% if r.file_type == 'pdf' %}&#128196;{% else %}&#128439;{% endif %}</span>
+            </label>
+            {% endfor %}
+            <label style="display:flex;align-items:center;gap:12px;padding:10px 14px;
+                          border:1.5px dashed var(--gray-200);border-radius:var(--radius);cursor:pointer;"
+                   id="rl-none">
+              <input type="radio" name="resume_id" value=""
+                     style="width:16px;height:16px;flex-shrink:0;" onchange="highlightSelected()">
+              <span style="font-size:.82rem;color:var(--gray-500);">Apply without attaching a resume</span>
+            </label>
+          </div>
+          <div style="margin-top:10px;">
+            <a href="{% url 'resume:upload' %}" target="_blank"
+               style="font-size:.78rem;color:var(--blue);font-weight:700;">+ Upload a new resume &#8599;</a>
+            <span style="font-size:.72rem;color:var(--gray-400);margin-left:6px;">(opens in new tab — refresh this page after uploading)</span>
+          </div>
+
+          {% else %}
+          <div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:var(--radius);padding:14px 16px;display:flex;gap:10px;align-items:flex-start;">
+            <span style="font-size:1.1rem;flex-shrink:0;">&#9888;</span>
+            <div>
+              <div style="font-size:.875rem;font-weight:700;color:#92400e;margin-bottom:4px;">No resume uploaded yet</div>
+              <div style="font-size:.8rem;color:#b45309;margin-bottom:10px;">Upload your resume so recruiters can review it with your application.</div>
+              <a href="{% url 'resume:upload' %}" target="_blank" class="btn-apply"
+                 style="padding:8px 18px;font-size:.82rem;background:#f59e0b;display:inline-flex;">
+                &#128196; Upload Resume Now &#8599;
+              </a>
+              <span style="display:block;font-size:.72rem;color:#b45309;margin-top:6px;">Opens in new tab — come back and refresh after uploading.</span>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:24px;padding-top:16px;border-top:1px solid var(--gray-100);">
+          <button type="submit" class="btn-apply">&#128640; Submit Application</button>
+          <a href="{% url 'jobs:detail' job.pk %}" class="btn btn-gray">Cancel</a>
+        </div>
+      </form>
+
+      <script>
+      function highlightSelected() {
+        document.querySelectorAll('#resumeList label').forEach(function(lbl) {
+          lbl.style.borderColor = lbl.querySelector('input').checked ? 'var(--blue)' : 'var(--gray-200)';
+        });
+      }
+      document.addEventListener('DOMContentLoaded', highlightSelected);
+      </script>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

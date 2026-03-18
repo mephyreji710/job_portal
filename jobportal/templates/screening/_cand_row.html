@@ -1,0 +1,56 @@
+{% comment %}
+Partial: single candidate row in the ranked list.
+Context vars: score (MatchScore), rank (int, 1-based position in full queryset)
+{% endcomment %}
+<div class="cand-row">
+
+  <div class="rank-num">#{{ rank }}</div>
+
+  <div class="score-circle" style="background:{{ score.score_color }};">
+    {{ score.total_score|floatformat:0 }}
+  </div>
+
+  <div class="cand-info">
+    <div class="cand-name">
+      {% if score.candidate.get_full_name %}{{ score.candidate.get_full_name }}{% else %}{{ score.candidate.email }}{% endif %}
+      <span class="st-badge st-{{ score.status }}">{{ score.get_status_display }}</span>
+    </div>
+    <div class="cand-email">{{ score.candidate.email }}</div>
+    <div class="cand-meta">
+      <span>&#128197; {{ score.experience_years_found|floatformat:1 }} yrs exp</span>
+      <span>&#9889; {{ score.matched_skills|length }} skill{{ score.matched_skills|length|pluralize }} matched</span>
+      {% if score.missing_skills %}<span style="color:#b91c1c;">&#10007; {{ score.missing_skills|length }} missing</span>{% endif %}
+      <span>Scored {{ score.computed_at|date:"M d" }}</span>
+    </div>
+    {% if score.recruiter_notes %}
+    <div style="margin-top:5px;font-size:.75rem;color:var(--gray-500);font-style:italic;">
+      &#128203; {{ score.recruiter_notes|truncatechars:80 }}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Mini component bars -->
+  <div class="mini-bars">
+    <div class="mb-row"><span>Skills</span><span style="color:var(--gray-700);font-weight:700;">{{ score.skills_score|floatformat:0 }}%</span></div>
+    <div class="mb-bg"><div class="mb-fill" style="width:{{ score.skills_score }}%;background:#6366f1;"></div></div>
+    <div class="mb-row"><span>Exp</span><span style="color:var(--gray-700);font-weight:700;">{{ score.experience_score|floatformat:0 }}%</span></div>
+    <div class="mb-bg"><div class="mb-fill" style="width:{{ score.experience_score }}%;background:#10b981;"></div></div>
+    <div class="mb-row"><span>Edu</span><span style="color:var(--gray-700);font-weight:700;">{{ score.education_score|floatformat:0 }}%</span></div>
+    <div class="mb-bg"><div class="mb-fill" style="width:{{ score.education_score }}%;background:#f59e0b;"></div></div>
+  </div>
+
+  <!-- Status form -->
+  <form method="post" action="{% url 'screening:update_status' score.pk %}" class="status-form" id="sf-{{ score.pk }}">
+    {% csrf_token %}
+    <select name="status" class="status-select" onchange="this.form.submit()">
+      <option value="new"         {% if score.status == 'new' %}selected{% endif %}>New</option>
+      <option value="reviewed"    {% if score.status == 'reviewed' %}selected{% endif %}>Reviewed</option>
+      <option value="shortlisted" {% if score.status == 'shortlisted' %}selected{% endif %}>&#11088; Shortlist</option>
+      <option value="rejected"    {% if score.status == 'rejected' %}selected{% endif %}>&#10007; Reject</option>
+    </select>
+    <input type="hidden" name="notes" id="notes-{{ score.pk }}" value="{{ score.recruiter_notes }}">
+  </form>
+
+  <a href="{% url 'screening:result' score.pk %}" class="btn btn-outline btn-sm" style="flex-shrink:0;">&#128202;</a>
+
+</div>

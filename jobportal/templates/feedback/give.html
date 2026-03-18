@@ -1,0 +1,142 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Leave Feedback{% endblock %}
+
+{% block extra_css %}
+.fb-wrap { max-width: 580px; margin: 40px auto; padding: 0 16px; }
+
+.fb-hero {
+  background: linear-gradient(135deg,
+    {% if is_c2co %}#1e1b4b 0%, #312e81 60%, #4338ca 100%
+    {% else %}#064e3b 0%, #065f46 60%, #0891b2 100%{% endif %});
+  border-radius: var(--radius-xl); padding: 28px 32px; margin-bottom: 24px; text-align: center;
+}
+
+.fb-card { background: var(--white); border-radius: var(--radius-xl); box-shadow: var(--shadow); padding: 32px; }
+
+/* CSS-only star rating ─ stars in reverse DOM order + flex-row-reverse */
+.star-rating {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: center;
+  gap: 6px;
+  margin: 20px 0;
+}
+.star-rating input[type="radio"] { display: none; }
+.star-rating label {
+  font-size: 3rem;
+  color: var(--gray-200);
+  cursor: pointer;
+  transition: color .1s, transform .1s;
+  line-height: 1;
+}
+/* Hover: highlight hovered star and all DOM-siblings that follow (lower value = right in flex-reverse) */
+.star-rating label:hover,
+.star-rating label:hover ~ label { color: #f59e0b; transform: scale(1.1); }
+/* Checked: highlight checked label + all subsequent siblings (lower stars) */
+.star-rating input[type="radio"]:checked + label,
+.star-rating input[type="radio"]:checked + label ~ label { color: #f59e0b; }
+
+.star-hint { text-align: center; font-size: .8rem; color: var(--gray-400); margin-top: -12px; margin-bottom: 20px; }
+.form-group { margin-bottom: 18px; }
+.form-label { font-size: .82rem; font-weight: 700; color: var(--gray-700); margin-bottom: 6px; display: block; }
+.form-control { width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray-200); border-radius: var(--radius);
+                font-family: var(--font); font-size: .875rem; color: var(--gray-800);
+                resize: vertical; outline: none; transition: border-color .15s; }
+.form-control:focus { border-color: var(--indigo); }
+.anon-row { display: flex; align-items: center; gap: 10px; font-size: .82rem; color: var(--gray-600); margin-bottom: 20px; }
+.anon-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--indigo); cursor: pointer; }
+{% endblock %}
+
+{% block content %}
+<div class="fb-wrap">
+
+  <div class="fb-hero">
+    <div style="font-size:2.5rem;margin-bottom:8px;">{% if is_c2co %}&#127968;{% else %}&#128100;{% endif %}</div>
+    <h2 style="color:#fff;font-size:1.2rem;font-weight:800;margin-bottom:4px;">
+      {% if is_c2co %}Rate {{ target_name }}{% else %}Rate {{ target_name }}{% endif %}
+    </h2>
+    <p style="color:rgba(255,255,255,.7);font-size:.875rem;">
+      {% if is_c2co %}
+        Share your experience applying to <strong style="color:#fff;">{{ app.job.title }}</strong>
+      {% else %}
+        Rate this candidate for <strong style="color:#fff;">{{ app.job.title }}</strong>
+      {% endif %}
+    </p>
+  </div>
+
+  <div class="fb-card">
+    <div style="text-align:center;margin-bottom:8px;">
+      <div style="font-size:.72rem;font-weight:800;color:var(--gray-400);text-transform:uppercase;letter-spacing:.08em;">Your Rating</div>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+
+      {# Star selector — DOM order 5→1 so CSS sibling trick works with flex-row-reverse #}
+      <div class="star-rating" id="star-widget">
+        <input type="radio" id="s5" name="rating" value="5">
+        <label for="s5" title="5 stars">&#9733;</label>
+        <input type="radio" id="s4" name="rating" value="4">
+        <label for="s4" title="4 stars">&#9733;</label>
+        <input type="radio" id="s3" name="rating" value="3">
+        <label for="s3" title="3 stars">&#9733;</label>
+        <input type="radio" id="s2" name="rating" value="2">
+        <label for="s2" title="2 stars">&#9733;</label>
+        <input type="radio" id="s1" name="rating" value="1">
+        <label for="s1" title="1 star">&#9733;</label>
+      </div>
+
+      {# Hidden rating field for Django form — synced by the star labels #}
+      <input type="hidden" name="rating" id="id_rating" value="{{ form.rating.value|default:'' }}">
+
+      <div class="star-hint" id="star-hint">Click a star to select your rating</div>
+
+      {# Keep stars in sync with hidden field via minimal inline JS #}
+      <script>
+        (function(){
+          var labels = document.querySelectorAll('.star-rating label');
+          var hidden = document.getElementById('id_rating');
+          var hint   = document.getElementById('star-hint');
+          var msgs   = ['','Terrible','Poor','OK','Good','Excellent'];
+          labels.forEach(function(lbl){
+            lbl.addEventListener('click', function(){
+              var val = lbl.htmlFor.replace('s','');
+              hidden.value = val;
+              hint.textContent = msgs[val] + ' (' + val + '/5)';
+            });
+          });
+        })();
+      </script>
+
+      <div class="form-group">
+        <label class="form-label" for="{{ form.comment.id_for_label }}">Review (optional)</label>
+        {{ form.comment }}
+        {% if form.comment.errors %}
+        <div style="color:var(--red);font-size:.75rem;margin-top:4px;">{{ form.comment.errors|join:", " }}</div>
+        {% endif %}
+      </div>
+
+      {% if is_c2co %}
+      <div class="anon-row">
+        {{ form.is_anonymous }}
+        <label for="{{ form.is_anonymous.id_for_label }}">Post anonymously (your name won't appear on the review)</label>
+      </div>
+      {% endif %}
+
+      {% if form.non_field_errors %}
+      <div style="background:var(--red-pale);border:1px solid #fca5a5;border-radius:var(--radius);padding:10px 14px;font-size:.82rem;color:#991b1b;margin-bottom:16px;">
+        {{ form.non_field_errors|join:", " }}
+      </div>
+      {% endif %}
+
+      <div style="display:flex;gap:10px;">
+        <button type="submit" class="btn btn-primary" style="flex:1;{% if is_c2co %}background:var(--indigo);{% else %}background:var(--green);{% endif %}">
+          &#9733; Submit Feedback
+        </button>
+        <a href="javascript:history.back();" class="btn btn-gray">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

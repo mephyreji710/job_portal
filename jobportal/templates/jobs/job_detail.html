@@ -1,0 +1,341 @@
+{% extends 'accounts/base.html' %}
+{% block title %}{{ job.title }} — {{ job.recruiter.company_name }}{% endblock %}
+
+{% block extra_css %}
+.detail-wrap { max-width: 960px; margin: 0 auto; padding: 28px 24px 60px; display: flex; gap: 24px; align-items: flex-start; }
+.detail-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+.detail-side { flex: 0 0 280px; display: flex; flex-direction: column; gap: 14px; position: sticky; top: 84px; }
+
+/* Hero card */
+.job-hero {
+  background: linear-gradient(135deg, var(--navy) 0%, #1e3a5f 100%);
+  border-radius: var(--radius-xl); padding: 28px 32px; position: relative; overflow: hidden;
+}
+.job-hero::before { content:''; position:absolute; top:-50px; right:-40px; width:200px; height:200px; background:radial-gradient(circle,rgba(255,255,255,.07) 0%,transparent 70%); }
+.hero-company { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+.hero-logo { width:52px; height:52px; border-radius:12px; border:2px solid rgba(255,255,255,.25); overflow:hidden; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.1); font-size:1.4rem; }
+.hero-logo img { width:100%; height:100%; object-fit:cover; }
+.hero-company-name { color:rgba(255,255,255,.85); font-size:.9rem; font-weight:700; }
+.hero-title { color:#fff; font-size:1.5rem; font-weight:800; margin-bottom:12px; }
+.hero-badges { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+.hero-badge {
+  padding:4px 12px; border-radius:999px; font-size:.78rem; font-weight:700;
+  background:rgba(255,255,255,.12); color:rgba(255,255,255,.9);
+}
+.hero-meta { color:rgba(255,255,255,.55); font-size:.8rem; display:flex; flex-wrap:wrap; gap:12px; }
+
+/* Content sections */
+.content-card { background:var(--white); border-radius:var(--radius-xl); box-shadow:var(--shadow); overflow:hidden; }
+.content-header { padding:18px 24px 14px; border-bottom:1px solid var(--gray-100); display:flex; align-items:center; gap:10px; }
+.content-icon { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+.content-title { font-size:.95rem; font-weight:700; color:var(--gray-900); }
+.content-body { padding:18px 24px; font-size:.9rem; color:var(--gray-700); line-height:1.8; white-space:pre-line; }
+
+/* Skills */
+.skills-cloud { display:flex; flex-wrap:wrap; gap:8px; padding:18px 24px; }
+.skill-pill { padding:5px 13px; border-radius:999px; font-size:.8rem; font-weight:600; background:var(--blue-pale); color:var(--blue-dark); border:1.5px solid #bfdbfe; }
+
+/* Sidebar */
+.side-card { background:var(--white); border-radius:var(--radius-lg); box-shadow:var(--shadow); overflow:hidden; }
+.side-header { padding:14px 18px; border-bottom:1px solid var(--gray-100); font-size:.8rem; font-weight:700; color:var(--gray-700); }
+.side-body { padding:14px 18px; display:flex; flex-direction:column; gap:10px; }
+.detail-row { display:flex; align-items:flex-start; gap:8px; font-size:.82rem; }
+.detail-icon { font-size:.95rem; flex-shrink:0; width:22px; text-align:center; margin-top:1px; }
+.detail-label { color:var(--gray-400); font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+.detail-val   { color:var(--gray-800); font-weight:600; margin-top:1px; }
+
+.apply-btn {
+  display:block; width:100%; padding:14px; text-align:center;
+  background:var(--blue); color:#fff; border-radius:var(--radius); font-size:.95rem;
+  font-weight:700; border:none; cursor:pointer; font-family:var(--font);
+  transition:background .2s; text-decoration:none;
+}
+.apply-btn:hover { background:var(--blue-dark); color:#fff; text-decoration:none; }
+.apply-btn.disabled { background:var(--gray-300); cursor:not-allowed; }
+{% endblock %}
+
+{% block content %}
+<div class="detail-wrap">
+
+  <!-- ===== MAIN ===== -->
+  <div class="detail-main">
+
+    <!-- Hero -->
+    <div class="job-hero">
+      <div class="hero-company">
+        <div class="hero-logo">
+          {% if job.recruiter.logo %}<img src="{{ job.recruiter.logo.url }}" alt="Logo">{% else %}&#127970;{% endif %}
+        </div>
+        <span class="hero-company-name">{{ job.recruiter.company_name }}</span>
+      </div>
+      <div class="hero-title">{{ job.title }}</div>
+      <div class="hero-badges">
+        <span class="hero-badge">&#128188; {{ job.get_job_type_display }}</span>
+        {% if job.is_remote %}<span class="hero-badge">&#127760; Remote</span>{% endif %}
+        {% if job.experience_level != 'any' %}<span class="hero-badge">&#128218; {{ job.get_experience_level_display }}</span>{% endif %}
+        {% with sal=job.get_salary_display %}{% if sal %}<span class="hero-badge">&#128181; {{ sal }}</span>{% endif %}{% endwith %}
+      </div>
+      <div class="hero-meta">
+        {% if job.location %}<span>&#128205; {{ job.location }}</span>{% endif %}
+        <span>&#128197; Posted {{ job.days_since_posted }}</span>
+        {% if job.deadline %}<span>&#9203; Deadline {{ job.deadline|date:"M d, Y" }}</span>{% endif %}
+        <span>&#128065; {{ job.views_count }} view{{ job.views_count|pluralize }}</span>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="content-card">
+      <div class="content-header">
+        <div class="content-icon" style="background:var(--blue-pale);">&#128196;</div>
+        <div class="content-title">Job Description</div>
+      </div>
+      <div class="content-body">{{ job.description }}</div>
+    </div>
+
+    <!-- Responsibilities -->
+    {% if job.responsibilities %}
+    <div class="content-card">
+      <div class="content-header">
+        <div class="content-icon" style="background:var(--green-pale);">&#128203;</div>
+        <div class="content-title">Responsibilities</div>
+      </div>
+      <div class="content-body">{{ job.responsibilities }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Requirements -->
+    {% if job.requirements %}
+    <div class="content-card">
+      <div class="content-header">
+        <div class="content-icon" style="background:var(--orange-pale);">&#10003;</div>
+        <div class="content-title">Requirements</div>
+      </div>
+      <div class="content-body">{{ job.requirements }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Required Skills -->
+    {% if skills %}
+    <div class="content-card">
+      <div class="content-header">
+        <div class="content-icon" style="background:#fef9c3;">&#9889;</div>
+        <div class="content-title">Required Skills</div>
+      </div>
+      <div class="skills-cloud">
+        {% for skill in skills %}
+        <span class="skill-pill">{{ skill }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="detail-side">
+
+    <!-- ── APPLY BUTTON ── -->
+    <div class="side-card">
+      <div class="side-body">
+        {% if request.user.is_authenticated and request.user.is_job_seeker_user %}
+
+          {# ---------- Already applied ---------- #}
+          {% if existing_application %}
+          <div style="text-align:center;margin-bottom:10px;">
+            <div style="background:#d1fae5;border:1.5px solid #6ee7b7;border-radius:var(--radius);padding:12px;">
+              <div style="font-size:1.1rem;margin-bottom:4px;">&#10003;</div>
+              <div style="font-weight:800;color:#065f46;font-size:.95rem;">Application Submitted</div>
+              <div style="font-size:.75rem;color:#059669;margin-top:2px;">{{ existing_application.applied_at|date:"M d, Y" }}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-size:.8rem;color:var(--gray-500);">Status:</span>
+            <span style="font-size:.8rem;font-weight:800;color:{{ existing_application.status_color }};">
+              {{ existing_application.get_status_display }}
+            </span>
+          </div>
+          <a href="{% url 'applications:my_applications' %}" class="apply-btn" style="background:var(--indigo);font-size:.85rem;padding:10px;display:block;text-align:center;">
+            &#128640; View My Applications
+          </a>
+          {% if existing_application.status == 'pending' %}
+          <form method="post" action="{% url 'applications:withdraw' existing_application.pk %}" style="margin-top:8px;"
+                onsubmit="return confirm('Withdraw your application?');">
+            {% csrf_token %}
+            <button type="submit" class="apply-btn" style="background:var(--red);font-size:.82rem;padding:9px;width:100%;">
+              &#10005; Withdraw Application
+            </button>
+          </form>
+          {% endif %}
+
+          {# ---------- Not applied yet ---------- #}
+          {% elif job.deadline and job.is_expired %}
+          <div style="text-align:center;">
+            <span class="apply-btn" style="background:var(--gray-400);cursor:not-allowed;">&#9203; Deadline Passed</span>
+          </div>
+
+          {% else %}
+          <a href="{% url 'applications:apply' job.pk %}" class="apply-btn">&#128640; Apply Now</a>
+          <p style="font-size:.75rem;color:var(--gray-400);text-align:center;margin-top:6px;">Quick apply with optional cover letter</p>
+          {% endif %}
+
+        {% elif is_owner %}
+          <a href="{% url 'jobs:edit' job.pk %}" class="apply-btn" style="background:var(--green);">&#9998; Edit This Job</a>
+        {% else %}
+          <a href="{% url 'accounts:login' %}" class="apply-btn">&#128272; Sign In to Apply</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ── AI MATCH SCORE ── -->
+    {% if request.user.is_authenticated and request.user.is_job_seeker_user %}
+    <div class="side-card">
+      <div class="side-header" style="font-size:.8rem;color:var(--gray-500);">&#128202; AI Match Score</div>
+      <div class="side-body">
+        {% if existing_score %}
+        <a href="{% url 'screening:result' existing_score.pk %}"
+           style="display:flex;align-items:center;gap:12px;text-decoration:none;margin-bottom:10px;">
+          <div style="width:46px;height:46px;border-radius:50%;background:{{ existing_score.score_color }};
+                      display:flex;align-items:center;justify-content:center;font-size:.95rem;font-weight:900;color:#fff;flex-shrink:0;">
+            {{ existing_score.total_score|floatformat:0 }}
+          </div>
+          <div>
+            <div style="font-weight:800;color:var(--gray-900);">{{ existing_score.score_label }} Match</div>
+            <div style="font-size:.75rem;color:var(--gray-400);">{{ existing_score.matched_skills|length }} skills matched</div>
+          </div>
+        </a>
+        <form method="post" action="{% url 'screening:check' job.pk %}">
+          {% csrf_token %}
+          <button type="submit" style="width:100%;padding:8px;background:none;border:1.5px solid var(--gray-200);
+                  border-radius:var(--radius);font-size:.78rem;font-weight:700;color:var(--gray-600);
+                  cursor:pointer;font-family:var(--font);">&#8635; Recompute</button>
+        </form>
+        {% else %}
+        <form method="post" action="{% url 'screening:check' job.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="apply-btn" style="background:var(--navy);font-size:.85rem;padding:10px;">
+            &#128202; Check My Match Score
+          </button>
+        </form>
+        <p style="font-size:.75rem;color:var(--gray-400);text-align:center;margin-top:6px;">AI-powered resume matching</p>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ── SAVE / BOOKMARK ── -->
+    {% if request.user.is_authenticated and request.user.is_job_seeker_user %}
+    <form method="post" action="{% url 'jobs:save' job.pk %}">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.path }}">
+      <button type="submit" style="
+        width:100%; padding:10px 16px; border-radius:var(--radius);
+        display:flex; align-items:center; justify-content:center; gap:8px;
+        font-size:.875rem; font-weight:700; cursor:pointer; font-family:var(--font);
+        border: 1.5px solid {% if is_saved %}#f59e0b{% else %}var(--gray-200){% endif %};
+        background: {% if is_saved %}#fffbeb{% else %}var(--white){% endif %};
+        color: {% if is_saved %}#d97706{% else %}var(--gray-500){% endif %};
+        transition: all .15s;">
+        {% if is_saved %}&#11088; Saved{% else %}&#9734; Save Job{% endif %}
+      </button>
+    </form>
+    {% endif %}
+
+    <!-- Job details -->
+    <div class="side-card">
+      <div class="side-header">Job Details</div>
+      <div class="side-body">
+        <div class="detail-row">
+          <span class="detail-icon">&#128188;</span>
+          <div><div class="detail-label">Job Type</div><div class="detail-val">{{ job.get_job_type_display }}</div></div>
+        </div>
+        {% if job.experience_level != 'any' %}
+        <div class="detail-row">
+          <span class="detail-icon">&#128218;</span>
+          <div><div class="detail-label">Experience Level</div><div class="detail-val">{{ job.get_experience_level_display }}</div></div>
+        </div>
+        {% endif %}
+        {% if job.experience_years_min or job.experience_years_max %}
+        <div class="detail-row">
+          <span class="detail-icon">&#128197;</span>
+          <div>
+            <div class="detail-label">Experience Required</div>
+            <div class="detail-val">
+              {{ job.experience_years_min }}{% if job.experience_years_max %}–{{ job.experience_years_max }}{% endif %}+ years
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        {% if job.education_required != 'any' %}
+        <div class="detail-row">
+          <span class="detail-icon">&#127979;</span>
+          <div><div class="detail-label">Education</div><div class="detail-val">{{ job.get_education_required_display }}</div></div>
+        </div>
+        {% endif %}
+        <div class="detail-row">
+          <span class="detail-icon">&#128205;</span>
+          <div>
+            <div class="detail-label">Location</div>
+            <div class="detail-val">
+              {% if job.is_remote and job.location %}{{ job.location }} / Remote
+              {% elif job.is_remote %}Remote
+              {% elif job.location %}{{ job.location }}
+              {% else %}Not specified{% endif %}
+            </div>
+          </div>
+        </div>
+        {% with sal=job.get_salary_display %}{% if sal %}
+        <div class="detail-row">
+          <span class="detail-icon">&#128181;</span>
+          <div><div class="detail-label">Salary</div><div class="detail-val">{{ sal }}</div></div>
+        </div>
+        {% endif %}{% endwith %}
+        {% if job.deadline %}
+        <div class="detail-row">
+          <span class="detail-icon">&#9203;</span>
+          <div>
+            <div class="detail-label">Deadline</div>
+            <div class="detail-val" style="{% if job.is_expired %}color:var(--red);{% endif %}">
+              {{ job.deadline|date:"M d, Y" }}{% if job.is_expired %} (Expired){% endif %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Company info -->
+    <div class="side-card">
+      <div class="side-header">About the Company</div>
+      <div class="side-body">
+        <div style="text-align:center;margin-bottom:12px;">
+          <div style="width:56px;height:56px;border-radius:14px;border:1.5px solid var(--gray-200);overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--gray-50);font-size:1.6rem;margin:0 auto 8px;">
+            {% if job.recruiter.logo %}<img src="{{ job.recruiter.logo.url }}" alt="Logo" style="width:100%;height:100%;object-fit:cover;">{% else %}&#127970;{% endif %}
+          </div>
+          <div style="font-weight:700;color:var(--gray-900);font-size:.9rem;">{{ job.recruiter.company_name }}</div>
+          {% if job.recruiter.tagline %}
+          <div style="font-size:.78rem;color:var(--gray-500);margin-top:2px;">{{ job.recruiter.tagline }}</div>
+          {% endif %}
+        </div>
+        {% if job.recruiter.industry %}
+        <div class="detail-row">
+          <span class="detail-icon">&#127981;</span>
+          <div><div class="detail-label">Industry</div><div class="detail-val">{{ job.recruiter.get_industry_display }}</div></div>
+        </div>
+        {% endif %}
+        {% if job.recruiter.company_size %}
+        <div class="detail-row">
+          <span class="detail-icon">&#128101;</span>
+          <div><div class="detail-label">Company Size</div><div class="detail-val">{{ job.recruiter.get_company_size_display }}</div></div>
+        </div>
+        {% endif %}
+        {% if job.recruiter.company_website %}
+        <a href="{{ job.recruiter.company_website }}" target="_blank" style="display:block;text-align:center;margin-top:8px;font-size:.82rem;color:var(--blue);">&#127760; Visit website</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <a href="{% url 'jobs:board' %}" style="text-align:center;font-size:.82rem;color:var(--gray-400);">&#8592; Back to Job Board</a>
+  </aside>
+
+</div>
+{% endblock %}

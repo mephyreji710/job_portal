@@ -1,0 +1,413 @@
+{% extends 'jobseeker/base_profile.html' %}
+{% block title %}{{ resume.original_filename }}{% endblock %}
+{% block nav_resume %}active{% endblock %}
+
+{% block extra_css %}
+.detail-hero {
+  background: linear-gradient(135deg, var(--navy) 0%, #1e3a5f 100%);
+  border-radius: var(--radius-xl); padding: 28px 32px;
+  display: flex; justify-content: space-between; align-items: center;
+  position: relative; overflow: hidden;
+}
+.detail-hero::before {
+  content: ''; position: absolute; top: -60px; right: -40px;
+  width: 220px; height: 220px;
+  background: radial-gradient(circle, rgba(79,70,229,0.3) 0%, transparent 70%);
+}
+.hero-left { z-index: 1; }
+.hero-filename { color: var(--white); font-size: 1.25rem; font-weight: 800; margin-bottom: 6px; word-break: break-word; }
+.hero-meta    { color: rgba(255,255,255,0.6); font-size: 0.82rem; display: flex; flex-wrap: wrap; gap: 10px; }
+.hero-actions { display: flex; gap: 10px; flex-wrap: wrap; z-index: 1; }
+
+.status-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 700;
+}
+.status-parsed  { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+.status-pending { background: rgba(245,158,11,0.2); color: #fcd34d; }
+.status-failed  { background: rgba(239,68,68,0.2);  color: #fca5a5; }
+
+/* Stat cards row */
+.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.stat-card {
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-lg); padding: 16px 18px; text-align: center;
+}
+.stat-num   { font-size: 1.6rem; font-weight: 800; color: var(--gray-900); }
+.stat-label { font-size: 0.75rem; color: var(--gray-400); font-weight: 600; margin-top: 2px; }
+
+/* Contact info row */
+.contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.contact-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; background: var(--gray-50); border-radius: var(--radius); font-size: 0.85rem;
+}
+.contact-icon { font-size: 1rem; flex-shrink: 0; width: 24px; text-align: center; }
+.contact-val  { color: var(--gray-700); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Skill tags */
+.skill-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.stag {
+  padding: 5px 12px; border-radius: 999px;
+  font-size: 0.8rem; font-weight: 600; border: 1.5px solid;
+}
+.stag-tech { background: var(--indigo-pale); color: var(--indigo); border-color: #c7d2fe; }
+.stag-soft { background: var(--green-pale);  color: var(--green-dark); border-color: #a7f3d0; }
+
+/* Keyword cloud */
+.kw-cloud { display: flex; flex-wrap: wrap; gap: 8px; }
+.kw-tag {
+  padding: 4px 11px; border-radius: 8px; font-size: 0.8rem; font-weight: 600;
+  border: 1.5px solid;
+}
+.kw-tech  { background: var(--indigo-pale); color: var(--indigo); border-color: #c7d2fe; }
+.kw-soft  { background: var(--green-pale);  color: var(--green-dark); border-color: #a7f3d0; }
+.kw-other { background: var(--gray-100);    color: var(--gray-600); border-color: var(--gray-200); }
+.kw-count { font-size: 0.7rem; color: inherit; opacity: 0.7; margin-left: 3px; }
+
+/* Section text block */
+.raw-section {
+  background: var(--gray-50); border: 1px solid var(--gray-200);
+  border-radius: var(--radius); padding: 14px 16px;
+  font-size: 0.82rem; color: var(--gray-700); line-height: 1.7;
+  white-space: pre-wrap; word-break: break-word;
+  max-height: 200px; overflow-y: auto;
+}
+{% endblock %}
+
+{% block main_content %}
+
+<!-- HERO BANNER -->
+<div class="detail-hero">
+  <div class="hero-left">
+    <div style="margin-bottom:8px;">
+      <span class="status-pill status-{{ resume.status }}">
+        {% if resume.status == 'parsed' %}&#10003; Parsed
+        {% elif resume.status == 'pending' %}&#8987; Pending
+        {% else %}&#10007; Failed{% endif %}
+      </span>
+      {% if resume.is_primary %}
+      <span style="margin-left:6px;background:rgba(255,255,255,0.15);color:#fff;font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:999px;">&#9733; Primary Resume</span>
+      {% endif %}
+    </div>
+    <div class="hero-filename">{{ resume.original_filename }}</div>
+    <div class="hero-meta">
+      <span>&#128197; {{ resume.uploaded_at|date:"M d, Y \a\t H:i" }}</span>
+      <span>&#128190; {{ resume.get_file_size_display }}</span>
+      <span>&#128196; {{ resume.file_type|upper }}</span>
+      {% if resume.raw_text %}<span>&#128221; {{ resume.word_count }} words</span>{% endif %}
+    </div>
+  </div>
+  <div class="hero-actions">
+    <a href="{% url 'resume:list' %}" class="btn btn-gray btn-sm" style="border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);">&#8592; All Resumes</a>
+
+    {% if parsed %}
+    <form method="post" action="{% url 'resume:apply_to_profile' resume.pk %}" style="display:inline;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary btn-sm">&#43; Sync Skills to Profile</button>
+    </form>
+    {% endif %}
+
+    <form method="post" action="{% url 'resume:reparse' resume.pk %}" style="display:inline;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-gray btn-sm" style="border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);">&#8635; Re-parse</button>
+    </form>
+  </div>
+</div>
+
+{% if resume.status == 'failed' %}
+<div class="alert alert-error">
+  <strong>&#9888; Parsing Failed</strong> &mdash;
+  {% if resume.parse_error %}{{ resume.parse_error }}{% else %}An unknown error occurred.{% endif %}
+  <form method="post" action="{% url 'resume:reparse' resume.pk %}" style="display:inline;margin-left:12px;">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-outline btn-sm">Try Re-parse</button>
+  </form>
+</div>
+{% endif %}
+
+
+{% if parsed %}
+
+<!-- STATS ROW -->
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-num" style="color:var(--indigo);">{{ parsed.tech_skill_count }}</div>
+    <div class="stat-label">Tech Skills</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="color:var(--green);">{{ parsed.soft_skill_count }}</div>
+    <div class="stat-label">Soft Skills</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="color:var(--orange);">{{ parsed.estimated_experience_years|default:"—" }}</div>
+    <div class="stat-label">Exp. Years</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="color:var(--teal);">{{ parsed.total_words }}</div>
+    <div class="stat-label">Total Words</div>
+  </div>
+</div>
+
+
+<!-- CONTACT INFO -->
+{% if parsed.extracted_name or parsed.extracted_email or parsed.extracted_phone or parsed.extracted_linkedin or parsed.extracted_github or parsed.extracted_website %}
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--blue-pale);">&#128100;</div>
+      <div>
+        <div class="section-title">Extracted Contact Info</div>
+        <div class="section-sub">Detected automatically from resume text</div>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="contact-grid">
+      {% if parsed.extracted_name %}
+      <div class="contact-item">
+        <span class="contact-icon">&#128100;</span>
+        <span class="contact-val">{{ parsed.extracted_name }}</span>
+      </div>
+      {% endif %}
+      {% if parsed.extracted_email %}
+      <div class="contact-item">
+        <span class="contact-icon">&#128231;</span>
+        <span class="contact-val">{{ parsed.extracted_email }}</span>
+      </div>
+      {% endif %}
+      {% if parsed.extracted_phone %}
+      <div class="contact-item">
+        <span class="contact-icon">&#128222;</span>
+        <span class="contact-val">{{ parsed.extracted_phone }}</span>
+      </div>
+      {% endif %}
+      {% if parsed.extracted_linkedin %}
+      <div class="contact-item">
+        <span class="contact-icon">&#128279;</span>
+        <a href="{{ parsed.extracted_linkedin }}" target="_blank" class="contact-val">LinkedIn Profile</a>
+      </div>
+      {% endif %}
+      {% if parsed.extracted_github %}
+      <div class="contact-item">
+        <span class="contact-icon">&#128025;</span>
+        <a href="{{ parsed.extracted_github }}" target="_blank" class="contact-val">GitHub Profile</a>
+      </div>
+      {% endif %}
+      {% if parsed.extracted_website %}
+      <div class="contact-item">
+        <span class="contact-icon">&#127760;</span>
+        <a href="{{ parsed.extracted_website }}" target="_blank" class="contact-val">Personal Website</a>
+      </div>
+      {% endif %}
+    </div>
+    {% if parsed.education_level %}
+    <div style="margin-top:12px;display:flex;align-items:center;gap:8px;">
+      <span style="font-size:0.82rem;color:var(--gray-500);">Education level detected:</span>
+      <span style="background:var(--purple-pale);color:#6d28d9;font-size:0.78rem;font-weight:700;padding:3px 10px;border-radius:999px;">&#127979; {{ parsed.get_education_level_display }}</span>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+
+<!-- SKILLS -->
+{% if parsed.extracted_skills %}
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:#fef9c3;">&#9889;</div>
+      <div>
+        <div class="section-title">Detected Skills</div>
+        <div class="section-sub">{{ parsed.tech_skill_count }} technical &bull; {{ parsed.soft_skill_count }} soft</div>
+      </div>
+    </div>
+    <form method="post" action="{% url 'resume:apply_to_profile' resume.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary btn-sm">&#43; Sync to Profile</button>
+    </form>
+  </div>
+  <div class="section-body">
+    {% if keywords_tech %}
+    <div style="margin-bottom:16px;">
+      <div style="font-size:0.75rem;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">Technical</div>
+      <div class="skill-tags">
+        {% for skill in parsed.extracted_skills %}
+          {% if skill.category == 'tech' %}
+          <span class="stag stag-tech">{{ skill.name }}</span>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    {% if keywords_soft %}
+    <div>
+      <div style="font-size:0.75rem;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">Soft Skills</div>
+      <div class="skill-tags">
+        {% for skill in parsed.extracted_skills %}
+          {% if skill.category == 'soft' %}
+          <span class="stag stag-soft">{{ skill.name }}</span>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+
+<!-- KEYWORDS -->
+{% if keywords_tech or keywords_soft or keywords_other %}
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--teal-pale);">&#128269;</div>
+      <div>
+        <div class="section-title">Top Keywords</div>
+        <div class="section-sub">Most frequent meaningful words in your resume</div>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+    {% if keywords_tech %}
+    <div style="margin-bottom:14px;">
+      <div style="font-size:0.72rem;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Technical</div>
+      <div class="kw-cloud">
+        {% for kw in keywords_tech %}
+        <span class="kw-tag kw-tech">{{ kw.word }}<span class="kw-count">&times;{{ kw.frequency }}</span></span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    {% if keywords_soft %}
+    <div style="margin-bottom:14px;">
+      <div style="font-size:0.72rem;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Soft Skills</div>
+      <div class="kw-cloud">
+        {% for kw in keywords_soft %}
+        <span class="kw-tag kw-soft">{{ kw.word }}<span class="kw-count">&times;{{ kw.frequency }}</span></span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    {% if keywords_other %}
+    <div>
+      <div style="font-size:0.72rem;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Other</div>
+      <div class="kw-cloud">
+        {% for kw in keywords_other %}
+        <span class="kw-tag kw-other">{{ kw.word }}<span class="kw-count">&times;{{ kw.frequency }}</span></span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+
+<!-- SECTIONS EXTRACTED -->
+{% if parsed.summary_text or parsed.skills_text or parsed.experience_text or parsed.education_text or parsed.certifications_text or parsed.projects_text %}
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--orange-pale);">&#128203;</div>
+      <div>
+        <div class="section-title">Extracted Sections</div>
+        <div class="section-sub">Raw text detected per resume section</div>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div style="display:flex;flex-direction:column;gap:16px;">
+
+      {% if parsed.summary_text %}
+      <div>
+        <div style="font-size:0.8rem;font-weight:700;color:var(--gray-600);margin-bottom:6px;">&#128100; Summary / Objective</div>
+        <div class="raw-section">{{ parsed.summary_text }}</div>
+      </div>
+      {% endif %}
+
+      {% if parsed.experience_text %}
+      <div>
+        <div style="font-size:0.8rem;font-weight:700;color:var(--gray-600);margin-bottom:6px;">&#128188; Experience</div>
+        <div class="raw-section">{{ parsed.experience_text }}</div>
+      </div>
+      {% endif %}
+
+      {% if parsed.education_text %}
+      <div>
+        <div style="font-size:0.8rem;font-weight:700;color:var(--gray-600);margin-bottom:6px;">&#127979; Education</div>
+        <div class="raw-section">{{ parsed.education_text }}</div>
+      </div>
+      {% endif %}
+
+      {% if parsed.skills_text %}
+      <div>
+        <div style="font-size:0.8rem;font-weight:700;color:var(--gray-600);margin-bottom:6px;">&#9889; Skills Section</div>
+        <div class="raw-section">{{ parsed.skills_text }}</div>
+      </div>
+      {% endif %}
+
+      {% if parsed.certifications_text %}
+      <div>
+        <div style="font-size:0.8rem;font-weight:700;color:var(--gray-600);margin-bottom:6px;">&#127941; Certifications</div>
+        <div class="raw-section">{{ parsed.certifications_text }}</div>
+      </div>
+      {% endif %}
+
+      {% if parsed.projects_text %}
+      <div>
+        <div style="font-size:0.8rem;font-weight:700;color:var(--gray-600);margin-bottom:6px;">&#128736; Projects</div>
+        <div class="raw-section">{{ parsed.projects_text }}</div>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endif %}
+
+
+{% else %}
+<!-- NOT PARSED YET -->
+<div class="section-card">
+  <div class="section-body">
+    <div class="empty-state">
+      <div class="empty-icon">&#128203;</div>
+      <div class="empty-title">Resume not yet parsed</div>
+      <div class="empty-desc">Click "Re-parse" to extract skills, keywords, and contact information from this resume.</div>
+      <form method="post" action="{% url 'resume:reparse' resume.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">&#8635; Parse Now</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+
+<!-- DANGER ZONE -->
+<div class="section-card" style="border:1.5px solid #fca5a5;">
+  <div class="section-header" style="border-bottom-color:#fee2e2;">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--red-pale);">&#128465;</div>
+      <div>
+        <div class="section-title" style="color:var(--red);">Danger Zone</div>
+        <div class="section-sub">This action is permanent and cannot be undone</div>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+    <p style="font-size:0.875rem;color:var(--gray-600);margin-bottom:16px;">
+      Deleting this resume will permanently remove the file and all parsed data associated with it.
+    </p>
+    <form method="post" action="{% url 'resume:delete' resume.pk %}"
+          onsubmit="return confirm('Permanently delete this resume? This cannot be undone.')">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">&#128465; Delete Resume</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

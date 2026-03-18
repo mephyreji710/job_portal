@@ -1,0 +1,104 @@
+{% extends 'jobseeker/base_profile.html' %}
+{% block title %}{{ action }} Certification{% endblock %}
+{% block nav_certifications %}active{% endblock %}
+
+{% block main_content %}
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--orange-pale);">&#127941;</div>
+      <div>
+        <div class="section-title">{{ action }} Certification</div>
+        <div class="section-sub">{% if action == 'Add' %}Add a professional certification{% else %}Update this certification{% endif %}</div>
+      </div>
+    </div>
+    <a href="{% url 'jobseeker:certifications' %}" class="btn btn-gray btn-sm">&#8592; Back</a>
+  </div>
+  <div class="section-body">
+
+    {% if form.errors %}
+    <div style="background:var(--red-pale);border-left:4px solid var(--red);border-radius:8px;padding:12px 16px;margin-bottom:20px;">
+      <p style="color:#991b1b;font-size:0.875rem;font-weight:600;">Please fix the errors:</p>
+      <ul style="color:#991b1b;font-size:0.82rem;padding-left:18px;margin-top:6px;">
+        {% for field in form %}{% for e in field.errors %}<li>{{ field.label }}: {{ e }}</li>{% endfor %}{% endfor %}
+        {% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <div class="form-grid-2">
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label class="form-label" for="id_name">Certification Name</label>
+          <input type="text" id="id_name" name="name"
+            class="form-control {% if form.name.errors %}error{% endif %}"
+            value="{{ form.name.value|default:'' }}"
+            placeholder="e.g. AWS Certified Solutions Architect" />
+          {% for e in form.name.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_issuing_organization">Issuing Organization</label>
+          <input type="text" id="id_issuing_organization" name="issuing_organization"
+            class="form-control {% if form.issuing_organization.errors %}error{% endif %}"
+            value="{{ form.issuing_organization.value|default:'' }}"
+            placeholder="e.g. Amazon Web Services" />
+          {% for e in form.issuing_organization.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_credential_id">Credential ID <span class="opt">(optional)</span></label>
+          <input type="text" id="id_credential_id" name="credential_id" class="form-control"
+            value="{{ form.credential_id.value|default:'' }}"
+            placeholder="Certificate ID or number" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_issue_date">Issue Date</label>
+          <input type="date" id="id_issue_date" name="issue_date"
+            class="form-control {% if form.issue_date.errors %}error{% endif %}"
+            value="{{ form.issue_date.value|default:'' }}" />
+          {% for e in form.issue_date.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_expiry_date">Expiry Date <span class="opt">(optional)</span></label>
+          <input type="date" id="id_expiry_date" name="expiry_date"
+            class="form-control {% if form.expiry_date.errors %}error{% endif %}"
+            value="{{ form.expiry_date.value|default:'' }}" />
+          {% for e in form.expiry_date.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-row">
+          <input type="checkbox" name="does_not_expire" id="id_does_not_expire"
+            {% if form.does_not_expire.value %}checked{% endif %} />
+          This certification does not expire
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="id_credential_url">Credential URL <span class="opt">(optional)</span></label>
+        <input type="url" id="id_credential_url" name="credential_url" class="form-control"
+          value="{{ form.credential_url.value|default:'' }}"
+          placeholder="https://verify.example.com/your-certificate" />
+        {% for e in form.credential_url.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        <span class="field-hint">A link where the certificate can be verified online</span>
+      </div>
+
+      <div class="flex gap-3 mt-4">
+        <button type="submit" class="btn btn-primary">
+          {% if action == 'Add' %}&#43; Add Certification{% else %}&#10003; Save Changes{% endif %}
+        </button>
+        <a href="{% url 'jobseeker:certifications' %}" class="btn btn-gray">Cancel</a>
+        {% if action == 'Edit' and object %}
+        <form method="post" action="{% url 'jobseeker:certification_delete' object.pk %}" style="margin-left:auto;" onsubmit="return confirm('Delete this certification?')">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">&#128465; Delete</button>
+        </form>
+        {% endif %}
+      </div>
+    </form>
+
+  </div>
+</div>
+{% endblock %}

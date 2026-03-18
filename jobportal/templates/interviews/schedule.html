@@ -1,0 +1,158 @@
+{% extends 'recruiter/base_recruiter.html' %}
+{% block title %}{% if is_edit %}Reschedule{% else %}Schedule{% endif %} Interview — {{ app.applicant.get_full_name|default:app.applicant.email }}{% endblock %}
+{% block nav_jobs %}active{% endblock %}
+
+{% block extra_css %}
+.sched-wrap { max-width: 760px; }
+
+.sched-hero {
+  background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%);
+  border-radius: var(--radius-xl); padding: 24px 28px;
+  display: flex; align-items: center; gap: 20px;
+}
+.av { width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; font-weight: 800; color: #fff; flex-shrink: 0; }
+.sched-card { background: var(--white); border-radius: var(--radius-xl); box-shadow: var(--shadow); overflow: hidden; }
+.sc-header { padding: 18px 24px 14px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; gap: 10px; }
+.sc-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+.sc-title { font-size: .95rem; font-weight: 700; color: var(--gray-900); }
+.sc-body { padding: 22px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group label { display: block; font-size: .82rem; font-weight: 700; color: var(--gray-700); margin-bottom: 5px; }
+.form-group .hint { font-size: .75rem; color: var(--gray-400); margin-top: 3px; }
+
+/* Type selector cards */
+.type-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.type-card { border: 2px solid var(--gray-200); border-radius: var(--radius); padding: 12px; text-align: center; cursor: pointer; transition: all .15s; }
+.type-card:has(input:checked) { border-color: var(--indigo); background: var(--indigo-pale); }
+.type-card input { display: none; }
+.type-card-icon { font-size: 1.4rem; margin-bottom: 4px; }
+.type-card-label { font-size: .78rem; font-weight: 700; color: var(--gray-600); }
+.type-card:has(input:checked) .type-card-label { color: var(--indigo); }
+{% endblock %}
+
+{% block main_content %}
+<div class="sched-wrap">
+
+  <!-- HERO -->
+  <div class="sched-hero">
+    <div class="av">
+      {{ app.applicant.get_full_name|slice:":1"|upper|default:app.applicant.email|slice:":1"|upper }}
+    </div>
+    <div>
+      <div style="color:rgba(255,255,255,.7);font-size:.8rem;font-weight:600;margin-bottom:4px;">
+        {% if is_edit %}RESCHEDULING INTERVIEW{% else %}SCHEDULING INTERVIEW{% endif %}
+      </div>
+      <div style="color:#fff;font-size:1.1rem;font-weight:800;">
+        {{ app.applicant.get_full_name|default:app.applicant.email }}
+      </div>
+      <div style="color:rgba(255,255,255,.7);font-size:.85rem;margin-top:2px;">
+        {{ app.job.title }} &bull; {{ app.job.recruiter.company_name }}
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    <!-- Date / Duration -->
+    <div class="sched-card">
+      <div class="sc-header">
+        <div class="sc-icon" style="background:#ede9fe;">&#128197;</div>
+        <div class="sc-title">Date &amp; Time</div>
+      </div>
+      <div class="sc-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.scheduled_at.id_for_label }}">{{ form.scheduled_at.label }}</label>
+            {{ form.scheduled_at }}
+            {% for e in form.scheduled_at.errors %}<span style="color:var(--red);font-size:.78rem;">{{ e }}</span>{% endfor %}
+          </div>
+          <div class="form-group">
+            <label for="{{ form.duration_mins.id_for_label }}">{{ form.duration_mins.label }}</label>
+            {{ form.duration_mins }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interview type -->
+    <div class="sched-card">
+      <div class="sc-header">
+        <div class="sc-icon" style="background:var(--blue-pale);">&#128249;</div>
+        <div class="sc-title">Interview Type</div>
+      </div>
+      <div class="sc-body">
+        <div class="type-grid">
+          {% for value, label in form.interview_type.field.choices %}
+          <label class="type-card">
+            <input type="radio" name="interview_type" value="{{ value }}"
+              {% if form.interview_type.value == value %}checked{% elif not form.interview_type.value and value == 'video' %}checked{% endif %}>
+            <div class="type-card-icon">
+              {% if value == 'video' %}&#128249;{% elif value == 'phone' %}&#128222;{% else %}&#127970;{% endif %}
+            </div>
+            <div class="type-card-label">{{ label }}</div>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Location / link -->
+    <div class="sched-card">
+      <div class="sc-header">
+        <div class="sc-icon" style="background:var(--green-pale);">&#128205;</div>
+        <div class="sc-title">Location &amp; Link</div>
+      </div>
+      <div class="sc-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.location.id_for_label }}">{{ form.location.label }}</label>
+            {{ form.location }}
+            <div class="hint">Physical address or platform (e.g. "Google Meet")</div>
+          </div>
+          <div class="form-group">
+            <label for="{{ form.meeting_link.id_for_label }}">{{ form.meeting_link.label }}</label>
+            {{ form.meeting_link }}
+            <div class="hint">Paste your video call link here</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="sched-card">
+      <div class="sc-header">
+        <div class="sc-icon" style="background:var(--orange-pale);">&#128203;</div>
+        <div class="sc-title">Message to Candidate</div>
+      </div>
+      <div class="sc-body">
+        <div class="form-group">
+          <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
+          {{ form.notes }}
+          <div class="hint">Preparation tips, what to bring, interview agenda, dress code…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div style="display:flex;gap:10px;flex-wrap:wrap;padding-top:4px;">
+      <button type="submit" class="btn btn-primary" style="background:var(--indigo);">
+        &#128197; {% if is_edit %}Update Interview{% else %}Schedule Interview{% endif %}
+      </button>
+      <a href="{% url 'applications:applicants' app.job_id %}" class="btn btn-gray">Cancel</a>
+      {% if is_edit and existing.status != 'cancelled' %}
+      <form method="post" action="{% url 'interviews:cancel' existing.pk %}" style="display:inline;"
+            onsubmit="return confirm('Cancel this interview and notify the candidate?');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">&#10005; Cancel Interview</button>
+      </form>
+      {% endif %}
+    </div>
+
+  </form>
+</div>
+{% endblock %}

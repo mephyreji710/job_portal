@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}My Profile{% endblock %} — TalentBridge</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0f1724; --navy-light: #1a2638;
+      --blue: #2563eb; --blue-dark: #1d4ed8; --blue-light: #60a5fa; --blue-pale: #eff6ff;
+      --indigo: #4f46e5; --indigo-pale: #eef2ff;
+      --green: #10b981; --green-dark: #059669; --green-pale: #ecfdf5;
+      --red: #ef4444; --red-pale: #fef2f2;
+      --orange: #f59e0b; --orange-pale: #fffbeb;
+      --purple: #8b5cf6; --purple-pale: #f5f3ff;
+      --teal: #0891b2; --teal-pale: #ecfeff;
+      --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+      --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280;
+      --gray-600: #4b5563; --gray-700: #374151; --gray-800: #1f2937;
+      --gray-900: #111827; --white: #ffffff;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,.08), 0 2px 4px -1px rgba(0,0,0,.04);
+      --shadow-md: 0 6px 16px -4px rgba(0,0,0,.1);
+      --shadow-lg: 0 10px 25px -5px rgba(0,0,0,.12);
+      --radius: 10px; --radius-lg: 16px; --radius-xl: 20px;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    html, body { height: 100%; font-family: var(--font); background: #f0f4f8; color: var(--gray-800); }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ===== TOPNAV ===== */
+    .topnav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--navy); height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; box-shadow: var(--shadow-md);
+    }
+    .topnav-brand {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--white); font-size: 1.25rem; font-weight: 800;
+      text-decoration: none; letter-spacing: -0.3px;
+    }
+    .brand-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--blue), var(--indigo)); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+    .topnav-brand .accent { color: var(--blue-light); }
+    .topnav-right { display: flex; align-items: center; gap: 6px; }
+    .topnav-right a, .topnav-right button {
+      color: var(--gray-300); font-size: 0.875rem; font-weight: 500;
+      padding: 6px 14px; border-radius: 8px;
+      border: none; background: none; cursor: pointer; font-family: var(--font);
+      text-decoration: none; transition: all 0.2s;
+    }
+    .topnav-right a:hover, .topnav-right button:hover { background: var(--navy-light); color: var(--white); }
+    .topnav-right .cta { background: var(--blue); color: var(--white); }
+    .topnav-right .cta:hover { background: var(--blue-dark); }
+
+    /* ===== MESSAGES ===== */
+    .msg-bar { padding: 12px 28px 0; }
+    .alert {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 12px 16px; border-radius: 8px; margin-bottom: 10px;
+      font-size: 0.875rem; border-left: 4px solid;
+    }
+    .alert-success { background: var(--green-pale);  border-color: var(--green);  color: #065f46; }
+    .alert-error   { background: var(--red-pale);    border-color: var(--red);    color: #991b1b; }
+    .alert-warning { background: var(--orange-pale); border-color: var(--orange); color: #92400e; }
+    .alert-info    { background: var(--blue-pale);   border-color: var(--blue);   color: #1e40af; }
+
+    /* ===== MAIN LAYOUT ===== */
+    .profile-layout {
+      display: flex; gap: 24px;
+      max-width: 1200px; margin: 0 auto;
+      padding: 24px 24px 48px;
+      align-items: flex-start;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .profile-sidebar {
+      flex: 0 0 270px; position: sticky; top: 84px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    /* Profile Card */
+    .profile-card {
+      background: var(--white); border-radius: var(--radius-xl);
+      box-shadow: var(--shadow); overflow: hidden;
+    }
+    .profile-card-top {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--indigo) 100%);
+      padding: 28px 20px 20px; text-align: center; position: relative;
+    }
+    .avatar-wrap {
+      width: 80px; height: 80px; border-radius: 50%;
+      margin: 0 auto 12px;
+      border: 3px solid rgba(255,255,255,0.3);
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, var(--blue), var(--indigo));
+    }
+    .avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-initials { color: var(--white); font-size: 1.6rem; font-weight: 800; }
+    .profile-name  { color: var(--white); font-size: 1rem; font-weight: 700; margin-bottom: 2px; }
+    .profile-headline { color: rgba(255,255,255,0.75); font-size: 0.78rem; line-height: 1.4; }
+    .avail-tag {
+      display: inline-block; margin-top: 8px;
+      padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700;
+    }
+    .avail-tag.yes { background: rgba(16,185,129,0.25); color: #6ee7b7; }
+    .avail-tag.no  { background: rgba(239,68,68,0.2);   color: #fca5a5; }
+
+    /* Completeness Ring */
+    .completeness-wrap {
+      padding: 18px 20px 12px; border-bottom: 1px solid var(--gray-100);
+      display: flex; align-items: center; gap: 16px;
+    }
+    .ring-container { position: relative; flex-shrink: 0; }
+    .progress-ring { transform: rotate(-90deg); }
+    .ring-bg   { fill: none; stroke: var(--gray-200); stroke-width: 3; }
+    .ring-fill { fill: none; stroke-width: 3; stroke-linecap: round; transition: stroke-dasharray 0.5s ease; }
+    .ring-overlay {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .ring-pct   { font-size: 0.9rem; font-weight: 800; color: var(--gray-900); }
+    .ring-label { font-size: 0.55rem; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.05em; }
+    .completeness-info { flex: 1; min-width: 0; }
+    .completeness-title { font-size: 0.8rem; font-weight: 700; color: var(--gray-700); margin-bottom: 4px; }
+    .completeness-sub   { font-size: 0.72rem; color: var(--gray-400); line-height: 1.5; }
+
+    /* Profile Meta */
+    .profile-meta { padding: 12px 20px; display: flex; flex-direction: column; gap: 8px; }
+    .meta-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--gray-600); }
+    .meta-icon { width: 20px; text-align: center; font-size: 0.9rem; flex-shrink: 0; }
+    .meta-item a { color: var(--blue); font-size: 0.8rem; }
+
+    /* ===== SIDEBAR NAV ===== */
+    .sidebar-nav { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow); overflow: hidden; }
+    .nav-header { padding: 14px 18px 10px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gray-400); }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 18px; font-size: 0.875rem; font-weight: 500;
+      color: var(--gray-600); text-decoration: none;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+    }
+    .nav-item:hover { background: var(--gray-50); color: var(--gray-900); text-decoration: none; }
+    .nav-item.active { background: var(--indigo-pale); color: var(--indigo); border-left-color: var(--indigo); font-weight: 600; }
+    .nav-icon { font-size: 1rem; width: 22px; text-align: center; }
+    .nav-count { margin-left: auto; background: var(--gray-100); color: var(--gray-500); font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+    .nav-item.active .nav-count { background: rgba(79,70,229,0.12); color: var(--indigo); }
+
+    /* ===== MAIN CONTENT ===== */
+    .profile-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+
+    /* Section Card */
+    .section-card {
+      background: var(--white); border-radius: var(--radius-xl);
+      box-shadow: var(--shadow); overflow: hidden;
+    }
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .section-title-wrap { display: flex; align-items: center; gap: 10px; }
+    .section-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+    .section-title { font-size: 1rem; font-weight: 700; color: var(--gray-900); }
+    .section-sub   { font-size: 0.78rem; color: var(--gray-400); margin-top: 1px; }
+    .section-body  { padding: 20px 24px; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 18px; border-radius: 8px;
+      font-size: 0.875rem; font-weight: 600;
+      border: 1.5px solid transparent; cursor: pointer;
+      font-family: var(--font); text-decoration: none;
+      transition: all 0.18s; line-height: 1;
+    }
+    .btn:hover { text-decoration: none; }
+    .btn-primary { background: var(--indigo); color: var(--white); border-color: var(--indigo); }
+    .btn-primary:hover { background: #4338ca; border-color: #4338ca; }
+    .btn-outline { background: transparent; color: var(--indigo); border-color: var(--indigo); }
+    .btn-outline:hover { background: var(--indigo-pale); }
+    .btn-gray    { background: var(--gray-100); color: var(--gray-700); border-color: var(--gray-200); }
+    .btn-gray:hover { background: var(--gray-200); }
+    .btn-danger  { background: transparent; color: var(--red); border-color: #fca5a5; }
+    .btn-danger:hover { background: var(--red-pale); }
+    .btn-sm { padding: 5px 12px; font-size: 0.8rem; }
+    .btn-xs { padding: 3px 9px; font-size: 0.75rem; border-radius: 6px; }
+
+    /* Form styles (reused across pages) */
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .form-group { margin-bottom: 18px; }
+    .form-label { display: block; margin-bottom: 5px; font-size: 0.82rem; font-weight: 600; color: var(--gray-700); }
+    .form-label .opt { font-weight: 400; color: var(--gray-400); font-size: 0.75rem; margin-left: 4px; }
+    .form-control {
+      width: 100%; padding: 9px 12px; font-size: 0.9rem; font-family: var(--font);
+      background: var(--white); border: 1.5px solid var(--gray-200);
+      border-radius: 8px; color: var(--gray-800); outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-control:focus { border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+    .form-control.error { border-color: var(--red); }
+    textarea.form-control { resize: vertical; min-height: 90px; }
+    .field-error { color: var(--red); font-size: 0.78rem; margin-top: 4px; display: block; }
+    .field-hint  { color: var(--gray-400); font-size: 0.75rem; margin-top: 4px; }
+    .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 0.875rem; color: var(--gray-600); cursor: pointer; }
+    .checkbox-row input { accent-color: var(--indigo); width: 16px; height: 16px; }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 40px 24px; }
+    .empty-icon { font-size: 2.8rem; margin-bottom: 12px; }
+    .empty-title { font-size: 1rem; font-weight: 700; color: var(--gray-700); margin-bottom: 6px; }
+    .empty-desc  { font-size: 0.875rem; color: var(--gray-400); margin-bottom: 20px; }
+
+    /* Utility */
+    .flex { display: flex; }
+    .gap-2 { gap: 8px; }
+    .gap-3 { gap: 12px; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .mt-3 { margin-top: 12px; }
+    .mt-4 { margin-top: 16px; }
+    .text-sm { font-size: 0.875rem; }
+    .text-xs { font-size: 0.75rem; }
+    .text-gray { color: var(--gray-500); }
+    .font-bold { font-weight: 700; }
+
+    {% block extra_css %}{% endblock %}
+  </style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <a class="topnav-brand" href="/accounts/dashboard/">
+    <div class="brand-icon">&#128188;</div>
+    Talent<span class="accent">Bridge</span>
+  </a>
+  <div class="topnav-right">
+    <a href="/accounts/dashboard/job-seeker/">Dashboard</a>
+    {# Notification Bell #}
+    <a href="{% url 'notifications:list' %}" style="position:relative;display:inline-flex;align-items:center;padding:6px 10px;border-radius:8px;color:rgba(255,255,255,.8);text-decoration:none;font-size:1.1rem;" title="Notifications">
+      &#128276;
+      {% if unread_notif_count %}
+      <span style="position:absolute;top:2px;right:2px;background:#ef4444;color:#fff;font-size:.6rem;font-weight:800;min-width:16px;height:16px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 3px;">{{ unread_notif_count }}</span>
+      {% endif %}
+    </a>
+    <a href="{% url 'jobseeker:profile' %}" class="cta">My Profile</a>
+    <form method="post" action="/accounts/logout/" style="display:inline">
+      {% csrf_token %}
+      <button type="submit">Log Out</button>
+    </form>
+  </div>
+</nav>
+
+{% if messages %}
+<div class="msg-bar">
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }}">{{ message|safe }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="profile-layout">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="profile-sidebar">
+
+    <!-- Profile Card -->
+    <div class="profile-card">
+      <div class="profile-card-top">
+        <div class="avatar-wrap">
+          {% if profile.profile_picture %}
+            <img src="{{ profile.profile_picture.url }}" alt="Profile picture" />
+          {% else %}
+            <span class="avatar-initials">
+              {{ request.user.first_name|slice:":1"|upper }}{{ request.user.last_name|slice:":1"|upper }}
+            </span>
+          {% endif %}
+        </div>
+        <div class="profile-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+        <div class="profile-headline">{{ profile.headline|default:"No headline yet" }}</div>
+        {% if profile.is_available %}
+          <span class="avail-tag yes">&#9679; Open to work</span>
+        {% else %}
+          <span class="avail-tag no">&#9679; Not available</span>
+        {% endif %}
+      </div>
+
+      <!-- Completeness Ring -->
+      {% with pct=profile.get_completeness %}
+      <div class="completeness-wrap">
+        <div class="ring-container">
+          <svg class="progress-ring" width="60" height="60" viewBox="0 0 60 60">
+            <circle class="ring-bg" cx="30" cy="30" r="24" />
+            <circle class="ring-fill" cx="30" cy="30" r="24"
+              stroke="{% if pct < 40 %}#ef4444{% elif pct < 70 %}#f59e0b{% else %}#10b981{% endif %}"
+              stroke-dasharray="{{ pct|floatformat:0 }} {{ 150|add:0 }}"
+              style="stroke-dasharray: calc({{ pct }} * 150.8 / 100) 150.8" />
+          </svg>
+          <div class="ring-overlay">
+            <span class="ring-pct">{{ pct }}%</span>
+            <span class="ring-label">done</span>
+          </div>
+        </div>
+        <div class="completeness-info">
+          <div class="completeness-title">Profile Strength</div>
+          {% if pct < 40 %}
+            <div class="completeness-sub" style="color:#ef4444;">Weak — add more info</div>
+          {% elif pct < 70 %}
+            <div class="completeness-sub" style="color:#f59e0b;">Moderate — keep going!</div>
+          {% elif pct < 100 %}
+            <div class="completeness-sub" style="color:#10b981;">Strong — almost there!</div>
+          {% else %}
+            <div class="completeness-sub" style="color:#10b981;">Complete! &#127881;</div>
+          {% endif %}
+        </div>
+      </div>
+      {% endwith %}
+
+      <!-- Meta Info -->
+      <div class="profile-meta">
+        {% if profile.location %}
+        <div class="meta-item"><span class="meta-icon">&#128205;</span>{{ profile.location }}</div>
+        {% endif %}
+        <div class="meta-item"><span class="meta-icon">&#128231;</span>{{ request.user.email }}</div>
+        {% if request.user.phone %}
+        <div class="meta-item"><span class="meta-icon">&#128222;</span>{{ request.user.phone }}</div>
+        {% endif %}
+        {% if profile.linkedin_url %}
+        <div class="meta-item"><span class="meta-icon">&#128279;</span><a href="{{ profile.linkedin_url }}" target="_blank">LinkedIn</a></div>
+        {% endif %}
+        {% if profile.github_url %}
+        <div class="meta-item"><span class="meta-icon">&#128025;</span><a href="{{ profile.github_url }}" target="_blank">GitHub</a></div>
+        {% endif %}
+        {% if profile.website %}
+        <div class="meta-item"><span class="meta-icon">&#127760;</span><a href="{{ profile.website }}" target="_blank">Portfolio</a></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+      <div class="nav-header">Profile Sections</div>
+      <a href="{% url 'jobseeker:profile' %}"
+         class="nav-item {% block nav_profile %}{% endblock %}">
+        <span class="nav-icon">&#128100;</span> Overview
+      </a>
+      <a href="{% url 'jobseeker:personal_edit' %}"
+         class="nav-item {% block nav_personal %}{% endblock %}">
+        <span class="nav-icon">&#9998;</span> Personal Details
+      </a>
+      <a href="{% url 'jobseeker:skills' %}"
+         class="nav-item {% block nav_skills %}{% endblock %}">
+        <span class="nav-icon">&#9889;</span> Skills
+        <span class="nav-count">{{ profile.skills.count }}</span>
+      </a>
+      <a href="{% url 'jobseeker:education' %}"
+         class="nav-item {% block nav_education %}{% endblock %}">
+        <span class="nav-icon">&#127979;</span> Education
+        <span class="nav-count">{{ profile.education.count }}</span>
+      </a>
+      <a href="{% url 'jobseeker:experience' %}"
+         class="nav-item {% block nav_experience %}{% endblock %}">
+        <span class="nav-icon">&#128188;</span> Experience
+        <span class="nav-count">{{ profile.experience.count }}</span>
+      </a>
+      <a href="{% url 'jobseeker:certifications' %}"
+         class="nav-item {% block nav_certifications %}{% endblock %}">
+        <span class="nav-icon">&#127941;</span> Certifications
+        <span class="nav-count">{{ profile.certifications.count }}</span>
+      </a>
+      <a href="{% url 'resume:list' %}"
+         class="nav-item {% block nav_resume %}{% endblock %}">
+        <span class="nav-icon">&#128196;</span> Resumes
+        <span class="nav-count">{{ request.user.resumes.count }}</span>
+      </a>
+    </nav>
+
+    <!-- Missing Items -->
+    {% with missing=profile.get_missing_items %}
+    {% if missing %}
+    <div style="background:var(--orange-pale);border:1px solid #fde68a;border-radius:var(--radius-lg);padding:14px 16px;">
+      <div style="font-size:0.75rem;font-weight:700;color:#92400e;margin-bottom:8px;">&#9888; Complete your profile</div>
+      {% for item in missing %}
+      <div style="font-size:0.75rem;color:#92400e;padding:2px 0;padding-left:12px;position:relative;">
+        <span style="position:absolute;left:0;">&#8226;</span>{{ item }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="profile-main">
+    {% block main_content %}{% endblock %}
+  </main>
+
+</div>
+
+</body>
+</html>

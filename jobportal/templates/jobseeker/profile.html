@@ -1,0 +1,297 @@
+{% extends 'jobseeker/base_profile.html' %}
+{% block title %}My Profile{% endblock %}
+{% block nav_profile %}active{% endblock %}
+
+{% block extra_css %}
+.overview-banner {
+  background: linear-gradient(135deg, var(--navy) 0%, #1e3a5f 100%);
+  border-radius: var(--radius-xl); padding: 28px 32px;
+  display: flex; justify-content: space-between; align-items: center;
+  position: relative; overflow: hidden;
+}
+.overview-banner::before {
+  content: ''; position: absolute; top: -50px; right: -40px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(79,70,229,0.3) 0%, transparent 70%);
+}
+.banner-text h2 { color: var(--white); font-size: 1.4rem; font-weight: 800; }
+.banner-text p  { color: rgba(255,255,255,0.65); margin-top: 6px; font-size: 0.9rem; }
+.banner-actions { display: flex; gap: 10px; flex-wrap: wrap; z-index: 1; }
+
+/* Skills preview */
+.skill-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+  margin: 4px;
+}
+.skill-beginner     { background: #e0f2fe; color: #075985; }
+.skill-intermediate { background: var(--indigo-pale); color: var(--indigo); }
+.skill-advanced     { background: var(--green-pale); color: var(--green-dark); }
+.skill-expert       { background: #fdf4ff; color: #7e22ce; }
+.skill-bar-wrap { display: flex; align-items: center; gap: 10px; }
+.skill-bar { flex: 1; height: 6px; background: var(--gray-100); border-radius: 999px; overflow: hidden; }
+.skill-bar-fill { height: 100%; border-radius: 999px; }
+
+/* Timeline */
+.timeline { display: flex; flex-direction: column; gap: 0; }
+.timeline-item { display: flex; gap: 16px; padding-bottom: 24px; position: relative; }
+.timeline-item:not(:last-child)::before {
+  content: ''; position: absolute; left: 17px; top: 36px; bottom: 0;
+  width: 2px; background: var(--gray-200);
+}
+.timeline-dot {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 1rem;
+  border: 2px solid var(--white); box-shadow: 0 0 0 2px var(--gray-200);
+}
+.timeline-content { flex: 1; }
+.timeline-title   { font-size: 0.95rem; font-weight: 700; color: var(--gray-900); }
+.timeline-sub     { font-size: 0.82rem; color: var(--gray-500); margin-top: 2px; }
+.timeline-date    { font-size: 0.78rem; color: var(--gray-400); margin-top: 3px; }
+.timeline-desc    { font-size: 0.85rem; color: var(--gray-600); margin-top: 8px; line-height: 1.6; }
+
+/* Cert card */
+.cert-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cert-card {
+  border: 1.5px solid var(--gray-200); border-radius: var(--radius);
+  padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start;
+}
+.cert-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--orange-pale); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+.cert-name { font-size: 0.875rem; font-weight: 700; color: var(--gray-900); }
+.cert-org  { font-size: 0.78rem; color: var(--gray-500); margin-top: 2px; }
+.cert-date { font-size: 0.75rem; color: var(--gray-400); margin-top: 4px; }
+.expired-tag { background: var(--red-pale); color: var(--red); font-size: 0.7rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; }
+
+.about-text { font-size: 0.9rem; color: var(--gray-700); line-height: 1.75; }
+.info-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.info-chip { display: flex; align-items: center; gap: 5px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 8px; padding: 6px 12px; font-size: 0.8rem; color: var(--gray-600); }
+{% endblock %}
+
+{% block main_content %}
+
+<!-- BANNER -->
+<div class="overview-banner">
+  <div class="banner-text">
+    <h2>Hi, {{ request.user.first_name|default:request.user.username }}! &#128075;</h2>
+    <p>Your profile is {{ profile.get_completeness }}% complete.
+      {% if profile.get_completeness < 100 %}Keep adding sections to stand out!{% else %}Great job — you're fully set up!{% endif %}
+    </p>
+  </div>
+  <div class="banner-actions">
+    <a href="{% url 'jobseeker:personal_edit' %}" class="btn btn-outline" style="border-color:rgba(255,255,255,0.4);color:#fff;">&#9998; Edit Profile</a>
+    <a href="{% url 'jobseeker:skills' %}"        class="btn btn-primary">Add Skills</a>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--blue-pale);">&#128100;</div>
+      <div>
+        <div class="section-title">About</div>
+        <div class="section-sub">Personal details & bio</div>
+      </div>
+    </div>
+    <a href="{% url 'jobseeker:personal_edit' %}" class="btn btn-gray btn-sm">&#9998; Edit</a>
+  </div>
+  <div class="section-body">
+    {% if profile.bio %}
+      <p class="about-text">{{ profile.bio }}</p>
+    {% else %}
+      <p style="color:var(--gray-400);font-style:italic;font-size:0.875rem;">No bio added yet. <a href="{% url 'jobseeker:personal_edit' %}">Add one</a></p>
+    {% endif %}
+    <div class="info-chips">
+      {% if profile.location %}<div class="info-chip">&#128205; {{ profile.location }}</div>{% endif %}
+      {% if profile.get_gender_display and profile.gender %}<div class="info-chip">&#128100; {{ profile.get_gender_display }}</div>{% endif %}
+      {% if profile.nationality %}<div class="info-chip">&#127760; {{ profile.nationality }}</div>{% endif %}
+      {% if profile.get_preferred_job_type_display and profile.preferred_job_type %}<div class="info-chip">&#128188; {{ profile.get_preferred_job_type_display }}</div>{% endif %}
+      {% if profile.expected_salary %}<div class="info-chip">&#128181; ${{ profile.expected_salary }}/mo</div>{% endif %}
+      {% if profile.date_of_birth %}<div class="info-chip">&#127874; {{ profile.date_of_birth|date:"M d, Y" }}</div>{% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- SKILLS -->
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:#fef9c3;">&#9889;</div>
+      <div>
+        <div class="section-title">Skills</div>
+        <div class="section-sub">{{ profile.skills.count }} skill{{ profile.skills.count|pluralize }} listed</div>
+      </div>
+    </div>
+    <a href="{% url 'jobseeker:skills' %}" class="btn btn-gray btn-sm">&#43; Manage</a>
+  </div>
+  <div class="section-body">
+    {% if profile.skills.exists %}
+      {% for skill in profile.skills.all %}
+      <div style="margin-bottom:12px;">
+        <div class="flex items-center justify-between" style="margin-bottom:5px;">
+          <div class="flex items-center gap-2">
+            <span class="skill-pill skill-{{ skill.proficiency }}">{{ skill.name }}</span>
+            <span style="font-size:0.75rem;color:var(--gray-400);">{{ skill.get_proficiency_display }}
+              {% if skill.years_of_experience %}&bull; {{ skill.years_of_experience }}yr{% endif %}
+            </span>
+          </div>
+          <span style="font-size:0.75rem;color:var(--gray-400);">{{ skill.get_pct }}%</span>
+        </div>
+        <div class="skill-bar">
+          <div class="skill-bar-fill" style="width:{{ skill.get_pct }}%;background:
+            {% if skill.proficiency == 'beginner' %}#0ea5e9
+            {% elif skill.proficiency == 'intermediate' %}{{ '' }}var(--indigo)
+            {% elif skill.proficiency == 'advanced' %}var(--green)
+            {% else %}#8b5cf6{% endif %};"></div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">&#9889;</div>
+        <div class="empty-title">No skills added yet</div>
+        <div class="empty-desc">Add your technical and soft skills to improve your profile visibility</div>
+        <a href="{% url 'jobseeker:skills' %}" class="btn btn-primary">Add Skills</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- EDUCATION -->
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:#fce7f3;">&#127979;</div>
+      <div>
+        <div class="section-title">Education</div>
+        <div class="section-sub">{{ profile.education.count }} entr{{ profile.education.count|pluralize:"y,ies" }}</div>
+      </div>
+    </div>
+    <a href="{% url 'jobseeker:education_add' %}" class="btn btn-gray btn-sm">&#43; Add</a>
+  </div>
+  <div class="section-body">
+    {% if profile.education.exists %}
+    <div class="timeline">
+      {% for edu in profile.education.all %}
+      <div class="timeline-item">
+        <div class="timeline-dot" style="background:#fce7f3;">&#127979;</div>
+        <div class="timeline-content">
+          <div class="timeline-title">{{ edu.get_degree_display }} in {{ edu.field_of_study }}</div>
+          <div class="timeline-sub">{{ edu.institution }}</div>
+          <div class="timeline-date">
+            {{ edu.start_year }} — {% if edu.is_current %}Present{% else %}{{ edu.end_year|default:"?" }}{% endif %}
+            {% if edu.grade %}&bull; {{ edu.grade }}{% endif %}
+          </div>
+          {% if edu.description %}<div class="timeline-desc">{{ edu.description }}</div>{% endif %}
+        </div>
+        <a href="{% url 'jobseeker:education_edit' edu.pk %}" class="btn btn-gray btn-xs" style="align-self:flex-start;">&#9998;</a>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">&#127979;</div>
+      <div class="empty-title">No education entries</div>
+      <div class="empty-desc">Add your educational background</div>
+      <a href="{% url 'jobseeker:education_add' %}" class="btn btn-primary">Add Education</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- EXPERIENCE -->
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--green-pale);">&#128188;</div>
+      <div>
+        <div class="section-title">Work Experience</div>
+        <div class="section-sub">{{ profile.experience.count }} entr{{ profile.experience.count|pluralize:"y,ies" }}</div>
+      </div>
+    </div>
+    <a href="{% url 'jobseeker:experience_add' %}" class="btn btn-gray btn-sm">&#43; Add</a>
+  </div>
+  <div class="section-body">
+    {% if profile.experience.exists %}
+    <div class="timeline">
+      {% for exp in profile.experience.all %}
+      <div class="timeline-item">
+        <div class="timeline-dot" style="background:var(--green-pale);">&#127970;</div>
+        <div class="timeline-content">
+          <div class="timeline-title">{{ exp.job_title }}</div>
+          <div class="timeline-sub">
+            {{ exp.company }}
+            {% if exp.location %}&bull; {{ exp.location }}{% endif %}
+            &bull; <span style="color:var(--indigo);">{{ exp.get_employment_type_display }}</span>
+          </div>
+          <div class="timeline-date">
+            {{ exp.start_date|date:"M Y" }} — {% if exp.is_current %}<span style="color:var(--green);font-weight:600;">Present</span>{% else %}{{ exp.end_date|date:"M Y"|default:"?" }}{% endif %}
+            &nbsp;&#183;&nbsp; {{ exp.get_duration }}
+          </div>
+          {% if exp.description %}<div class="timeline-desc">{{ exp.description|linebreaksbr }}</div>{% endif %}
+        </div>
+        <a href="{% url 'jobseeker:experience_edit' exp.pk %}" class="btn btn-gray btn-xs" style="align-self:flex-start;">&#9998;</a>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">&#128188;</div>
+      <div class="empty-title">No experience entries</div>
+      <div class="empty-desc">Add your work experience to show recruiters what you've done</div>
+      <a href="{% url 'jobseeker:experience_add' %}" class="btn btn-primary">Add Experience</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- CERTIFICATIONS -->
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--orange-pale);">&#127941;</div>
+      <div>
+        <div class="section-title">Certifications</div>
+        <div class="section-sub">{{ profile.certifications.count }} certification{{ profile.certifications.count|pluralize }}</div>
+      </div>
+    </div>
+    <a href="{% url 'jobseeker:certification_add' %}" class="btn btn-gray btn-sm">&#43; Add</a>
+  </div>
+  <div class="section-body">
+    {% if profile.certifications.exists %}
+    <div class="cert-cards">
+      {% for cert in profile.certifications.all %}
+      <div class="cert-card">
+        <div class="cert-icon">&#127941;</div>
+        <div style="flex:1;min-width:0;">
+          <div class="cert-name">{{ cert.name }}</div>
+          <div class="cert-org">{{ cert.issuing_organization }}</div>
+          <div class="cert-date">
+            Issued: {{ cert.issue_date|date:"M Y" }}
+            {% if cert.does_not_expire %}
+              &bull; <span style="color:var(--green);font-weight:600;">No expiry</span>
+            {% elif cert.expiry_date %}
+              &bull; Expires: {{ cert.expiry_date|date:"M Y" }}
+              {% if cert.is_expired %}<span class="expired-tag">Expired</span>{% endif %}
+            {% endif %}
+          </div>
+          {% if cert.credential_url %}
+          <a href="{{ cert.credential_url }}" target="_blank" style="font-size:0.75rem;margin-top:4px;display:inline-block;">&#128279; View credential</a>
+          {% endif %}
+        </div>
+        <a href="{% url 'jobseeker:certification_edit' cert.pk %}" class="btn btn-gray btn-xs" style="align-self:flex-start;">&#9998;</a>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">&#127941;</div>
+      <div class="empty-title">No certifications yet</div>
+      <div class="empty-desc">Add your professional certifications and licenses</div>
+      <a href="{% url 'jobseeker:certification_add' %}" class="btn btn-primary">Add Certification</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

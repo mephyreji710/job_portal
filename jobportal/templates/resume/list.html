@@ -1,0 +1,148 @@
+{% extends 'jobseeker/base_profile.html' %}
+{% block title %}My Resumes{% endblock %}
+{% block nav_resume %}active{% endblock %}
+
+{% block extra_css %}
+.resume-card {
+  border: 1.5px solid var(--gray-200); border-radius: var(--radius-lg);
+  padding: 18px 20px; display: flex; gap: 16px; align-items: flex-start;
+  transition: border-color 0.2s, box-shadow 0.2s; position: relative;
+}
+.resume-card:hover { border-color: var(--indigo); box-shadow: var(--shadow-md); }
+.resume-card.primary { border-color: var(--indigo); background: var(--indigo-pale); }
+.resume-file-icon {
+  width: 48px; height: 56px; border-radius: 8px; flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-weight: 800; letter-spacing: 0.03em;
+  padding-top: 8px; position: relative;
+}
+.icon-pdf  { background: #fee2e2; color: #dc2626; }
+.icon-docx { background: #dbeafe; color: #1d4ed8; }
+.resume-info { flex: 1; min-width: 0; }
+.resume-name { font-size: 0.95rem; font-weight: 700; color: var(--gray-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.resume-meta { font-size: 0.78rem; color: var(--gray-400); margin-top: 3px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.resume-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+
+.status-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700;
+}
+.status-parsed  { background: var(--green-pale); color: var(--green-dark); }
+.status-pending { background: var(--orange-pale); color: #b45309; }
+.status-failed  { background: var(--red-pale); color: #b91c1c; }
+.primary-badge {
+  background: var(--indigo); color: #fff;
+  padding: 2px 10px; border-radius: 999px; font-size: 0.7rem; font-weight: 700;
+}
+
+.stats-mini { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+.stat-chip {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.75rem; color: var(--gray-500); padding: 2px 0;
+}
+{% endblock %}
+
+{% block main_content %}
+
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--indigo-pale);">&#128196;</div>
+      <div>
+        <div class="section-title">My Resumes</div>
+        <div class="section-sub">{{ resumes|length }} resume{{ resumes|length|pluralize }} uploaded</div>
+      </div>
+    </div>
+    <a href="{% url 'resume:upload' %}" class="btn btn-primary btn-sm">&#43; Upload New</a>
+  </div>
+  <div class="section-body">
+
+    {% if resumes %}
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      {% for resume in resumes %}
+      <div class="resume-card {% if resume.is_primary %}primary{% endif %}">
+
+        <!-- File Icon -->
+        <div class="resume-file-icon {% if resume.file_type == 'pdf' %}icon-pdf{% else %}icon-docx{% endif %}">
+          &#128196;<br>{{ resume.file_type|upper }}
+        </div>
+
+        <!-- Info -->
+        <div class="resume-info">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span class="resume-name">{{ resume.original_filename }}</span>
+            {% if resume.is_primary %}<span class="primary-badge">&#9733; Primary</span>{% endif %}
+            <span class="status-pill status-{{ resume.status }}">
+              {% if resume.status == 'parsed' %}&#10003; Parsed
+              {% elif resume.status == 'pending' %}&#8987; Pending
+              {% else %}&#10007; Failed{% endif %}
+            </span>
+          </div>
+
+          <div class="resume-meta">
+            <span>&#128197; {{ resume.uploaded_at|date:"M d, Y" }}</span>
+            <span>&#183;</span>
+            <span>&#128190; {{ resume.get_file_size_display }}</span>
+            {% if resume.raw_text %}
+            <span>&#183;</span>
+            <span>&#128221; {{ resume.word_count }} words</span>
+            {% endif %}
+          </div>
+
+          {% if resume.status == 'parsed' and resume.parsed %}
+          <div class="stats-mini">
+            <span class="stat-chip">&#9889; {{ resume.parsed.tech_skill_count }} tech skills</span>
+            <span class="stat-chip">&#128100; {{ resume.parsed.soft_skill_count }} soft skills</span>
+            {% if resume.parsed.estimated_experience_years %}
+            <span class="stat-chip">&#128188; {{ resume.parsed.estimated_experience_years }}yr exp</span>
+            {% endif %}
+            {% if resume.parsed.education_level %}
+            <span class="stat-chip">&#127979; {{ resume.parsed.get_education_level_display }}</span>
+            {% endif %}
+          </div>
+          {% endif %}
+
+          {% if resume.status == 'failed' and resume.parse_error %}
+          <div style="margin-top:6px;font-size:0.78rem;color:var(--red);">&#9888; {{ resume.parse_error|truncatechars:120 }}</div>
+          {% endif %}
+
+          <div class="resume-actions">
+            <a href="{% url 'resume:detail' resume.pk %}" class="btn btn-outline btn-sm">&#128269; View Details</a>
+
+            {% if not resume.is_primary %}
+            <form method="post" action="{% url 'resume:set_primary' resume.pk %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-gray btn-sm">&#9733; Set Primary</button>
+            </form>
+            {% endif %}
+
+            <form method="post" action="{% url 'resume:reparse' resume.pk %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-gray btn-sm">&#8635; Re-parse</button>
+            </form>
+
+            <form method="post" action="{% url 'resume:delete' resume.pk %}" style="display:inline;"
+                  onsubmit="return confirm('Delete {{ resume.original_filename|escapejs }}? This cannot be undone.')">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger btn-sm">&#128465; Delete</button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">&#128196;</div>
+      <div class="empty-title">No resumes uploaded yet</div>
+      <div class="empty-desc">Upload your resume to auto-extract skills, keywords, and experience data.</div>
+      <a href="{% url 'resume:upload' %}" class="btn btn-primary">&#128640; Upload Resume</a>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}

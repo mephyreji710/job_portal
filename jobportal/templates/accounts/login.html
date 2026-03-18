@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — TalentBridge</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0f1724; --navy-mid: #162032; --blue: #2563eb; --blue-dark: #1d4ed8;
+      --blue-light: #60a5fa; --blue-pale: #eff6ff; --indigo: #4f46e5;
+      --green: #10b981; --green-pale: #ecfdf5;
+      --red: #ef4444; --red-pale: #fef2f2;
+      --orange: #f59e0b; --orange-pale: #fffbeb;
+      --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+      --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280;
+      --gray-600: #4b5563; --gray-700: #374151; --gray-800: #1f2937;
+      --gray-900: #111827; --white: #ffffff;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    html, body { height: 100%; font-family: var(--font); }
+
+    /* ===== SPLIT LAYOUT ===== */
+    .auth-layout { display: flex; min-height: 100vh; }
+
+    /* LEFT PANEL */
+    .auth-brand {
+      flex: 1; min-width: 420px;
+      background: linear-gradient(160deg, var(--navy) 0%, #102040 50%, #0a1628 100%);
+      display: flex; flex-direction: column; justify-content: space-between;
+      padding: 48px;
+      position: relative; overflow: hidden;
+    }
+    .auth-brand::before {
+      content: '';
+      position: absolute; top: -100px; right: -80px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(37,99,235,0.25) 0%, transparent 70%);
+    }
+    .auth-brand::after {
+      content: '';
+      position: absolute; bottom: -60px; left: -60px;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(79,70,229,0.2) 0%, transparent 70%);
+    }
+    .brand-top { position: relative; z-index: 1; }
+    .brand-logo {
+      display: flex; align-items: center; gap: 12px;
+      color: var(--white); font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px;
+    }
+    .brand-logo-icon {
+      width: 46px; height: 46px;
+      background: linear-gradient(135deg, var(--blue), var(--indigo));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+    }
+    .brand-logo .accent { color: var(--blue-light); }
+    .brand-middle { position: relative; z-index: 1; }
+    .brand-tagline {
+      font-size: 2.1rem; font-weight: 800;
+      color: var(--white); line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .brand-tagline span { color: var(--blue-light); }
+    .brand-desc { color: rgba(255,255,255,0.65); font-size: 1rem; line-height: 1.7; }
+    .brand-features { margin-top: 36px; display: flex; flex-direction: column; gap: 16px; }
+    .brand-feature {
+      display: flex; align-items: center; gap: 14px;
+      color: rgba(255,255,255,0.8); font-size: 0.95rem;
+    }
+    .feature-icon {
+      width: 40px; height: 40px; flex-shrink: 0;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+    }
+    .brand-bottom { position: relative; z-index: 1; }
+    .brand-roles { display: flex; gap: 12px; flex-wrap: wrap; }
+    .brand-role-tag {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 999px;
+      padding: 6px 16px;
+      color: rgba(255,255,255,0.75);
+      font-size: 0.82rem; font-weight: 500;
+    }
+
+    /* RIGHT PANEL */
+    .auth-form-panel {
+      flex: 0 0 480px;
+      display: flex; flex-direction: column; justify-content: center;
+      background: var(--gray-50); padding: 48px 52px;
+      overflow-y: auto;
+    }
+    .auth-form-inner { max-width: 380px; width: 100%; }
+    .auth-heading { margin-bottom: 8px; font-size: 1.75rem; font-weight: 800; color: var(--gray-900); }
+    .auth-subheading { color: var(--gray-500); font-size: 0.95rem; margin-bottom: 32px; }
+
+    /* FORM ELEMENTS */
+    .form-group { margin-bottom: 20px; }
+    .form-label {
+      display: block; margin-bottom: 6px;
+      font-size: 0.875rem; font-weight: 600; color: var(--gray-700);
+    }
+    .form-control {
+      width: 100%; padding: 11px 14px;
+      font-size: 0.95rem; font-family: var(--font);
+      background: var(--white);
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px;
+      color: var(--gray-800);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .form-control:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+    }
+    .form-control.error { border-color: var(--red); }
+    .field-error { color: var(--red); font-size: 0.8rem; margin-top: 5px; }
+
+    /* REMEMBER + FORGOT */
+    .form-extras {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .checkbox-label {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.875rem; color: var(--gray-600); cursor: pointer;
+    }
+    .checkbox-label input[type="checkbox"] {
+      width: 16px; height: 16px; accent-color: var(--blue); cursor: pointer;
+    }
+    .forgot-link { font-size: 0.875rem; color: var(--blue); font-weight: 500; }
+    .forgot-link:hover { color: var(--blue-dark); }
+
+    /* SUBMIT BUTTON */
+    .btn-submit {
+      width: 100%; padding: 13px;
+      background: var(--blue); color: var(--white);
+      border: none; border-radius: 8px;
+      font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: background 0.2s, transform 0.1s;
+      font-family: var(--font); letter-spacing: 0.3px;
+    }
+    .btn-submit:hover { background: var(--blue-dark); }
+    .btn-submit:active { transform: scale(0.99); }
+
+    /* DIVIDER */
+    .auth-divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 24px 0; color: var(--gray-400); font-size: 0.85rem;
+    }
+    .auth-divider::before, .auth-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--gray-200);
+    }
+
+    /* REGISTER LINK */
+    .auth-register { text-align: center; font-size: 0.9rem; color: var(--gray-600); }
+    .auth-register a { color: var(--blue); font-weight: 600; }
+
+    /* MESSAGES */
+    .alert {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 12px 16px; border-radius: 8px;
+      margin-bottom: 20px; font-size: 0.875rem; border-left: 4px solid;
+    }
+    .alert-error   { background: var(--red-pale);   border-color: var(--red);   color: #991b1b; }
+    .alert-success { background: var(--green-pale);  border-color: var(--green); color: #065f46; }
+    .alert-warning { background: var(--orange-pale); border-color: var(--orange); color: #92400e; }
+    .alert-info    { background: var(--blue-pale);  border-color: var(--blue);  color: #1e40af; }
+  </style>
+</head>
+<body>
+<div class="auth-layout">
+
+  <!-- LEFT: BRAND PANEL -->
+  <div class="auth-brand">
+    <div class="brand-top">
+      <div class="brand-logo">
+        <div class="brand-logo-icon">&#128188;</div>
+        Talent<span class="accent">Bridge</span>
+      </div>
+    </div>
+
+    <div class="brand-middle">
+      <h2 class="brand-tagline">
+        Find Your<br>
+        <span>Dream Career</span><br>
+        Today
+      </h2>
+      <p class="brand-desc">
+        Connecting talented professionals with top companies through intelligent resume screening and smart matching.
+      </p>
+      <div class="brand-features">
+        <div class="brand-feature">
+          <div class="feature-icon">&#129302;</div>
+          <span>AI-powered resume screening & ranking</span>
+        </div>
+        <div class="brand-feature">
+          <div class="feature-icon">&#127775;</div>
+          <span>Smart job matching for your skills</span>
+        </div>
+        <div class="brand-feature">
+          <div class="feature-icon">&#128274;</div>
+          <span>Secure, verified profiles</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="brand-bottom">
+      <p style="color:rgba(255,255,255,0.5); font-size:0.8rem; margin-bottom:12px;">Who uses TalentBridge?</p>
+      <div class="brand-roles">
+        <span class="brand-role-tag">&#128100; Job Seekers</span>
+        <span class="brand-role-tag">&#127970; Recruiters</span>
+        <span class="brand-role-tag">&#128736; Admins</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: FORM PANEL -->
+  <div class="auth-form-panel">
+    <div class="auth-form-inner">
+
+      <h1 class="auth-heading">Welcome back</h1>
+      <p class="auth-subheading">Sign in to your account to continue</p>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }}">{{ message|safe }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post" action="{% url 'accounts:login' %}" novalidate>
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label class="form-label" for="id_email">Email Address</label>
+          <input
+            type="email"
+            id="id_email"
+            name="email"
+            class="form-control {% if form.email.errors %}error{% endif %}"
+            placeholder="Enter your email"
+            value="{{ form.email.value|default:'' }}"
+            autocomplete="email"
+            required
+          />
+          {% for error in form.email.errors %}
+            <span class="field-error">{{ error }}</span>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="id_password">Password</label>
+          <input
+            type="password"
+            id="id_password"
+            name="password"
+            class="form-control {% if form.password.errors %}error{% endif %}"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+            required
+          />
+          {% for error in form.password.errors %}
+            <span class="field-error">{{ error }}</span>
+          {% endfor %}
+        </div>
+
+        <div class="form-extras">
+          <label class="checkbox-label">
+            <input type="checkbox" name="remember_me" id="id_remember_me"
+              {% if form.remember_me.value %}checked{% endif %} />
+            Remember me
+          </label>
+          <a href="{% url 'accounts:password_reset_request' %}" class="forgot-link">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn-submit">Sign In</button>
+      </form>
+
+      <div class="auth-divider">or</div>
+
+      <div class="auth-register">
+        Don't have an account?
+        <a href="{% url 'accounts:register' %}">Create one free</a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,110 @@
+{% extends 'jobseeker/base_profile.html' %}
+{% block title %}{{ action }} Experience{% endblock %}
+{% block nav_experience %}active{% endblock %}
+
+{% block main_content %}
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:var(--green-pale);">&#128188;</div>
+      <div>
+        <div class="section-title">{{ action }} Work Experience</div>
+        <div class="section-sub">{% if action == 'Add' %}Add a new position{% else %}Update this entry{% endif %}</div>
+      </div>
+    </div>
+    <a href="{% url 'jobseeker:experience' %}" class="btn btn-gray btn-sm">&#8592; Back</a>
+  </div>
+  <div class="section-body">
+
+    {% if form.errors %}
+    <div style="background:var(--red-pale);border-left:4px solid var(--red);border-radius:8px;padding:12px 16px;margin-bottom:20px;">
+      <p style="color:#991b1b;font-size:0.875rem;font-weight:600;">Please fix the errors below:</p>
+      <ul style="color:#991b1b;font-size:0.82rem;padding-left:18px;margin-top:6px;">
+        {% for field in form %}{% for e in field.errors %}<li>{{ field.label }}: {{ e }}</li>{% endfor %}{% endfor %}
+        {% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="id_job_title">Job Title</label>
+          <input type="text" id="id_job_title" name="job_title"
+            class="form-control {% if form.job_title.errors %}error{% endif %}"
+            value="{{ form.job_title.value|default:'' }}"
+            placeholder="e.g. Backend Developer" />
+          {% for e in form.job_title.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_company">Company</label>
+          <input type="text" id="id_company" name="company"
+            class="form-control {% if form.company.errors %}error{% endif %}"
+            value="{{ form.company.value|default:'' }}"
+            placeholder="e.g. Google" />
+          {% for e in form.company.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_employment_type">Employment Type</label>
+          <select id="id_employment_type" name="employment_type" class="form-control">
+            {% for val, label in form.fields.employment_type.choices %}
+              <option value="{{ val }}" {% if form.employment_type.value == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_location">Location <span class="opt">(optional)</span></label>
+          <input type="text" id="id_location" name="location" class="form-control"
+            value="{{ form.location.value|default:'' }}"
+            placeholder="e.g. New York, USA or Remote" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_start_date">Start Date</label>
+          <input type="date" id="id_start_date" name="start_date"
+            class="form-control {% if form.start_date.errors %}error{% endif %}"
+            value="{{ form.start_date.value|default:'' }}" />
+          {% for e in form.start_date.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_end_date">End Date <span class="opt">(optional)</span></label>
+          <input type="date" id="id_end_date" name="end_date"
+            class="form-control {% if form.end_date.errors %}error{% endif %}"
+            value="{{ form.end_date.value|default:'' }}" />
+          {% for e in form.end_date.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-row">
+          <input type="checkbox" name="is_current" id="id_is_current"
+            {% if form.is_current.value %}checked{% endif %} />
+          I currently work here
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="id_description">Description <span class="opt">(optional)</span></label>
+        <textarea id="id_description" name="description" class="form-control" rows="5"
+          placeholder="• Designed and built REST APIs using Django REST Framework&#10;• Reduced page load time by 40% via caching&#10;• Mentored 3 junior developers…">{{ form.description.value|default:'' }}</textarea>
+        <span class="field-hint">Tip: Use bullet points starting with action verbs (Designed, Built, Led, Reduced…)</span>
+      </div>
+
+      <div class="flex gap-3 mt-4">
+        <button type="submit" class="btn btn-primary">
+          {% if action == 'Add' %}&#43; Add Experience{% else %}&#10003; Save Changes{% endif %}
+        </button>
+        <a href="{% url 'jobseeker:experience' %}" class="btn btn-gray">Cancel</a>
+        {% if action == 'Edit' and object %}
+        <form method="post" action="{% url 'jobseeker:experience_delete' object.pk %}" style="margin-left:auto;" onsubmit="return confirm('Delete this entry?')">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">&#128465; Delete</button>
+        </form>
+        {% endif %}
+      </div>
+    </form>
+
+  </div>
+</div>
+{% endblock %}

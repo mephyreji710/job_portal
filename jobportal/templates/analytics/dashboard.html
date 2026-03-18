@@ -1,0 +1,284 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Analytics — TalentBridge{% endblock %}
+
+{% block extra_css %}
+.an-wrap  { padding: 32px; }
+.grid-4   { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+.grid-2   { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px; }
+.grid-3   { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 28px; }
+
+/* Page header */
+.an-hero {
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+  border-radius: var(--radius-xl); padding: 28px 32px; margin-bottom: 28px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+/* KPI cards */
+.kpi {
+  background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow);
+  padding: 20px 22px; border-top: 3px solid var(--gray-200);
+}
+.kpi-val   { font-size: 2rem; font-weight: 900; line-height: 1; }
+.kpi-label { font-size: .72rem; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: .06em; margin-top: 4px; }
+.kpi-sub   { font-size: .72rem; color: var(--gray-300); margin-top: 3px; }
+
+/* Section card */
+.an-card {
+  background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.an-card-hd {
+  padding: 16px 22px; border-bottom: 1px solid var(--gray-100);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.an-card-title { font-size: .875rem; font-weight: 800; color: var(--gray-800); }
+.an-card-body  { padding: 20px 22px; }
+
+/* Horizontal bar chart */
+.h-bar-row   { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.h-bar-label { width: 150px; font-size: .78rem; font-weight: 600; color: var(--gray-700);
+               flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.h-bar-track { flex: 1; height: 10px; background: var(--gray-100); border-radius: 999px; overflow: hidden; }
+.h-bar-fill  { height: 100%; border-radius: 999px; transition: width .4s ease; }
+.h-bar-count { width: 38px; text-align: right; font-size: .78rem; font-weight: 700; color: var(--gray-600); flex-shrink: 0; }
+
+/* Donut chart */
+.donut-wrap  { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+.donut       { width: 156px; height: 156px; border-radius: 50%; flex-shrink: 0;
+               position: relative; }
+.donut-hole  { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+               width: 88px; height: 88px; border-radius: 50%; background: var(--white);
+               display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.donut-val   { font-size: 1.4rem; font-weight: 900; color: var(--gray-800); line-height: 1; }
+.donut-lbl   { font-size: .62rem; font-weight: 700; color: var(--gray-400); text-transform: uppercase; }
+.legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: .82rem; }
+.legend-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* Vertical bar chart (monthly trend) */
+.v-bar-wrap  { display: flex; align-items: flex-end; gap: 8px; height: 140px; padding-top: 10px; }
+.v-bar-col   { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.v-bar-fill  { width: 100%; border-radius: 4px 4px 0 0; background: var(--indigo);
+               min-height: 4px; transition: height .4s ease; }
+.v-bar-count { font-size: .65rem; font-weight: 700; color: var(--gray-400); }
+.v-bar-label { font-size: .65rem; color: var(--gray-400); text-align: center; white-space: nowrap; }
+
+/* Rate ring cards */
+.rate-card {
+  background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow);
+  padding: 22px; text-align: center; border-top: 3px solid var(--gray-200);
+}
+.rate-val    { font-size: 2.2rem; font-weight: 900; line-height: 1; }
+.rate-label  { font-size: .72rem; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: .06em; margin-top: 6px; }
+.rate-track  { height: 6px; background: var(--gray-100); border-radius: 999px; overflow: hidden; margin: 10px 0 0; }
+.rate-fill   { height: 100%; border-radius: 999px; }
+
+/* Section label */
+.sec-lbl { font-size: .72rem; font-weight: 800; color: var(--gray-400); text-transform: uppercase;
+           letter-spacing: .08em; margin-bottom: 10px; }
+{% endblock %}
+
+{% block content %}
+<div class="an-wrap">
+
+  <!-- HERO HEADER -->
+  <div class="an-hero">
+    <div>
+      <h1 style="color:#fff;font-size:1.4rem;font-weight:900;margin-bottom:4px;">&#128200; Analytics Dashboard</h1>
+      <p style="color:rgba(255,255,255,.65);font-size:.875rem;">
+        {{ scope_label }} &bull; Data as of today
+        {% if not is_admin %}&bull; <a href="{% url 'recruiter:panel' %}" style="color:rgba(255,255,255,.7);">&#8592; Company Panel</a>{% endif %}
+      </p>
+    </div>
+    {% if is_admin %}
+    <a href="{% url 'accounts:admin_dashboard' %}" class="btn btn-gray btn-sm"
+       style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.85);background:rgba(255,255,255,.1);">
+      &#128736; Admin Dashboard
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- KPI ROW -->
+  <div class="sec-lbl">Key Metrics</div>
+  <div class="grid-4">
+    <div class="kpi" style="border-top-color:var(--indigo);">
+      <div class="kpi-val" style="color:var(--indigo);">{{ total_jobs }}</div>
+      <div class="kpi-label">Total Jobs</div>
+      <div class="kpi-sub">{{ active_jobs }} active</div>
+    </div>
+    <div class="kpi" style="border-top-color:var(--blue);">
+      <div class="kpi-val" style="color:var(--blue);">{{ total_apps }}</div>
+      <div class="kpi-label">Applications</div>
+      <div class="kpi-sub">across all jobs</div>
+    </div>
+    <div class="kpi" style="border-top-color:var(--green);">
+      <div class="kpi-val" style="color:var(--green);">{{ hire_rate }}%</div>
+      <div class="kpi-label">Hire Rate</div>
+      <div class="kpi-sub">{{ total_hired }} hired total</div>
+    </div>
+    <div class="kpi" style="border-top-color:#8b5cf6;">
+      <div class="kpi-val" style="color:#8b5cf6;">{{ interview_rate }}%</div>
+      <div class="kpi-label">Interview Rate</div>
+      <div class="kpi-sub">of applicants reached</div>
+    </div>
+  </div>
+
+  <!-- ROW: Apps per Job + Hiring Pipeline (Donut) -->
+  <div class="sec-lbl">Charts</div>
+  <div class="grid-2">
+
+    <!-- Applications per Job -->
+    <div class="an-card">
+      <div class="an-card-hd">
+        <span class="an-card-title">&#128640; Applications per Job (Top 10)</span>
+        <span style="font-size:.72rem;color:var(--gray-400);">by application count</span>
+      </div>
+      <div class="an-card-body">
+        {% if apps_per_job %}
+        {% for item in apps_per_job %}
+        <div class="h-bar-row">
+          <div class="h-bar-label" title="{{ item.title }} — {{ item.company }}">{{ item.title|truncatechars:22 }}</div>
+          <div class="h-bar-track">
+            <div class="h-bar-fill" style="width:{{ item.pct }}%;background:var(--indigo);"></div>
+          </div>
+          <div class="h-bar-count">{{ item.count }}</div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div style="text-align:center;padding:32px;color:var(--gray-300);">No applications yet</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Hiring Rate / Pipeline Donut -->
+    <div class="an-card">
+      <div class="an-card-hd">
+        <span class="an-card-title">&#127919; Hiring Pipeline</span>
+        <span style="font-size:.72rem;color:var(--gray-400);">status distribution</span>
+      </div>
+      <div class="an-card-body">
+        {% if total_apps %}
+        <div class="donut-wrap">
+          <div class="donut" style="background: conic-gradient({{ donut_gradient }});">
+            <div class="donut-hole">
+              <div class="donut-val">{{ hire_rate }}%</div>
+              <div class="donut-lbl">Hired</div>
+            </div>
+          </div>
+          <div style="flex:1;">
+            {% for p in pipeline %}
+            <div class="legend-item">
+              <div class="legend-dot" style="background:{{ p.color }};"></div>
+              <div style="flex:1;color:var(--gray-700);">{{ p.label }}</div>
+              <div style="font-weight:700;color:var(--gray-800);">{{ p.count }}</div>
+              <div style="color:var(--gray-400);width:36px;text-align:right;font-size:.75rem;">{{ p.pct }}%</div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% else %}
+        <div style="text-align:center;padding:40px;color:var(--gray-300);">No application data yet</div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ROW: Most Demanded Skills + Job Type Breakdown -->
+  <div class="grid-2">
+
+    <!-- Most Demanded Skills -->
+    <div class="an-card">
+      <div class="an-card-hd">
+        <span class="an-card-title">&#127775; Most Demanded Skills (Top 15)</span>
+        <span style="font-size:.72rem;color:var(--gray-400);">across all job postings</span>
+      </div>
+      <div class="an-card-body">
+        {% if top_skills %}
+        {% for skill in top_skills %}
+        <div class="h-bar-row">
+          <div class="h-bar-label">{{ skill.name }}</div>
+          <div class="h-bar-track">
+            <div class="h-bar-fill" style="width:{{ skill.pct }}%;background:{% cycle '#4f46e5' '#0891b2' '#10b981' '#d97706' '#8b5cf6' '#2563eb' '#06b6d4' '#059669' '#f59e0b' '#7c3aed' %};"></div>
+          </div>
+          <div class="h-bar-count">{{ skill.count }}</div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div style="text-align:center;padding:32px;color:var(--gray-300);">No skills data found</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Job Type Breakdown + Rate Cards -->
+    <div style="display:flex;flex-direction:column;gap:20px;">
+
+      <!-- Job Type -->
+      <div class="an-card">
+        <div class="an-card-hd">
+          <span class="an-card-title">&#128188; Job Type Distribution</span>
+        </div>
+        <div class="an-card-body">
+          {% if job_types %}
+          {% for t in job_types %}
+          <div class="h-bar-row">
+            <div class="h-bar-label">{{ t.label }}</div>
+            <div class="h-bar-track">
+              <div class="h-bar-fill" style="width:{{ t.pct }}%;background:var(--blue);"></div>
+            </div>
+            <div class="h-bar-count">{{ t.count }}</div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div style="text-align:center;padding:20px;color:var(--gray-300);">No jobs yet</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Conversion rate cards -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+        <div class="rate-card" style="border-top-color:var(--green);">
+          <div class="rate-val" style="color:var(--green);">{{ shortlist_rate }}%</div>
+          <div class="rate-label">Shortlist</div>
+          <div class="rate-track"><div class="rate-fill" style="width:{{ shortlist_rate }}%;background:var(--green);"></div></div>
+        </div>
+        <div class="rate-card" style="border-top-color:var(--indigo);">
+          <div class="rate-val" style="color:var(--indigo);">{{ interview_rate }}%</div>
+          <div class="rate-label">Interview</div>
+          <div class="rate-track"><div class="rate-fill" style="width:{{ interview_rate }}%;background:var(--indigo);"></div></div>
+        </div>
+        <div class="rate-card" style="border-top-color:#8b5cf6;">
+          <div class="rate-val" style="color:#8b5cf6;">{{ hire_rate }}%</div>
+          <div class="rate-label">Hire</div>
+          <div class="rate-track"><div class="rate-fill" style="width:{{ hire_rate }}%;background:#8b5cf6;"></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MONTHLY TREND -->
+  <div class="sec-lbl">Applications Over Time</div>
+  <div class="an-card" style="margin-bottom:28px;">
+    <div class="an-card-hd">
+      <span class="an-card-title">&#128197; Monthly Applications (Last 6 Months)</span>
+    </div>
+    <div class="an-card-body">
+      {% if monthly %}
+      <div class="v-bar-wrap">
+        {% for m in monthly %}
+        <div class="v-bar-col">
+          <div class="v-bar-count">{{ m.count }}</div>
+          <div class="v-bar-fill" style="height:{% widthratio m.count 140 140 %}px;min-height:{% if m.count %}6{% else %}0{% endif %}px;background:linear-gradient(180deg,var(--indigo),#818cf8);"></div>
+          <div class="v-bar-label">{{ m.label }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:32px;color:var(--gray-300);">No monthly data yet</div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

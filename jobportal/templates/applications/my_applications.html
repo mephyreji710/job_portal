@@ -1,0 +1,184 @@
+{% extends 'jobseeker/base_profile.html' %}
+{% block title %}My Applications{% endblock %}
+{% block nav_resume %}active{% endblock %}
+
+{% block extra_css %}
+.apps-wrap { max-width: 860px; }
+
+.page-header {
+  background: linear-gradient(135deg, var(--indigo) 0%, #4338ca 100%);
+  border-radius: var(--radius-xl); padding: 24px 28px; margin-bottom: 20px;
+}
+
+.app-card {
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-lg); padding: 18px 20px;
+  display: flex; align-items: flex-start; gap: 16px;
+  transition: border-color .2s; margin-bottom: 10px;
+}
+.app-card:hover { border-color: var(--indigo); }
+
+.co-logo { width: 46px; height: 46px; border-radius: 10px; border: 1.5px solid var(--gray-200);
+           overflow: hidden; display: flex; align-items: center; justify-content: center;
+           background: var(--gray-50); font-size: 1.2rem; flex-shrink: 0; }
+.co-logo img { width: 100%; height: 100%; object-fit: cover; }
+
+.app-info { flex: 1; min-width: 0; }
+.app-job  { font-size: .95rem; font-weight: 700; color: var(--gray-900); margin-bottom: 2px; }
+.app-co   { font-size: .82rem; color: var(--blue); font-weight: 600; }
+.app-meta { font-size: .75rem; color: var(--gray-400); margin-top: 5px; display: flex; flex-wrap: wrap; gap: 10px; }
+
+.st-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: .75rem; font-weight: 700; }
+
+.cover-preview { margin-top: 8px; font-size: .8rem; color: var(--gray-600); font-style: italic;
+                  background: var(--gray-50); padding: 8px 12px; border-radius: 8px;
+                  border-left: 3px solid var(--gray-200); white-space: pre-line; }
+
+/* Stat strip */
+.stat-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+.ss-card { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: var(--radius-lg);
+           padding: 12px 16px; text-align: center; }
+.ss-num   { font-size: 1.4rem; font-weight: 800; }
+.ss-label { font-size: .72rem; color: var(--gray-400); font-weight: 600; margin-top: 2px; }
+{% endblock %}
+
+{% block main_content %}
+<div class="apps-wrap">
+
+  <div class="page-header">
+    <h2 style="color:#fff;font-size:1.2rem;font-weight:800;margin-bottom:4px;">&#128640; My Applications</h2>
+    <p style="color:rgba(255,255,255,.65);font-size:.875rem;">
+      {{ counts.total }} application{{ counts.total|pluralize }} submitted
+    </p>
+  </div>
+
+  <!-- STATS -->
+  <div class="stat-strip">
+    <div class="ss-card">
+      <div class="ss-num" style="color:var(--gray-600);">{{ counts.total }}</div>
+      <div class="ss-label">Total</div>
+    </div>
+    <div class="ss-card">
+      <div class="ss-num" style="color:var(--gray-500);">{{ counts.pending }}</div>
+      <div class="ss-label">Pending</div>
+    </div>
+    <div class="ss-card">
+      <div class="ss-num" style="color:var(--green);">{{ counts.shortlisted }}</div>
+      <div class="ss-label">Shortlisted</div>
+    </div>
+    <div class="ss-card">
+      <div class="ss-num" style="color:#8b5cf6;">{{ counts.hired }}</div>
+      <div class="ss-label">Hired</div>
+    </div>
+  </div>
+
+  {% if applications %}
+  <div>
+    {% for app in applications %}
+    <div class="app-card">
+      <div class="co-logo">
+        {% if app.job.recruiter.logo %}<img src="{{ app.job.recruiter.logo.url }}" alt="">{% else %}&#127970;{% endif %}
+      </div>
+
+      <div class="app-info">
+        <div class="app-job">{{ app.job.title }}</div>
+        <div class="app-co">{{ app.job.recruiter.company_name }}</div>
+        <div class="app-meta">
+          <span>&#128197; Applied {{ app.applied_at|date:"M d, Y" }}</span>
+          <span>&#128188; {{ app.job.get_job_type_display }}</span>
+          {% if app.job.location %}<span>&#128205; {{ app.job.location }}</span>{% endif %}
+          {% if app.job.is_remote %}<span>&#127760; Remote</span>{% endif %}
+        </div>
+        {% if app.resume %}
+        <div style="margin-top:6px;display:flex;align-items:center;gap:8px;font-size:.78rem;">
+          <span style="color:var(--gray-500);">&#128196; Resume:</span>
+          <a href="{{ app.resume.file.url }}" target="_blank"
+             style="color:var(--blue);font-weight:700;text-decoration:none;">
+            {{ app.resume.original_filename }}
+          </a>
+        </div>
+        {% endif %}
+        {% if app.cover_letter %}
+        <div class="cover-preview">&#128196; {{ app.cover_letter|truncatechars:140 }}</div>
+        {% endif %}
+
+        {# Interview info block #}
+        {% with iv=app.interview %}
+        {% if iv and iv.status != 'cancelled' %}
+        <div style="margin-top:10px;background:#eef2ff;border-left:3px solid var(--indigo);border-radius:0 8px 8px 0;padding:10px 14px;font-size:.82rem;">
+          <div style="font-size:.7rem;font-weight:800;color:var(--indigo);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">
+            &#128197; Interview Scheduled
+          </div>
+          <div style="color:var(--gray-700);font-weight:600;">
+            {{ iv.get_interview_type_display }} &bull; {{ iv.scheduled_at|date:"l, F d Y" }} at {{ iv.scheduled_at|date:"H:i" }} &bull; {{ iv.duration_mins }} min
+          </div>
+          <div style="margin-top:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span style="background:{{ iv.status_bg }};color:{{ iv.status_color }};padding:2px 8px;border-radius:999px;font-size:.7rem;font-weight:700;">
+              &#9679; {{ iv.get_status_display }}
+            </span>
+            {% if iv.meeting_link %}
+            <a href="{{ iv.meeting_link }}" target="_blank" style="color:var(--blue);font-size:.75rem;font-weight:600;">&#128279; Join Call</a>
+            {% endif %}
+            {% if iv.location %}
+            <span style="color:var(--gray-500);">&#128205; {{ iv.location }}</span>
+            {% endif %}
+          </div>
+          {% if iv.status == 'scheduled' %}
+          <div style="margin-top:8px;display:flex;gap:8px;">
+            <form method="post" action="{% url 'interviews:confirm' iv.pk %}" style="margin:0;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-primary btn-sm" style="font-size:.72rem;background:var(--green);">&#10003; Confirm</button>
+            </form>
+            <form method="post" action="{% url 'interviews:decline' iv.pk %}"
+                  onsubmit="return confirm('Decline this interview?');" style="margin:0;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger btn-sm" style="font-size:.72rem;">&#10005; Decline</button>
+            </form>
+          </div>
+          {% elif iv.status == 'confirmed' %}
+          <div style="margin-top:6px;">
+            <a href="{% url 'interviews:my_interviews' %}" style="font-size:.72rem;color:var(--indigo);font-weight:600;">&#128279; View in My Interviews</a>
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+        {% endwith %}
+      </div>
+
+      <!-- Status + actions -->
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
+        <span class="st-pill" style="background:{{ app.status_bg }};color:{{ app.status_color }};">
+          &#9679; {{ app.get_status_display }}
+        </span>
+        <a href="{% url 'jobs:detail' app.job.pk %}" class="btn btn-outline btn-sm">&#128269; View Job</a>
+        <a href="{% url 'interviews:my_interviews' %}" class="btn btn-outline btn-sm" style="border-color:var(--indigo);color:var(--indigo);">&#128197; Interviews</a>
+        {% if app.status != 'pending' %}
+          {% if app.pk in rated_company_ids %}
+          <span style="font-size:.72rem;color:var(--green);font-weight:700;">&#9733; Company Rated</span>
+          {% else %}
+          <a href="{% url 'feedback:give' app.pk %}" class="btn btn-outline btn-sm" style="border-color:#f59e0b;color:#d97706;font-size:.72rem;">&#11088; Rate Company</a>
+          {% endif %}
+        {% endif %}
+        {% if app.status == 'pending' %}
+        <form method="post" action="{% url 'applications:withdraw' app.pk %}"
+              onsubmit="return confirm('Withdraw your application for {{ app.job.title|escapejs }}?')">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger btn-sm">&#10005; Withdraw</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div style="text-align:center;padding:64px 24px;background:var(--white);border-radius:var(--radius-xl);box-shadow:var(--shadow);">
+    <div style="font-size:3rem;margin-bottom:12px;">&#128640;</div>
+    <div style="font-size:1.1rem;font-weight:700;color:var(--gray-700);margin-bottom:6px;">No applications yet</div>
+    <div style="font-size:.875rem;color:var(--gray-400);margin-bottom:20px;">Browse jobs and click "Apply Now" to start applying.</div>
+    <a href="{% url 'jobs:board' %}" class="btn btn-primary">&#128269; Browse Jobs</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
