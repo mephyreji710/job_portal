@@ -1,4 +1,5 @@
 asgiref==3.11.1
+dj-database-url==2.3.0
 cffi==2.0.0
 charset-normalizer==3.4.4
 cryptography==46.0.5

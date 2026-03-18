@@ -1,12 +1,25 @@
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-exva0n7s-5o69nwm8@u*x-5$ch^!ld*g8x*w+jg=pji2ixxq_5'
+# ---------------------------------------------------------------------------
+# Core
+# ---------------------------------------------------------------------------
 
-DEBUG = True
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'django-insecure-exva0n7s-5o69nwm8@u*x-5$ch^!ld*g8x*w+jg=pji2ixxq_5'
+)
 
-ALLOWED_HOSTS = ['*']
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+
+ALLOWED_HOSTS_ENV = os.environ.get('ALLOWED_HOSTS', '')
+ALLOWED_HOSTS = [h.strip() for h in ALLOWED_HOSTS_ENV.split(',') if h.strip()] or ['*']
+
+# ---------------------------------------------------------------------------
+# Installed apps
+# ---------------------------------------------------------------------------
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -29,8 +42,13 @@ INSTALLED_APPS = [
     'feedback',
 ]
 
+# ---------------------------------------------------------------------------
+# Middleware  — WhiteNoise must come right after SecurityMiddleware
+# ---------------------------------------------------------------------------
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',          # <-- static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -60,12 +78,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'jobportal.wsgi.application'
 
+# ---------------------------------------------------------------------------
+# Database — uses DATABASE_URL env var on Railway, SQLite locally
+# ---------------------------------------------------------------------------
+
+import dj_database_url
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+    )
 }
+
+# ---------------------------------------------------------------------------
+# Password validation
+# ---------------------------------------------------------------------------
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -74,44 +102,67 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
-USE_I18N = True
-USE_TZ = True
+# ---------------------------------------------------------------------------
+# Internationalisation
+# ---------------------------------------------------------------------------
 
-STATIC_URL = '/static/'
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE     = 'UTC'
+USE_I18N      = True
+USE_TZ        = True
+
+# ---------------------------------------------------------------------------
+# Static & media files
+# ---------------------------------------------------------------------------
+
+STATIC_URL  = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'          # collected by collectstatic
 STATICFILES_DIRS = [BASE_DIR / 'static']
-MEDIA_URL = '/media/'
+
+# WhiteNoise: serve compressed, cached static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+MEDIA_URL  = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Allow resume uploads up to 15 MB
-FILE_UPLOAD_MAX_MEMORY_SIZE = 15 * 1024 * 1024   # 15 MB in memory
-DATA_UPLOAD_MAX_MEMORY_SIZE  = 15 * 1024 * 1024   # 15 MB total request body
+# ---------------------------------------------------------------------------
+# Uploads
+# ---------------------------------------------------------------------------
+
+FILE_UPLOAD_MAX_MEMORY_SIZE = 15 * 1024 * 1024
+DATA_UPLOAD_MAX_MEMORY_SIZE = 15 * 1024 * 1024
+
+# ---------------------------------------------------------------------------
+# Auth
+# ---------------------------------------------------------------------------
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+AUTH_USER_MODEL    = 'accounts.User'
 
-# Custom User Model
-AUTH_USER_MODEL = 'accounts.User'
-
-# Authentication Backends — allow email + password login
 AUTHENTICATION_BACKENDS = [
     'accounts.backends.EmailBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-# Login / Logout redirects
-LOGIN_URL = '/accounts/login/'
+LOGIN_URL          = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/accounts/dashboard/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
-# Site URL — used in emails. Change to your real domain when hosted.
-SITE_URL = 'http://127.0.0.1:8000'
+# ---------------------------------------------------------------------------
+# Site URL — used in emails. Railway sets RAILWAY_PUBLIC_DOMAIN automatically.
+# ---------------------------------------------------------------------------
 
+_railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN', '')
+SITE_URL = f'https://{_railway_domain}' if _railway_domain else os.environ.get('SITE_URL', 'http://127.0.0.1:8000')
+
+# ---------------------------------------------------------------------------
 # Email — Gmail SMTP
-EMAIL_BACKEND    = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST       = 'smtp.gmail.com'
-EMAIL_PORT       = 587
-EMAIL_USE_TLS    = True
-EMAIL_HOST_USER     = 'development.skillopt@gmail.com'
-EMAIL_HOST_PASSWORD = 'skrj mfsj gyun smdp'
+# ---------------------------------------------------------------------------
+
+EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST          = 'smtp.gmail.com'
+EMAIL_PORT          = 587
+EMAIL_USE_TLS       = True
+EMAIL_HOST_USER     = os.environ.get('EMAIL_HOST_USER', 'development.skillopt@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'skrj mfsj gyun smdp')
 DEFAULT_FROM_EMAIL  = f'TalentBridge <{EMAIL_HOST_USER}>'
