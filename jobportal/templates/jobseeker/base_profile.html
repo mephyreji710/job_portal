@@ -227,13 +227,55 @@
     .text-gray { color: var(--gray-500); }
     .font-bold { font-weight: 700; }
 
+    /* ===== RESPONSIVE ===== */
+    .mob-hamburger {
+      display: none; background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,.85); font-size: 1.5rem; padding: 4px 8px; line-height: 1;
+    }
+    .sidebar-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.5); z-index: 150;
+    }
+    .sidebar-overlay.open { display: block; }
+    @media (max-width: 900px) {
+      .topnav { padding: 0 16px; }
+      .topnav-brand { font-size: 1.05rem; }
+      .topnav-right a:not(.cta):not([title]), .topnav-right button { display: none; }
+      .mob-hamburger { display: flex; align-items: center; order: -1; }
+      .profile-layout { padding: 16px 16px 40px; flex-direction: column; gap: 0; }
+      .profile-sidebar {
+        position: fixed; top: 0; left: -300px; width: 290px; height: 100vh;
+        overflow-y: auto; z-index: 200; background: #f0f4f8;
+        padding: 16px; gap: 12px; display: flex; flex-direction: column;
+        transition: left 0.3s ease; box-shadow: 4px 0 24px rgba(0,0,0,.2);
+        flex: none;
+      }
+      .profile-sidebar.open { left: 0; }
+      .profile-main { width: 100%; }
+      .form-grid-2 { grid-template-columns: 1fr !important; }
+      .section-header { flex-wrap: wrap; gap: 10px; }
+      .section-body { padding: 16px; }
+      .section-header { padding: 16px; }
+    }
+    @media (max-width: 480px) {
+      .profile-layout { padding: 12px 12px 32px; }
+      .topnav { height: 54px; }
+      .section-body { padding: 12px; }
+      .btn { padding: 8px 14px; font-size: 0.82rem; }
+      .topnav-right .cta { padding: 5px 10px; font-size: 0.8rem; }
+    }
+
     {% block extra_css %}{% endblock %}
   </style>
 </head>
 <body>
 
+<!-- MOBILE SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
 <!-- TOP NAV -->
 <nav class="topnav">
+  <button class="mob-hamburger" onclick="openSidebar()" aria-label="Menu">&#9776;</button>
   <a class="topnav-brand" href="/accounts/dashboard/">
     <div class="brand-icon">&#128188;</div>
     Talent<span class="accent">Bridge</span>
@@ -266,7 +308,7 @@
 <div class="profile-layout">
 
   <!-- ===== SIDEBAR ===== -->
-  <aside class="profile-sidebar">
+  <aside class="profile-sidebar" id="profileSidebar">
 
     <!-- Profile Card -->
     <div class="profile-card">
@@ -401,6 +443,23 @@
   </main>
 
 </div>
+
+<script>
+function openSidebar() {
+  document.getElementById('profileSidebar').classList.add('open');
+  document.getElementById('sidebarOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+  document.getElementById('profileSidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+// Close sidebar when a nav link is clicked on mobile
+document.querySelectorAll('.profile-sidebar .nav-item').forEach(function(el) {
+  el.addEventListener('click', closeSidebar);
+});
+</script>
 
 </body>
 </html>
