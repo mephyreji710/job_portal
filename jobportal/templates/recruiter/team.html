@@ -24,6 +24,12 @@
   border: 2px dashed var(--gray-300); border-radius: var(--radius-lg);
   padding: 32px; text-align: center; background: var(--gray-50);
 }
+@media (max-width: 768px) {
+  .member-card { flex-wrap: wrap; gap: 12px; }
+  .member-card > div:last-child { align-items: flex-start; flex-direction: row; gap: 10px; width: 100%; }
+  .account-info-grid { grid-template-columns: 1fr !important; }
+  .invite-box { padding: 20px 16px; }
+}
 {% endblock %}
 
 {% block main_content %}
@@ -90,7 +96,7 @@
     </div>
   </div>
   <div class="section-body">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="account-info-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
       <div style="padding:12px 14px;background:var(--gray-50);border-radius:var(--radius);">
         <div style="font-size:0.72rem;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">Full Name</div>
         <div style="font-size:0.875rem;font-weight:600;color:var(--gray-800);">{{ request.user.get_full_name|default:"—" }}</div>

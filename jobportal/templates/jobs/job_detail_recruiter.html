@@ -24,6 +24,15 @@
 .s-draft   { background:rgba(255,255,255,.15); color:rgba(255,255,255,.7); }
 .s-paused  { background:rgba(245,158,11,.2); color:#fcd34d; }
 .s-closed  { background:rgba(239,68,68,.2); color:#fca5a5; }
+@media (max-width: 768px) {
+  .preview-banner { flex-direction: column !important; gap: 14px; padding: 18px 20px; align-items: flex-start !important; }
+  .preview-banner > div:last-child { width: 100%; }
+  .meta-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
+  .meta-grid { grid-template-columns: 1fr; }
+  .preview-banner { padding: 16px; }
+}
 {% endblock %}
 
 {% block main_content %}
