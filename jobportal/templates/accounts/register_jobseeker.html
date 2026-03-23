@@ -170,6 +170,40 @@
       font-size: 0.9rem; color: var(--gray-500);
     }
     .login-link a { color: var(--blue); font-weight: 600; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      .sidebar { flex: 0 0 240px; padding: 28px 20px; }
+      .form-area { padding: 32px 32px; }
+    }
+    @media (max-width: 768px) {
+      .top-bar { padding: 0 16px; }
+      .page { flex-direction: column; }
+      .sidebar {
+        flex: none; width: 100%;
+        padding: 16px 16px;
+        flex-direction: row; flex-wrap: wrap; gap: 12px;
+        align-items: center;
+      }
+      .sidebar > div:first-child { flex: 1; min-width: 0; }
+      .sidebar-title { font-size: 0.95rem; margin-bottom: 0; }
+      .sidebar-sub { display: none; }
+      .step-list { flex-direction: row; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+      .step-item { padding: 5px 10px; font-size: 0.78rem; gap: 6px; }
+      .step-num { width: 22px; height: 22px; font-size: 0.72rem; }
+      .tips-box { display: none; }
+      .form-area { padding: 24px 16px; max-width: 100%; }
+      .row-2 { grid-template-columns: 1fr; }
+      .form-actions { flex-direction: column-reverse; }
+      .btn-back { width: 100%; justify-content: center; }
+      .btn-submit { width: 100%; }
+    }
+    @media (max-width: 480px) {
+      .top-bar { height: 56px; }
+      .top-bar-right { display: none; }
+      .form-header h1 { font-size: 1.3rem; }
+      .form-area { padding: 20px 12px; }
+    }
   </style>
 </head>
 <body>

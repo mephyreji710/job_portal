@@ -138,6 +138,25 @@
       font-size: 0.9rem; color: var(--gray-500);
     }
     .back-link a { color: var(--blue); font-weight: 600; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .top-bar { padding: 0 16px; }
+      .top-bar-right { font-size: 0.82rem; }
+      .page-wrapper { padding: 32px 16px; }
+      .page-heading h1 { font-size: 1.5rem; }
+      .page-heading { margin-bottom: 28px; }
+      .role-grid { grid-template-columns: 1fr; gap: 16px; }
+      .role-card { padding: 28px 20px; }
+      .role-emoji { font-size: 2.8rem; }
+      .role-title { font-size: 1.15rem; }
+    }
+    @media (max-width: 480px) {
+      .top-bar-right { display: none; }
+      .page-wrapper { padding: 24px 12px; }
+      .role-card { padding: 22px 16px; }
+      .admin-note { padding: 14px 16px; }
+    }
   </style>
 </head>
 <body>
