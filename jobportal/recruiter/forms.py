@@ -1,6 +1,7 @@
 import datetime
 from django import forms
 from accounts.models import RecruiterProfile
+from .models import HRMember
 
 
 class CompanyProfileForm(forms.ModelForm):
@@ -40,4 +41,16 @@ class CompanyProfileForm(forms.ModelForm):
             'company_description': 'About the Company',
             'linkedin_url':    'LinkedIn URL',
             'twitter_url':     'Twitter / X URL',
+        }
+
+
+class HRMemberForm(forms.ModelForm):
+    class Meta:
+        model = HRMember
+        fields = ['name', 'email', 'phone', 'role']
+        widgets = {
+            'name':  forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Full name'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'email@company.com'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+1 (555) 000-0000 (optional)'}),
+            'role':  forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. HR Manager, Talent Recruiter'}),
         }

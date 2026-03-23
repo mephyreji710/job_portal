@@ -1,9 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 from accounts.models import RecruiterProfile
-from .forms import CompanyProfileForm
+from .forms import CompanyProfileForm, HRMemberForm
+from .models import HRMember
 
 
 def _require_recruiter(request):
@@ -78,19 +79,50 @@ def hr_team(request):
     if profile is None:
         return redirect('accounts:dashboard')
 
-    # In the current architecture each company = one recruiter account.
-    # Shown as primary HR contact; extensible when multi-user companies are added.
-    team_members = [
-        {
-            'user': request.user,
-            'role': 'Primary Recruiter / HR Manager',
-            'is_primary': True,
-        }
-    ]
+    form = HRMemberForm()
+    members = profile.hr_members.all()
     return render(request, 'recruiter/team.html', {
         'profile': profile,
-        'team_members': team_members,
+        'members': members,
+        'form': form,
     })
+
+
+@login_required
+def add_hr_member(request):
+    profile = _require_recruiter(request)
+    if profile is None:
+        return redirect('accounts:dashboard')
+
+    if request.method == 'POST':
+        form = HRMemberForm(request.POST)
+        if form.is_valid():
+            member = form.save(commit=False)
+            member.company = profile
+            try:
+                member.save()
+                messages.success(request, f'{member.name} added to HR team.')
+            except Exception:
+                messages.error(request, 'That email address is already in your team.')
+        else:
+            for field, errors in form.errors.items():
+                for e in errors:
+                    messages.error(request, f'{field.capitalize()}: {e}')
+    return redirect('recruiter:team')
+
+
+@login_required
+def remove_hr_member(request, pk):
+    profile = _require_recruiter(request)
+    if profile is None:
+        return redirect('accounts:dashboard')
+
+    if request.method == 'POST':
+        member = get_object_or_404(HRMember, pk=pk, company=profile)
+        name = member.name
+        member.delete()
+        messages.success(request, f'{name} removed from HR team.')
+    return redirect('recruiter:team')
 
 
 # ---------------------------------------------------------------------------
