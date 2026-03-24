@@ -27,6 +27,14 @@ class Application(models.Model):
         null=True, blank=True,
         related_name='applications',
     )
+    # Application form fields filled by job seeker at apply time
+    full_name            = models.CharField(max_length=200, blank=True)
+    phone                = models.CharField(max_length=30, blank=True)
+    applicant_location   = models.CharField(max_length=200, blank=True)
+    skills_summary       = models.TextField(blank=True, help_text='Comma-separated skills')
+    experience_summary   = models.TextField(blank=True, help_text='Brief work experience summary')
+    resume_file          = models.FileField(upload_to='application_resumes/', blank=True, null=True)
+
     cover_letter    = models.TextField(blank=True)
     status          = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     recruiter_notes = models.TextField(blank=True)
@@ -49,6 +57,12 @@ class Application(models.Model):
             'rejected':    '#ef4444',
             'hired':       '#8b5cf6',
         }.get(self.status, '#6b7280')
+
+    def get_skills_list(self):
+        """Return skills as a list of stripped strings."""
+        if not self.skills_summary:
+            return []
+        return [s.strip() for s in self.skills_summary.split(',') if s.strip()]
 
     def status_bg(self):
         return {

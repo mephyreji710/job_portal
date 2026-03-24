@@ -4,8 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 from jobseeker.models import JobSeekerProfile, Skill
-from .models import Resume
-from .forms import ResumeUploadForm
+from .models import Resume, BuiltResume
+from .forms import ResumeUploadForm, BuiltResumeForm
 from .parser import run_parse_and_save
 
 
@@ -209,3 +209,157 @@ def apply_to_profile(request, pk):
         messages.info(request, 'No new skills to add — all detected skills are already in your profile.')
 
     return redirect('resume:detail', pk=pk)
+
+
+# ---------------------------------------------------------------------------
+# Resume Builder
+# ---------------------------------------------------------------------------
+
+@login_required
+def builder_list(request):
+    profile = _require_jobseeker(request)
+    if profile is None:
+        return redirect("accounts:login")
+    built_resumes = BuiltResume.objects.filter(user=request.user)
+    return render(request, "resume/builder_list.html", {
+        "profile":       profile,
+        "built_resumes": built_resumes,
+    })
+
+
+@login_required
+def builder_create(request):
+    profile = _require_jobseeker(request)
+    if profile is None:
+        return redirect("accounts:login")
+    if request.method == "POST":
+        form = BuiltResumeForm(request.POST)
+        if form.is_valid():
+            br = form.save(commit=False)
+            br.user = request.user
+            br.save()
+            messages.success(request, f"Resume \"{br.title}\" created\!")
+            return redirect("resume:builder_preview", pk=br.pk)
+    else:
+        # Pre-fill contact from profile
+        initial = {
+            "custom_name":     request.user.get_full_name(),
+            "custom_email":    request.user.email,
+            "custom_phone":    getattr(request.user, "phone", "") or "",
+            "custom_location": profile.location,
+            "custom_linkedin": profile.linkedin_url,
+            "custom_website":  profile.website,
+            "summary":         profile.bio,
+        }
+        form = BuiltResumeForm(initial=initial)
+    return render(request, "resume/builder_form.html", {
+        "profile": profile,
+        "form":    form,
+        "action":  "Create",
+    })
+
+
+@login_required
+def builder_edit(request, pk):
+    profile = _require_jobseeker(request)
+    if profile is None:
+        return redirect("accounts:login")
+    br = get_object_or_404(BuiltResume, pk=pk, user=request.user)
+    if request.method == "POST":
+        form = BuiltResumeForm(request.POST, instance=br)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Resume updated.")
+            return redirect("resume:builder_preview", pk=br.pk)
+    else:
+        form = BuiltResumeForm(instance=br)
+    return render(request, "resume/builder_form.html", {
+        "profile": profile,
+        "form":    form,
+        "action":  "Save Changes",
+        "resume":  br,
+    })
+
+
+@login_required
+def builder_preview(request, pk):
+    profile = _require_jobseeker(request)
+    if profile is None:
+        return redirect("accounts:login")
+    br = get_object_or_404(BuiltResume, pk=pk, user=request.user)
+
+    # ── Contact (override > profile) ──────────────────────────────────────
+    ctx_name     = br.custom_name     or request.user.get_full_name() or request.user.email
+    ctx_email    = br.custom_email    or request.user.email
+    ctx_phone    = br.custom_phone    or getattr(request.user, "phone", "") or ""
+    ctx_location = br.custom_location or profile.location
+    ctx_linkedin = br.custom_linkedin or profile.linkedin_url
+    ctx_website  = br.custom_website  or profile.website
+
+    # ── Font resolution ────────────────────────────────────────────────────
+    FONT_STACKS = {
+        'sans':       ("-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif", None),
+        'inter':      ("'Inter', 'Segoe UI', Arial, sans-serif",
+                       "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap"),
+        'serif':      ("Georgia, Cambria, 'Times New Roman', serif", None),
+        'montserrat': ("'Montserrat', Arial, sans-serif",
+                       "https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap"),
+        'raleway':    ("'Raleway', 'Segoe UI', sans-serif",
+                       "https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;800&display=swap"),
+    }
+    font_stack, font_url = FONT_STACKS.get(br.font_family or 'sans', FONT_STACKS['sans'])
+
+    # ── Accent colour (template default if blank) ──────────────────────────
+    DEFAULT_ACCENTS = {
+        'classic': '#1d4ed8',
+        'modern':  '#0891b2',
+        'sidebar': '#6366f1',
+    }
+    accent = br.accent_color or DEFAULT_ACCENTS.get(br.template_name, '#4f46e5')
+
+    # ── Section order ──────────────────────────────────────────────────────
+    ALL_SECTIONS = ['summary', 'experience', 'skills', 'education', 'certs']
+    raw_order = br.section_order or ','.join(ALL_SECTIONS)
+    sections  = [s.strip() for s in raw_order.split(',') if s.strip() in ALL_SECTIONS]
+    # Append any missing sections at the end (safety net)
+    for s in ALL_SECTIONS:
+        if s not in sections:
+            sections.append(s)
+
+    template_map = {
+        "classic": "resume/preview_classic.html",
+        "modern":  "resume/preview_modern.html",
+        "sidebar": "resume/preview_sidebar.html",
+    }
+    tpl = template_map.get(br.template_name, "resume/preview_classic.html")
+    return render(request, tpl, {
+        "br":         br,
+        "profile":    profile,
+        "name":       ctx_name,
+        "email":      ctx_email,
+        "phone":      ctx_phone,
+        "location":   ctx_location,
+        "linkedin":   ctx_linkedin,
+        "website":    ctx_website,
+        "headline":   profile.headline,
+        "summary":    br.summary or profile.bio,
+        "skills":     profile.skills.all(),
+        "experience": profile.experience.all(),
+        "education":  profile.education.all(),
+        "certs":      profile.certifications.all(),
+        # customisation
+        "accent":     accent,
+        "font_stack": font_stack,
+        "font_url":   font_url,
+        "sections":   sections,
+    })
+
+
+@login_required
+def builder_delete(request, pk):
+    br = get_object_or_404(BuiltResume, pk=pk, user=request.user)
+    if request.method == "POST":
+        title = br.title
+        br.delete()
+        messages.success(request, f"Resume \"{title}\" deleted.")
+    return redirect("resume:builder_list")

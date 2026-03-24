@@ -10,4 +10,5 @@ urlpatterns = [
     path('team/add/',                 views.add_hr_member,   name='add_hr_member'),
     path('team/remove/<int:pk>/',     views.remove_hr_member, name='remove_hr_member'),
     path('jobs/',                     views.jobs_list,       name='jobs'),
+    path('company/<int:pk>/',         views.public_company_profile, name='public_profile'),
 ]

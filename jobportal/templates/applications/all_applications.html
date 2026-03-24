@@ -1,0 +1,327 @@
+{% extends 'recruiter/base_recruiter.html' %}
+{% block title %}All Applications{% endblock %}
+{% block nav_applications %}active{% endblock %}
+
+{% block extra_css %}
+.page-header {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1d4ed8 100%);
+  border-radius: var(--radius-xl); padding: 24px 28px;
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;
+}
+
+/* Filter bar */
+.filter-bar {
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-lg); padding: 12px 18px;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.filter-select {
+  padding: 7px 11px; border: 1.5px solid var(--gray-200); border-radius: 8px;
+  font-size: .82rem; font-family: var(--font); color: var(--gray-700);
+  background: var(--gray-50); cursor: pointer; outline: none;
+}
+.filter-select:focus { border-color: var(--indigo); }
+
+/* Applicant card */
+.appl-card {
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-lg); overflow: hidden;
+  transition: border-color .2s; margin-bottom: 12px;
+}
+.appl-card:hover { border-color: var(--indigo); }
+
+.appl-card-header {
+  background: var(--gray-50); border-bottom: 1.5px solid var(--gray-100);
+  padding: 10px 18px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.job-badge {
+  font-size: .72rem; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+  background: var(--indigo-pale); color: var(--indigo);
+}
+.appl-card-body { padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start; }
+
+.av { width: 46px; height: 46px; border-radius: 50%;
+      background: var(--indigo-pale); display: flex; align-items: center;
+      justify-content: center; font-size: 1.1rem; font-weight: 800;
+      color: var(--indigo); flex-shrink: 0; }
+
+.appl-info { flex: 1; min-width: 0; }
+.appl-name  { font-size: .92rem; font-weight: 700; color: var(--gray-900); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.appl-email { font-size: .75rem; color: var(--gray-400); margin-top: 2px; }
+.appl-meta  { font-size: .75rem; color: var(--gray-500); margin-top: 5px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+/* Status pill */
+.st-pill { display: inline-flex; align-items: center; gap: 3px; padding: 2px 9px; border-radius: 999px; font-size: .72rem; font-weight: 700; }
+.sp-pending     { background: var(--gray-100);  color: var(--gray-600); }
+.sp-reviewed    { background: #dbeafe;           color: #1e40af; }
+.sp-shortlisted { background: #d1fae5;           color: #065f46; }
+.sp-rejected    { background: #fee2e2;           color: #991b1b; }
+.sp-hired       { background: #ede9fe;           color: #5b21b6; }
+
+/* Skills tags */
+.skill-chip {
+  padding: 2px 9px; background: var(--blue-pale); color: var(--blue-dark);
+  border-radius: 999px; font-size: .7rem; font-weight: 600;
+}
+
+/* Detail blocks */
+.detail-block { margin-top: 8px; }
+.detail-block-label {
+  font-size: .68rem; font-weight: 700; color: var(--gray-400);
+  text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px;
+}
+.detail-block-text {
+  font-size: .8rem; color: var(--gray-700); background: var(--gray-50);
+  padding: 8px 12px; border-radius: 8px; white-space: pre-line;
+}
+.cover-text {
+  font-size: .8rem; color: var(--gray-600); font-style: italic;
+  background: var(--gray-50); padding: 8px 12px; border-radius: 8px;
+  border-left: 3px solid var(--gray-300);
+}
+
+/* Resume buttons */
+.dl-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 999px; font-size: .73rem;
+  font-weight: 700; text-decoration: none; transition: opacity .15s;
+}
+.dl-btn:hover { opacity: .82; text-decoration: none; }
+.dl-profile  { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.dl-uploaded { background: var(--green-pale); color: var(--green-dark); border: 1px solid #6ee7b7; }
+
+/* Actions column */
+.appl-actions { flex-shrink: 0; display: flex; flex-direction: column; gap: 7px; align-items: flex-end; }
+.status-select {
+  padding: 5px 8px; border: 1.5px solid var(--gray-200); border-radius: 8px;
+  font-size: .78rem; font-family: var(--font); color: var(--gray-700);
+  background: var(--white); cursor: pointer; outline: none;
+}
+.status-select:focus { border-color: var(--indigo); }
+
+/* Score badge */
+.score-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 999px; font-size: .72rem; font-weight: 700;
+  text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .page-header { flex-direction: column; align-items: flex-start; }
+  .appl-card-body { flex-direction: column; }
+  .appl-actions { flex-direction: row; flex-wrap: wrap; align-items: flex-start; }
+  .filter-bar { gap: 8px; }
+}
+{% endblock %}
+
+{% block main_content %}
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div>
+    <h2 style="color:#fff;font-size:1.25rem;font-weight:800;margin-bottom:4px;">&#128640; All Applications</h2>
+    <p style="color:rgba(255,255,255,.65);font-size:.875rem;">
+      Across all your job postings &bull; {{ counts.total }} application{{ counts.total|pluralize }}
+    </p>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a href="{% url 'jobs:manage' %}" class="btn btn-gray btn-sm" style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.8);">&#128196; My Jobs</a>
+  </div>
+</div>
+
+<!-- STATS STRIP -->
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;" class="stats-strip">
+  <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:12px 16px;text-align:center;">
+    <div style="font-size:1.4rem;font-weight:800;color:var(--indigo);">{{ counts.total }}</div>
+    <div style="font-size:.72rem;color:var(--gray-400);font-weight:600;margin-top:2px;">Total</div>
+  </div>
+  <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:12px 16px;text-align:center;">
+    <div style="font-size:1.4rem;font-weight:800;color:var(--gray-500);">{{ counts.pending }}</div>
+    <div style="font-size:.72rem;color:var(--gray-400);font-weight:600;margin-top:2px;">Pending</div>
+  </div>
+  <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:12px 16px;text-align:center;">
+    <div style="font-size:1.4rem;font-weight:800;color:var(--green);">{{ counts.shortlisted }}</div>
+    <div style="font-size:.72rem;color:var(--gray-400);font-weight:600;margin-top:2px;">Shortlisted</div>
+  </div>
+  <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:12px 16px;text-align:center;">
+    <div style="font-size:1.4rem;font-weight:800;color:#8b5cf6;">{{ counts.hired }}</div>
+    <div style="font-size:.72rem;color:var(--gray-400);font-weight:600;margin-top:2px;">Hired</div>
+  </div>
+  <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:12px 16px;text-align:center;">
+    <div style="font-size:1.4rem;font-weight:800;color:var(--red);">{{ counts.rejected }}</div>
+    <div style="font-size:.72rem;color:var(--gray-400);font-weight:600;margin-top:2px;">Rejected</div>
+  </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <span style="font-size:.8rem;font-weight:700;color:var(--gray-500);">&#128269; Filter:</span>
+  <form method="get" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+    <select name="job" class="filter-select" onchange="this.form.submit()">
+      <option value="">All Jobs</option>
+      {% for j in jobs_list %}
+      <option value="{{ j.pk }}" {% if job_filter == j.pk|stringformat:"s" %}selected{% endif %}>{{ j.title }}</option>
+      {% endfor %}
+    </select>
+    <select name="status" class="filter-select" onchange="this.form.submit()">
+      <option value="">All Statuses</option>
+      <option value="pending"     {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+      <option value="reviewed"    {% if status_filter == 'reviewed' %}selected{% endif %}>Reviewed</option>
+      <option value="shortlisted" {% if status_filter == 'shortlisted' %}selected{% endif %}>Shortlisted</option>
+      <option value="rejected"    {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+      <option value="hired"       {% if status_filter == 'hired' %}selected{% endif %}>Hired</option>
+    </select>
+    {% if status_filter or job_filter %}
+    <a href="{% url 'applications:all_applications' %}" style="font-size:.78rem;color:var(--red);font-weight:600;">&#10005; Clear</a>
+    {% endif %}
+  </form>
+</div>
+
+<!-- APPLICATIONS LIST -->
+{% if applications %}
+
+{% for app in applications %}
+<div class="appl-card">
+
+  <!-- Card header: job title + applied date -->
+  <div class="appl-card-header">
+    <a href="{% url 'applications:applicants' app.job.pk %}" class="job-badge" style="text-decoration:none;">
+      &#128196; {{ app.job.title }}
+    </a>
+    <span style="font-size:.72rem;color:var(--gray-400);">&#128197; Applied {{ app.applied_at|date:"M d, Y · g:i A" }}</span>
+    <span class="st-pill sp-{{ app.status }}" style="margin-left:auto;">&#9679; {{ app.get_status_display }}</span>
+  </div>
+
+  <div class="appl-card-body">
+
+    <!-- Avatar -->
+    <div class="av">
+      {% if app.full_name %}{{ app.full_name|slice:":1"|upper }}{% elif app.applicant.get_full_name %}{{ app.applicant.get_full_name|slice:":1"|upper }}{% else %}{{ app.applicant.email|slice:":1"|upper }}{% endif %}
+    </div>
+
+    <!-- Info -->
+    <div class="appl-info">
+
+      <!-- Name + status -->
+      <div class="appl-name">
+        {% if app.full_name %}{{ app.full_name }}{% elif app.applicant.get_full_name %}{{ app.applicant.get_full_name }}{% else %}{{ app.applicant.email }}{% endif %}
+        {% if app.match_score %}
+        <a href="{% url 'screening:result' app.match_score.pk %}"
+           class="score-badge" style="background:{{ app.match_score.score_color }};color:#fff;">
+          &#128202; {{ app.match_score.total_score|floatformat:0 }}% match
+        </a>
+        {% endif %}
+      </div>
+
+      <!-- Email + phone + location -->
+      <div class="appl-email">
+        {{ app.applicant.email }}
+        {% if app.phone %} &bull; &#128222; {{ app.phone }}{% endif %}
+        {% if app.applicant_location %} &bull; &#128205; {{ app.applicant_location }}{% endif %}
+      </div>
+
+      <!-- Skills -->
+      {% if app.skills_summary %}
+      <div class="detail-block">
+        <div class="detail-block-label">&#127919; Skills</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">
+          {% for skill in app.get_skills_list %}
+          <span class="skill-chip">{{ skill }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Experience -->
+      {% if app.experience_summary %}
+      <div class="detail-block">
+        <div class="detail-block-label">&#128188; Experience</div>
+        <div class="detail-block-text" style="border-left:3px solid var(--indigo);">{{ app.experience_summary|truncatechars:350 }}</div>
+      </div>
+      {% endif %}
+
+      <!-- Cover letter -->
+      {% if app.cover_letter %}
+      <div class="detail-block">
+        <div class="detail-block-label">&#128221; Cover Letter</div>
+        <div class="cover-text">{{ app.cover_letter|truncatechars:280 }}</div>
+      </div>
+      {% endif %}
+
+      <!-- Resume Download Buttons -->
+      <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:7px;align-items:center;">
+        {% if app.resume %}
+        <a href="{% url 'applications:download_resume' app.pk 'profile' %}" class="dl-btn dl-profile">
+          &#11015; Download Profile Resume
+        </a>
+        {% endif %}
+        {% if app.resume_file %}
+        <a href="{% url 'applications:download_resume' app.pk 'uploaded' %}" class="dl-btn dl-uploaded">
+          &#11015; Download Uploaded Resume
+        </a>
+        {% endif %}
+        {% if not app.resume and not app.resume_file %}
+        <span style="font-size:.72rem;color:var(--gray-300);">&#128196; No resume attached</span>
+        {% endif %}
+      </div>
+
+    </div><!-- /appl-info -->
+
+    <!-- Actions -->
+    <div class="appl-actions">
+      <form method="post" action="{% url 'applications:update_status' app.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{% url 'applications:all_applications' %}{% if status_filter or job_filter %}?status={{ status_filter }}&job={{ job_filter }}{% endif %}">
+        <select name="status" class="status-select" onchange="this.form.submit()">
+          <option value="pending"     {% if app.status == 'pending' %}selected{% endif %}>Pending</option>
+          <option value="reviewed"    {% if app.status == 'reviewed' %}selected{% endif %}>Reviewed</option>
+          <option value="shortlisted" {% if app.status == 'shortlisted' %}selected{% endif %}>&#11088; Shortlist</option>
+          <option value="rejected"    {% if app.status == 'rejected' %}selected{% endif %}>&#10007; Reject</option>
+          <option value="hired"       {% if app.status == 'hired' %}selected{% endif %}>&#127881; Hired</option>
+        </select>
+      </form>
+      <a href="{% url 'applications:applicants' app.job.pk %}"
+         class="btn btn-gray btn-sm" style="font-size:.72rem;">View All for This Job</a>
+      {% if app.status == 'shortlisted' or app.status == 'reviewed' %}
+      {% with iv=app.interview %}
+      {% if not iv or iv.status == 'cancelled' %}
+      <a href="{% url 'interviews:schedule' app.pk %}"
+         class="btn btn-sm" style="background:var(--indigo);color:#fff;font-size:.72rem;">&#128197; Schedule Interview</a>
+      {% else %}
+      <span style="font-size:.72rem;font-weight:700;color:var(--green);">&#128197; Interview Scheduled</span>
+      {% endif %}
+      {% endwith %}
+      {% endif %}
+    </div>
+
+  </div><!-- /card-body -->
+</div>
+{% endfor %}
+
+{% else %}
+<div class="section-card">
+  <div class="empty-state">
+    <div class="empty-icon">&#128640;</div>
+    <div class="empty-title">No applications yet</div>
+    <div class="empty-desc">
+      {% if status_filter or job_filter %}
+        No applications match the selected filter. <a href="{% url 'applications:all_applications' %}">Clear filters</a>
+      {% else %}
+        When job seekers apply to your postings, they'll appear here.
+      {% endif %}
+    </div>
+    <a href="{% url 'jobs:manage' %}" class="btn btn-primary">&#128196; View My Jobs</a>
+  </div>
+</div>
+{% endif %}
+
+<style>
+@media (max-width: 640px) {
+  .stats-strip { grid-template-columns: repeat(3, 1fr) !important; }
+}
+@media (max-width: 400px) {
+  .stats-strip { grid-template-columns: 1fr 1fr !important; }
+}
+</style>
+
+{% endblock %}

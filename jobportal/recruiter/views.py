@@ -136,3 +136,17 @@ def jobs_list(request):
     if profile is None:
         return redirect('accounts:dashboard')
     return redirect('jobs:manage')
+
+
+# ---------------------------------------------------------------------------
+# Public Company Profile (visible to anyone)
+# ---------------------------------------------------------------------------
+
+def public_company_profile(request, pk):
+    from jobs.models import JobPost
+    profile = get_object_or_404(RecruiterProfile, pk=pk)
+    active_jobs = profile.jobs.filter(status=JobPost.STATUS_ACTIVE).order_by('-created_at')
+    return render(request, 'recruiter/public_profile.html', {
+        'profile': profile,
+        'active_jobs': active_jobs,
+    })

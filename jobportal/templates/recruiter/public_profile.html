@@ -1,0 +1,246 @@
+{% extends 'accounts/base.html' %}
+{% block title %}{{ profile.company_name }} — Company Profile{% endblock %}
+
+{% block extra_css %}
+.profile-wrap { max-width: 960px; margin: 0 auto; padding: 28px 24px 60px; display: flex; gap: 24px; align-items: flex-start; }
+.profile-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+.profile-side  { flex: 0 0 270px; display: flex; flex-direction: column; gap: 14px; position: sticky; top: 84px; }
+
+/* Hero banner */
+.co-hero {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #0891b2 100%);
+  border-radius: var(--radius-xl); padding: 32px 28px; display: flex;
+  align-items: center; gap: 20px;
+}
+.co-logo {
+  width: 72px; height: 72px; border-radius: 16px; overflow: hidden;
+  background: rgba(255,255,255,.15); display: flex; align-items: center;
+  justify-content: center; font-size: 2rem; flex-shrink: 0;
+  border: 2px solid rgba(255,255,255,.25);
+}
+.co-logo img { width: 100%; height: 100%; object-fit: cover; }
+.co-name   { font-size: 1.35rem; font-weight: 800; color: #fff; }
+.co-tag    { font-size: .88rem; color: rgba(255,255,255,.75); margin-top: 4px; }
+.co-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.co-badge  {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 999px; font-size: .72rem; font-weight: 600;
+  background: rgba(255,255,255,.15); color: rgba(255,255,255,.9);
+}
+
+/* Info card */
+.info-card { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: var(--radius-lg); overflow: hidden; }
+.info-header { padding: 14px 18px; font-size: .8rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase; letter-spacing: .05em; background: var(--gray-50); border-bottom: 1.5px solid var(--gray-200); }
+.info-body   { padding: 16px 18px; }
+
+.detail-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--gray-100); }
+.detail-row:last-child { border-bottom: none; }
+.detail-icon { font-size: 1rem; margin-top: 1px; flex-shrink: 0; }
+.detail-label { font-size: .72rem; color: var(--gray-400); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.detail-val   { font-size: .85rem; color: var(--gray-800); font-weight: 500; margin-top: 1px; }
+
+/* About text */
+.about-text { font-size: .9rem; line-height: 1.7; color: var(--gray-700); white-space: pre-line; }
+
+/* Jobs list */
+.job-row {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px 18px; border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-lg); transition: border-color .2s; text-decoration: none;
+}
+.job-row:hover { border-color: var(--green); text-decoration: none; }
+.job-row + .job-row { margin-top: 8px; }
+.job-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--green-pale); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+.job-title-text { font-size: .92rem; font-weight: 700; color: var(--gray-900); }
+.job-meta-row { font-size: .76rem; color: var(--gray-400); margin-top: 3px; display: flex; gap: 8px; flex-wrap: wrap; }
+.badge-sm { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: .7rem; font-weight: 600; }
+.b-type   { background: var(--blue-pale); color: var(--blue); }
+.b-remote { background: var(--teal-pale,#ecfeff); color: var(--teal); }
+.b-exp    { background: var(--gray-100); color: var(--gray-600); }
+
+/* Side card */
+.side-card { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: var(--radius-lg); overflow: hidden; }
+.side-header { padding: 12px 16px; font-size: .78rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase; letter-spacing: .05em; background: var(--gray-50); border-bottom: 1.5px solid var(--gray-200); }
+.side-body   { padding: 16px; }
+
+.social-link {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 0; border-bottom: 1px solid var(--gray-100);
+  font-size: .85rem; color: var(--blue); font-weight: 500; text-decoration: none;
+}
+.social-link:last-child { border-bottom: none; }
+.social-link:hover { color: var(--blue-dark); text-decoration: underline; }
+
+.team-member { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--gray-100); }
+.team-member:last-child { border-bottom: none; }
+.member-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--green-pale); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--green-dark); font-size: .85rem; flex-shrink: 0; }
+.member-name  { font-size: .85rem; font-weight: 600; color: var(--gray-800); }
+.member-role  { font-size: .75rem; color: var(--gray-400); }
+
+@media (max-width: 768px) {
+  .profile-wrap { flex-direction: column; padding: 20px 16px 40px; }
+  .profile-side  { flex: none; width: 100%; position: static; }
+  .co-hero { flex-direction: column; align-items: flex-start; gap: 14px; padding: 22px 20px; }
+}
+@media (max-width: 480px) {
+  .co-name { font-size: 1.1rem; }
+  .profile-wrap { padding: 16px 12px 32px; }
+}
+{% endblock %}
+
+{% block content %}
+<div class="profile-wrap">
+
+  <!-- MAIN COLUMN -->
+  <div class="profile-main">
+
+    <!-- Hero -->
+    <div class="co-hero">
+      <div class="co-logo">
+        {% if profile.logo %}<img src="{{ profile.logo.url }}" alt="{{ profile.company_name }}">{% else %}&#127970;{% endif %}
+      </div>
+      <div>
+        <div class="co-name">{{ profile.company_name }}</div>
+        {% if profile.tagline %}<div class="co-tag">{{ profile.tagline }}</div>{% endif %}
+        <div class="co-badges">
+          {% if profile.industry %}<span class="co-badge">&#127981; {{ profile.get_industry_display }}</span>{% endif %}
+          {% if profile.company_size %}<span class="co-badge">&#128101; {{ profile.get_company_size_display }}</span>{% endif %}
+          {% if profile.company_type %}<span class="co-badge">&#127970; {{ profile.get_company_type_display }}</span>{% endif %}
+          {% if profile.location %}<span class="co-badge">&#128205; {{ profile.location }}</span>{% endif %}
+          {% if profile.founded_year %}<span class="co-badge">&#128197; Est. {{ profile.founded_year }}</span>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- About -->
+    {% if profile.company_description %}
+    <div class="info-card">
+      <div class="info-header">About the Company</div>
+      <div class="info-body">
+        <div class="about-text">{{ profile.company_description }}</div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Active Jobs -->
+    <div class="info-card">
+      <div class="info-header">Open Positions ({{ active_jobs.count }})</div>
+      <div class="info-body" style="padding:14px 16px;">
+        {% if active_jobs %}
+          {% for job in active_jobs %}
+          <a href="{% url 'jobs:detail' job.pk %}" class="job-row">
+            <div class="job-icon">&#128196;</div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <span class="job-title-text">{{ job.title }}</span>
+                {% if job.is_remote %}<span class="badge-sm b-remote">&#127760; Remote</span>{% endif %}
+              </div>
+              <div class="job-meta-row">
+                <span class="badge-sm b-type">{{ job.get_job_type_display }}</span>
+                {% if job.location %}<span>&#128205; {{ job.location }}</span>{% endif %}
+                {% with sal=job.get_salary_display %}{% if sal %}<span>&#128181; {{ sal }}</span>{% endif %}{% endwith %}
+                {% if job.experience_level != 'any' %}<span class="badge-sm b-exp">{{ job.get_experience_level_display }}</span>{% endif %}
+                <span>&#128197; {{ job.created_at|date:"M d, Y" }}</span>
+              </div>
+            </div>
+          </a>
+          {% endfor %}
+        {% else %}
+          <div style="text-align:center;padding:28px 0;color:var(--gray-400);">
+            <div style="font-size:2rem;margin-bottom:8px;">&#128196;</div>
+            <div style="font-size:.88rem;">No open positions at this time.</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div><!-- /main -->
+
+  <!-- SIDE COLUMN -->
+  <aside class="profile-side">
+
+    <!-- Quick Info -->
+    <div class="side-card">
+      <div class="side-header">Company Info</div>
+      <div class="side-body" style="padding:10px 16px;">
+        {% if profile.location %}
+        <div class="detail-row">
+          <span class="detail-icon">&#128205;</span>
+          <div><div class="detail-label">Location</div><div class="detail-val">{{ profile.location }}</div></div>
+        </div>
+        {% endif %}
+        {% if profile.company_size %}
+        <div class="detail-row">
+          <span class="detail-icon">&#128101;</span>
+          <div><div class="detail-label">Company Size</div><div class="detail-val">{{ profile.get_company_size_display }}</div></div>
+        </div>
+        {% endif %}
+        {% if profile.company_type %}
+        <div class="detail-row">
+          <span class="detail-icon">&#127970;</span>
+          <div><div class="detail-label">Type</div><div class="detail-val">{{ profile.get_company_type_display }}</div></div>
+        </div>
+        {% endif %}
+        {% if profile.industry %}
+        <div class="detail-row">
+          <span class="detail-icon">&#127981;</span>
+          <div><div class="detail-label">Industry</div><div class="detail-val">{{ profile.get_industry_display }}</div></div>
+        </div>
+        {% endif %}
+        {% if profile.founded_year %}
+        <div class="detail-row">
+          <span class="detail-icon">&#128197;</span>
+          <div><div class="detail-label">Founded</div><div class="detail-val">{{ profile.founded_year }}</div></div>
+        </div>
+        {% endif %}
+        {% if profile.company_website %}
+        <div class="detail-row">
+          <span class="detail-icon">&#127760;</span>
+          <div>
+            <div class="detail-label">Website</div>
+            <a href="{{ profile.company_website }}" target="_blank" class="detail-val" style="color:var(--blue);">{{ profile.company_website|truncatechars:30 }}</a>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Social Links -->
+    {% if profile.linkedin_url or profile.twitter_url %}
+    <div class="side-card">
+      <div class="side-header">Connect</div>
+      <div class="side-body" style="padding:10px 16px;">
+        {% if profile.linkedin_url %}
+        <a href="{{ profile.linkedin_url }}" target="_blank" class="social-link">&#128101; LinkedIn</a>
+        {% endif %}
+        {% if profile.twitter_url %}
+        <a href="{{ profile.twitter_url }}" target="_blank" class="social-link">&#128038; Twitter / X</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- HR Team -->
+    {% if profile.hr_members.exists %}
+    <div class="side-card">
+      <div class="side-header">HR Team</div>
+      <div class="side-body" style="padding:10px 16px;">
+        {% for member in profile.hr_members.all %}
+        <div class="team-member">
+          <div class="member-avatar">{{ member.name|slice:":1" }}</div>
+          <div>
+            <div class="member-name">{{ member.name }}</div>
+            <div class="member-role">{{ member.role }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <a href="{% url 'jobs:board' %}" style="text-align:center;font-size:.82rem;color:var(--gray-400);">&#8592; Back to Job Board</a>
+
+  </aside>
+
+</div>
+{% endblock %}

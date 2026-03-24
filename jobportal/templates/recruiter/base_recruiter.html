@@ -396,6 +396,11 @@
          class="nav-item {% block nav_jobs %}{% endblock %}">
         <span class="nav-icon">&#128196;</span> Active Jobs
       </a>
+      <a href="{% url 'applications:all_applications' %}"
+         class="nav-item {% block nav_applications %}{% endblock %}">
+        <span class="nav-icon">&#128640;</span> Applications
+        {% if total_application_count %}<span class="nav-count">{{ total_application_count }}</span>{% endif %}
+      </a>
       <a href="{% url 'screening:recruiter_overview' %}"
          class="nav-item {% block nav_screening %}{% endblock %}">
         <span class="nav-icon">&#129302;</span> AI Screening

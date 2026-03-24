@@ -1,0 +1,487 @@
+{% extends 'jobseeker/base_profile.html' %}
+{% block title %}{{ action }} Resume{% endblock %}
+{% block nav_builder %}active{% endblock %}
+
+{% block extra_css %}
+.form-wrap { display: flex; flex-direction: column; gap: 20px; }
+.form-card { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: var(--radius-xl); overflow: hidden; }
+.fc-head { padding: 18px 24px 14px; border-bottom: 1.5px solid var(--gray-100); display: flex; align-items: center; gap: 10px; }
+.fc-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+.fc-title { font-size: .95rem; font-weight: 700; color: var(--gray-900); }
+.fc-sub { font-size: .75rem; color: var(--gray-400); margin-top: 1px; }
+.fc-body { padding: 22px 24px; }
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.fl { display: block; font-size: .83rem; font-weight: 700; color: var(--gray-700); margin-bottom: 6px; }
+.fh { font-size: .72rem; color: var(--gray-400); margin-bottom: 8px; }
+.fc  { width: 100%; padding: 10px 13px; border: 1.5px solid var(--gray-200); border-radius: var(--radius); font-size: .9rem; font-family: var(--font); color: var(--gray-800); outline: none; transition: border-color .15s; box-sizing: border-box; }
+.fc:focus { border-color: var(--indigo); }
+textarea.fc { resize: vertical; min-height: 100px; }
+.fe { color: var(--red); font-size: .75rem; margin-top: 4px; }
+
+/* Template picker */
+.tpl-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+.tpl-option { position: relative; cursor: pointer; }
+.tpl-option input[type=radio] { position: absolute; opacity: 0; width: 0; height: 0; }
+.tpl-card { border: 2.5px solid var(--gray-200); border-radius: var(--radius-lg); overflow: hidden; transition: border-color .2s, box-shadow .2s; }
+.tpl-option input:checked + .tpl-card { border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(79,70,229,.15); }
+.tpl-thumb { height: 100px; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; }
+.tpl-classic { background: linear-gradient(135deg,#1e3a5f,#0f172a); }
+.tpl-modern  { background: linear-gradient(135deg,#064e3b,#065f46); }
+.tpl-sidebar { background: linear-gradient(135deg,#4c1d95,#5b21b6); }
+.tpl-info { padding: 10px 12px; background: var(--gray-50); }
+.tpl-name { font-size: .82rem; font-weight: 700; color: var(--gray-800); }
+.tpl-desc { font-size: .7rem; color: var(--gray-400); margin-top: 2px; }
+.tpl-ats  { font-size: .68rem; font-weight: 700; color: var(--indigo); margin-top: 3px; }
+.checked-badge { position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border-radius: 50%; background: var(--indigo); color: #fff; display: none; align-items: center; justify-content: center; font-size: .75rem; font-weight: 800; }
+.tpl-option input:checked ~ .checked-badge { display: flex; }
+
+/* Profile strip */
+.profile-strip { background: var(--indigo-pale); border: 1.5px solid #c7d2fe; border-radius: var(--radius-lg); padding: 14px 18px; display: flex; align-items: flex-start; gap: 12px; }
+
+/* ── Customise — colour swatches ── */
+.color-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.color-swatch {
+  width: 30px; height: 30px; border-radius: 50%; border: 2.5px solid transparent;
+  cursor: pointer; transition: transform .15s, border-color .15s;
+}
+.color-swatch:hover { transform: scale(1.15); }
+.color-swatch.active { border-color: var(--gray-900); transform: scale(1.15); }
+.color-input { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--gray-200); padding: 1px; cursor: pointer; background: none; }
+
+/* ── Customise — font options ── */
+.font-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; }
+.font-option { position: relative; cursor: pointer; }
+.font-option input[type=radio] { position: absolute; opacity: 0; width: 0; height: 0; }
+.font-card {
+  border: 2px solid var(--gray-200); border-radius: var(--radius-lg);
+  padding: 12px 8px; text-align: center; transition: border-color .2s, box-shadow .2s;
+}
+.font-option input:checked + .font-card { border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(79,70,229,.12); }
+.font-sample { font-size: 1.3rem; font-weight: 700; color: var(--gray-900); line-height: 1; margin-bottom: 5px; }
+.font-label  { font-size: .68rem; color: var(--gray-500); font-weight: 600; }
+.font-sans       .font-sample { font-family: -apple-system, 'Segoe UI', Arial, sans-serif; }
+.font-inter      .font-sample { font-family: 'Inter', 'Segoe UI', sans-serif; }
+.font-serif      .font-sample { font-family: Georgia, 'Times New Roman', serif; }
+.font-montserrat .font-sample { font-family: 'Montserrat', Arial, sans-serif; }
+.font-raleway    .font-sample { font-family: 'Raleway', sans-serif; }
+
+/* ── Customise — section drag list ── */
+.sort-list { display: flex; flex-direction: column; gap: 8px; }
+.sort-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; background: var(--gray-50);
+  border: 1.5px solid var(--gray-200); border-radius: var(--radius-lg);
+  cursor: grab; user-select: none; transition: background .15s, box-shadow .15s;
+}
+.sort-item:hover { background: #eef2ff; border-color: #c7d2fe; }
+.sort-item.drag-over { box-shadow: 0 0 0 2px var(--indigo); background: #eef2ff; }
+.sort-handle { font-size: 1.1rem; color: var(--gray-400); flex-shrink: 0; line-height: 1; }
+.sort-icon   { font-size: 1rem; flex-shrink: 0; }
+.sort-name   { font-size: .87rem; font-weight: 600; color: var(--gray-800); flex: 1; }
+.sort-badge  { font-size: .68rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+.badge-main  { background: #eef2ff; color: var(--indigo); }
+.badge-side  { background: #f0fdf4; color: #166534; }
+
+@media (max-width: 700px) {
+  .row-2 { grid-template-columns: 1fr; }
+  .tpl-grid { grid-template-columns: 1fr; }
+  .fc-body { padding: 16px; }
+  .font-grid { grid-template-columns: repeat(3,1fr); }
+}
+{% endblock %}
+
+{% block main_content %}
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px;">
+  <div>
+    <h2 style="font-size:1.15rem;font-weight:800;color:var(--gray-900);">
+      {% if resume %}Edit Resume{% else %}Build a New Resume{% endif %}
+    </h2>
+    <p style="font-size:.82rem;color:var(--gray-400);">Your skills, experience, education &amp; certifications are pulled from your profile automatically.</p>
+  </div>
+  <a href="{% url 'resume:builder_list' %}" class="btn btn-gray btn-sm">&#8592; My Resumes</a>
+</div>
+
+<form method="post" class="form-wrap" novalidate>
+{% csrf_token %}
+{{ form.section_order }}
+
+<!-- ══ TEMPLATE PICKER ══════════════════════════════════════════════════ -->
+<div class="form-card">
+  <div class="fc-head">
+    <div class="fc-icon" style="background:#eef2ff;">&#127775;</div>
+    <div>
+      <div class="fc-title">Choose Template</div>
+      <div class="fc-sub">Select the style that best fits the job you're applying to</div>
+    </div>
+  </div>
+  <div class="fc-body">
+    <div class="tpl-grid">
+
+      <label class="tpl-option">
+        <input type="radio" name="template_name" value="classic"
+               {% if form.template_name.value == 'classic' or not form.template_name.value %}checked{% endif %}>
+        <div class="tpl-card">
+          <div class="tpl-thumb tpl-classic">&#128196;</div>
+          <div class="tpl-info">
+            <div class="tpl-name">Classic Professional</div>
+            <div class="tpl-desc">Clean single-column, traditional layout</div>
+            <div class="tpl-ats">★★★★★ Best ATS compatibility</div>
+          </div>
+        </div>
+        <div class="checked-badge">&#10003;</div>
+      </label>
+
+      <label class="tpl-option">
+        <input type="radio" name="template_name" value="modern"
+               {% if form.template_name.value == 'modern' %}checked{% endif %}>
+        <div class="tpl-card">
+          <div class="tpl-thumb tpl-modern">&#127775;</div>
+          <div class="tpl-info">
+            <div class="tpl-name">Modern Clean</div>
+            <div class="tpl-desc">Contemporary design with colour accents</div>
+            <div class="tpl-ats">★★★★☆ Excellent ATS compatibility</div>
+          </div>
+        </div>
+        <div class="checked-badge">&#10003;</div>
+      </label>
+
+      <label class="tpl-option">
+        <input type="radio" name="template_name" value="sidebar"
+               {% if form.template_name.value == 'sidebar' %}checked{% endif %}>
+        <div class="tpl-card">
+          <div class="tpl-thumb tpl-sidebar">&#127959;</div>
+          <div class="tpl-info">
+            <div class="tpl-name">Executive Sidebar</div>
+            <div class="tpl-desc">Two-column with sidebar for skills</div>
+            <div class="tpl-ats">★★★☆☆ Good for creative roles</div>
+          </div>
+        </div>
+        <div class="checked-badge">&#10003;</div>
+      </label>
+
+    </div>
+    {% for e in form.template_name.errors %}<div class="fe">{{ e }}</div>{% endfor %}
+  </div>
+</div>
+
+<!-- ══ CUSTOMISE STYLE ══════════════════════════════════════════════════ -->
+<div class="form-card">
+  <div class="fc-head">
+    <div class="fc-icon" style="background:#fdf4ff;">&#127912;</div>
+    <div>
+      <div class="fc-title">Customise Style</div>
+      <div class="fc-sub">Pick your accent colour, font &amp; section order</div>
+    </div>
+  </div>
+  <div class="fc-body" style="display:flex;flex-direction:column;gap:24px;">
+
+    <!-- Accent colour -->
+    <div>
+      <label class="fl">Accent Colour</label>
+      <div class="fh">Choose a colour that represents your personal brand</div>
+      <div class="color-row" id="swatch-row">
+        <span class="color-swatch" style="background:#1d4ed8;" data-color="#1d4ed8" title="Classic Blue"></span>
+        <span class="color-swatch" style="background:#0891b2;" data-color="#0891b2" title="Teal"></span>
+        <span class="color-swatch" style="background:#6366f1;" data-color="#6366f1" title="Indigo"></span>
+        <span class="color-swatch" style="background:#7c3aed;" data-color="#7c3aed" title="Violet"></span>
+        <span class="color-swatch" style="background:#db2777;" data-color="#db2777" title="Pink"></span>
+        <span class="color-swatch" style="background:#dc2626;" data-color="#dc2626" title="Red"></span>
+        <span class="color-swatch" style="background:#d97706;" data-color="#d97706" title="Amber"></span>
+        <span class="color-swatch" style="background:#16a34a;" data-color="#16a34a" title="Green"></span>
+        <span class="color-swatch" style="background:#0f172a;" data-color="#0f172a" title="Navy"></span>
+        <span class="color-swatch" style="background:#374151;" data-color="#374151" title="Slate"></span>
+        <label title="Custom colour" style="display:inline-flex;align-items:center;">
+          {{ form.accent_color }}
+        </label>
+      </div>
+    </div>
+
+    <!-- Font family -->
+    <div>
+      <label class="fl">Font Style</label>
+      <div class="fh">The font used throughout your resume</div>
+      <div class="font-grid">
+
+        <label class="font-option font-sans">
+          <input type="radio" name="font_family" value="sans"
+                 {% if form.font_family.value == 'sans' or not form.font_family.value %}checked{% endif %}>
+          <div class="font-card">
+            <div class="font-sample">Aa</div>
+            <div class="font-label">Modern Sans</div>
+          </div>
+        </label>
+
+        <label class="font-option font-inter">
+          <input type="radio" name="font_family" value="inter"
+                 {% if form.font_family.value == 'inter' %}checked{% endif %}>
+          <div class="font-card">
+            <div class="font-sample" style="font-family:'Segoe UI',sans-serif;">Aa</div>
+            <div class="font-label">Inter</div>
+          </div>
+        </label>
+
+        <label class="font-option font-serif">
+          <input type="radio" name="font_family" value="serif"
+                 {% if form.font_family.value == 'serif' %}checked{% endif %}>
+          <div class="font-card">
+            <div class="font-sample" style="font-family:Georgia,serif;">Aa</div>
+            <div class="font-label">Classic Serif</div>
+          </div>
+        </label>
+
+        <label class="font-option font-montserrat">
+          <input type="radio" name="font_family" value="montserrat"
+                 {% if form.font_family.value == 'montserrat' %}checked{% endif %}>
+          <div class="font-card">
+            <div class="font-sample" style="font-family:'Trebuchet MS',sans-serif;">Aa</div>
+            <div class="font-label">Montserrat</div>
+          </div>
+        </label>
+
+        <label class="font-option font-raleway">
+          <input type="radio" name="font_family" value="raleway"
+                 {% if form.font_family.value == 'raleway' %}checked{% endif %}>
+          <div class="font-card">
+            <div class="font-sample" style="font-family:Verdana,sans-serif;">Aa</div>
+            <div class="font-label">Raleway</div>
+          </div>
+        </label>
+
+      </div>
+    </div>
+
+    <!-- Section order -->
+    <div>
+      <label class="fl">Section Order</label>
+      <div class="fh">Drag to reorder how sections appear in your resume</div>
+      <div class="sort-list" id="sort-list">
+
+        <div class="sort-item" draggable="true" data-key="summary">
+          <span class="sort-handle">&#8801;</span>
+          <span class="sort-icon">&#128221;</span>
+          <span class="sort-name">Professional Summary</span>
+          <span class="sort-badge badge-main">intro</span>
+        </div>
+
+        <div class="sort-item" draggable="true" data-key="experience">
+          <span class="sort-handle">&#8801;</span>
+          <span class="sort-icon">&#128188;</span>
+          <span class="sort-name">Work Experience</span>
+          <span class="sort-badge badge-main">main</span>
+        </div>
+
+        <div class="sort-item" draggable="true" data-key="skills">
+          <span class="sort-handle">&#8801;</span>
+          <span class="sort-icon">&#127919;</span>
+          <span class="sort-name">Skills</span>
+          <span class="sort-badge badge-side" id="skills-badge">main</span>
+        </div>
+
+        <div class="sort-item" draggable="true" data-key="education">
+          <span class="sort-handle">&#8801;</span>
+          <span class="sort-icon">&#127979;</span>
+          <span class="sort-name">Education</span>
+          <span class="sort-badge badge-side" id="edu-badge">main</span>
+        </div>
+
+        <div class="sort-item" draggable="true" data-key="certs">
+          <span class="sort-handle">&#8801;</span>
+          <span class="sort-icon">&#127941;</span>
+          <span class="sort-name">Certifications</span>
+          <span class="sort-badge badge-main">main</span>
+        </div>
+
+      </div>
+      <div style="margin-top:8px;font-size:.72rem;color:var(--gray-400);">
+        &#128276; In the <strong>Executive Sidebar</strong> template, Skills &amp; Education always appear in the left sidebar regardless of order.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ RESUME TITLE ══════════════════════════════════════════════════════ -->
+<div class="form-card">
+  <div class="fc-head">
+    <div class="fc-icon" style="background:var(--blue-pale);">&#127991;</div>
+    <div>
+      <div class="fc-title">Resume Title</div>
+      <div class="fc-sub">A label for you — not shown on the resume itself</div>
+    </div>
+  </div>
+  <div class="fc-body">
+    <label class="fl" for="{{ form.title.id_for_label }}">Title <span style="color:var(--red);">*</span></label>
+    {{ form.title }}
+    {% for e in form.title.errors %}<div class="fe">{{ e }}</div>{% endfor %}
+  </div>
+</div>
+
+<!-- ══ PROFESSIONAL SUMMARY ══════════════════════════════════════════════ -->
+<div class="form-card">
+  <div class="fc-head">
+    <div class="fc-icon" style="background:var(--green-pale);">&#128221;</div>
+    <div>
+      <div class="fc-title">Professional Summary</div>
+      <div class="fc-sub">Tailor this for the specific job — 3–5 impactful sentences</div>
+    </div>
+  </div>
+  <div class="fc-body">
+    <div class="fh">Write what makes you unique. Include your years of experience, key skills, and career goals. This is the first thing recruiters read.</div>
+    {{ form.summary }}
+    {% for e in form.summary.errors %}<div class="fe">{{ e }}</div>{% endfor %}
+  </div>
+</div>
+
+<!-- ══ CONTACT INFO ════════════════════════════════════════════════════════ -->
+<div class="form-card">
+  <div class="fc-head">
+    <div class="fc-icon" style="background:var(--orange-pale);">&#128100;</div>
+    <div>
+      <div class="fc-title">Contact Information</div>
+      <div class="fc-sub">Leave blank to use your profile data automatically</div>
+    </div>
+  </div>
+  <div class="fc-body">
+    <div class="profile-strip" style="margin-bottom:18px;">
+      <span style="font-size:1.2rem;">&#128161;</span>
+      <div style="font-size:.8rem;color:#3730a3;">
+        <strong>Auto-filled from your profile.</strong> Fill these fields only if you want to use different contact details for this specific resume.
+      </div>
+    </div>
+    <div class="row-2" style="margin-bottom:14px;">
+      <div>
+        <label class="fl" for="{{ form.custom_name.id_for_label }}">Full Name</label>
+        {{ form.custom_name }}
+      </div>
+      <div>
+        <label class="fl" for="{{ form.custom_email.id_for_label }}">Email</label>
+        {{ form.custom_email }}
+      </div>
+    </div>
+    <div class="row-2" style="margin-bottom:14px;">
+      <div>
+        <label class="fl" for="{{ form.custom_phone.id_for_label }}">Phone</label>
+        {{ form.custom_phone }}
+      </div>
+      <div>
+        <label class="fl" for="{{ form.custom_location.id_for_label }}">Location</label>
+        {{ form.custom_location }}
+      </div>
+    </div>
+    <div class="row-2">
+      <div>
+        <label class="fl" for="{{ form.custom_linkedin.id_for_label }}">LinkedIn</label>
+        {{ form.custom_linkedin }}
+      </div>
+      <div>
+        <label class="fl" for="{{ form.custom_website.id_for_label }}">Website / Portfolio</label>
+        {{ form.custom_website }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PROFILE DATA NOTE ════════════════════════════════════════════════════ -->
+<div style="background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:16px 20px;">
+  <div style="font-size:.8rem;font-weight:700;color:var(--gray-600);margin-bottom:10px;">&#128274; Automatically included from your profile:</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;">
+    <span style="padding:4px 12px;background:var(--blue-pale);color:var(--blue-dark);border-radius:999px;font-size:.75rem;font-weight:600;">&#127919; {{ profile.skills.count }} Skills</span>
+    <span style="padding:4px 12px;background:var(--green-pale);color:var(--green-dark);border-radius:999px;font-size:.75rem;font-weight:600;">&#128188; {{ profile.experience.count }} Work Experiences</span>
+    <span style="padding:4px 12px;background:#eef2ff;color:var(--indigo);border-radius:999px;font-size:.75rem;font-weight:600;">&#127979; {{ profile.education.count }} Education Entries</span>
+    <span style="padding:4px 12px;background:var(--orange-pale);color:#92400e;border-radius:999px;font-size:.75rem;font-weight:600;">&#127941; {{ profile.certifications.count }} Certifications</span>
+  </div>
+  {% if profile.skills.count == 0 or profile.experience.count == 0 %}
+  <div style="margin-top:10px;font-size:.75rem;color:#92400e;">
+    &#9888; <a href="{% url 'jobseeker:profile' %}" style="color:#d97706;font-weight:700;">Complete your profile</a> to add more content to your resume.
+  </div>
+  {% endif %}
+</div>
+
+<!-- ══ SUBMIT ════════════════════════════════════════════════════════════════ -->
+<div style="display:flex;gap:12px;padding-bottom:8px;">
+  <button type="submit" class="btn btn-primary" style="background:var(--indigo);border-color:var(--indigo);">
+    {% if resume %}&#128065; Save &amp; Preview{% else %}&#9998; Create &amp; Preview{% endif %}
+  </button>
+  <a href="{% url 'resume:builder_list' %}" class="btn btn-gray">Cancel</a>
+</div>
+
+</form>
+
+<script>
+(function () {
+  /* ── Colour swatches ── */
+  const colorInput = document.querySelector('input[name="accent_color"]');
+  const swatches   = document.querySelectorAll('#swatch-row .color-swatch');
+
+  function syncSwatches(hex) {
+    swatches.forEach(s => s.classList.toggle('active', s.dataset.color === hex));
+  }
+
+  swatches.forEach(s => {
+    s.addEventListener('click', () => {
+      colorInput.value = s.dataset.color;
+      syncSwatches(s.dataset.color);
+    });
+  });
+
+  colorInput.addEventListener('input', () => syncSwatches(colorInput.value));
+
+  // Init active swatch from current value
+  syncSwatches(colorInput.value || '#4f46e5');
+
+  /* ── Section drag-and-drop ── */
+  const list    = document.getElementById('sort-list');
+  const orderIn = document.getElementById('{{ form.section_order.id_for_label }}');
+  let dragged   = null;
+
+  function updateOrder() {
+    const keys = Array.from(list.querySelectorAll('.sort-item')).map(i => i.dataset.key);
+    if (orderIn) orderIn.value = keys.join(',');
+  }
+
+  list.addEventListener('dragstart', e => {
+    dragged = e.target.closest('.sort-item');
+    setTimeout(() => dragged && (dragged.style.opacity = '0.4'), 0);
+  });
+
+  list.addEventListener('dragend', () => {
+    if (dragged) { dragged.style.opacity = ''; dragged = null; }
+    updateOrder();
+  });
+
+  list.addEventListener('dragover', e => {
+    e.preventDefault();
+    const target = e.target.closest('.sort-item');
+    if (!target || target === dragged) return;
+    const rect = target.getBoundingClientRect();
+    if (e.clientY < rect.top + rect.height / 2) {
+      list.insertBefore(dragged, target);
+    } else {
+      list.insertBefore(dragged, target.nextSibling);
+    }
+  });
+
+  list.addEventListener('dragenter', e => {
+    const t = e.target.closest('.sort-item');
+    if (t && t !== dragged) t.classList.add('drag-over');
+  });
+
+  list.addEventListener('dragleave', e => {
+    const t = e.target.closest('.sort-item');
+    if (t) t.classList.remove('drag-over');
+  });
+
+  // Restore saved order on page load
+  const saved = orderIn ? orderIn.value : '';
+  if (saved) {
+    const keys = saved.split(',').filter(Boolean);
+    keys.forEach(key => {
+      const el = list.querySelector('[data-key="' + key + '"]');
+      if (el) list.appendChild(el);
+    });
+  }
+
+  updateOrder(); // ensure hidden field is populated
+}());
+</script>
+{% endblock %}

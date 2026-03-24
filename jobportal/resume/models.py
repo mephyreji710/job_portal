@@ -124,3 +124,68 @@ class ExtractedKeyword(models.Model):
 
     def __str__(self):
         return f"{self.word} ({self.frequency}×)"
+
+
+# ---------------------------------------------------------------------------
+# Resume Builder
+# ---------------------------------------------------------------------------
+
+class BuiltResume(models.Model):
+    TEMPLATE_CLASSIC = 'classic'
+    TEMPLATE_MODERN  = 'modern'
+    TEMPLATE_SIDEBAR = 'sidebar'
+    TEMPLATE_CHOICES = [
+        (TEMPLATE_CLASSIC, 'Classic Professional'),
+        (TEMPLATE_MODERN,  'Modern Clean'),
+        (TEMPLATE_SIDEBAR, 'Executive Sidebar'),
+    ]
+
+    user          = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name='built_resumes')
+    title         = models.CharField(max_length=200, help_text='e.g. "Software Developer Resume"')
+    template_name = models.CharField(max_length=20, choices=TEMPLATE_CHOICES,
+                                     default=TEMPLATE_CLASSIC)
+
+    # Contact info — overrides profile if filled
+    custom_name     = models.CharField(max_length=200, blank=True)
+    custom_email    = models.EmailField(blank=True)
+    custom_phone    = models.CharField(max_length=30, blank=True)
+    custom_location = models.CharField(max_length=150, blank=True)
+    custom_linkedin = models.URLField(blank=True)
+    custom_website  = models.URLField(blank=True)
+
+    # Resume-specific summary
+    summary = models.TextField(blank=True,
+                               help_text='A 3-5 sentence professional summary tailored for this resume.')
+
+    # ── Customisation ──────────────────────────────────────────────────────
+    FONT_SANS       = 'sans'
+    FONT_INTER      = 'inter'
+    FONT_SERIF      = 'serif'
+    FONT_MONTSERRAT = 'montserrat'
+    FONT_RALEWAY    = 'raleway'
+    FONT_CHOICES = [
+        (FONT_SANS,       'Modern Sans'),
+        (FONT_INTER,      'Inter'),
+        (FONT_SERIF,      'Classic Serif'),
+        (FONT_MONTSERRAT, 'Montserrat'),
+        (FONT_RALEWAY,    'Raleway'),
+    ]
+
+    accent_color  = models.CharField(max_length=7, blank=True, default='',
+                                     help_text='Hex colour e.g. #4f46e5 — leave blank for template default')
+    font_family   = models.CharField(max_length=20, choices=FONT_CHOICES, default=FONT_SANS)
+    section_order = models.CharField(
+        max_length=120, blank=True,
+        default='summary,experience,skills,education,certs',
+        help_text='Comma-separated section keys controlling display order')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f"{self.title} [{self.get_template_name_display()}]"

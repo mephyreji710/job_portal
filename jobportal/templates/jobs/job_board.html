@@ -135,7 +135,7 @@
       <!-- Info -->
       <div style="flex:1;min-width:0;">
         <div class="job-title">{{ job.title }}</div>
-        <div class="job-company">{{ job.recruiter.company_name }}</div>
+        <a href="{% url 'recruiter:public_profile' job.recruiter.pk %}" class="job-company" style="color:inherit;text-decoration:none;">{{ job.recruiter.company_name }}</a>
         <div class="job-meta">
           {% if job.location %}<span>&#128205; {{ job.location }}</span>{% endif %}
           <span>&#128197; {{ job.days_since_posted }}</span>

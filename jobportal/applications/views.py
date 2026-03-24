@@ -1,7 +1,11 @@
+import mimetypes
+import os
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_POST
+from django.http import FileResponse, Http404
 
 from jobs.models import JobPost
 from .models import Application
@@ -40,14 +44,33 @@ def apply(request, pk):
     from resume.models import Resume
     user_resumes = Resume.objects.filter(user=request.user).order_by('-is_primary', '-uploaded_at')
 
+    # Pre-populate from JobSeekerProfile if available
+    initial = {}
+    try:
+        profile = request.user.jobseeker_profile
+        initial['full_name']           = request.user.get_full_name() or ''
+        initial['applicant_location']  = profile.location or ''
+        skills_qs = profile.skills.all()
+        if skills_qs.exists():
+            initial['skills_summary'] = ', '.join(s.name for s in skills_qs)
+        exp_qs = profile.experience.order_by('-start_date')
+        if exp_qs.exists():
+            lines = []
+            for e in exp_qs[:3]:
+                dur = f"{e.start_date.strftime('%b %Y')} – {'Present' if e.is_current else e.end_date.strftime('%b %Y') if e.end_date else 'Present'}"
+                lines.append(f"{e.job_title} at {e.company} ({dur})")
+            initial['experience_summary'] = '\n'.join(lines)
+    except Exception:
+        pass
+
     if request.method == 'POST':
-        form = ApplyForm(request.POST)
+        form = ApplyForm(request.POST, request.FILES)
         if form.is_valid():
             app = form.save(commit=False)
             app.job = job
             app.applicant = request.user
 
-            # Attach selected resume
+            # Attach selected existing resume
             resume_id = request.POST.get('resume_id')
             if resume_id:
                 try:
@@ -92,7 +115,7 @@ def apply(request, pk):
                    from_user=request.user)
             return redirect('jobs:detail', pk=pk)
     else:
-        form = ApplyForm()
+        form = ApplyForm(initial=initial)
 
     return render(request, 'applications/apply.html', {
         'job':          job,
@@ -150,6 +173,64 @@ def my_applications(request):
         'applications':      apps,
         'counts':            counts,
         'rated_company_ids': rated_company_ids,
+    })
+
+
+# ---------------------------------------------------------------------------
+# Recruiter: All Applications (across all jobs)
+# ---------------------------------------------------------------------------
+
+@login_required
+def all_applications(request):
+    """Recruiter view: all applications across all their jobs."""
+    if not _is_recruiter(request.user):
+        messages.error(request, "Only recruiters can view applications.")
+        return redirect('jobs:board')
+
+    try:
+        profile = request.user.recruiter_profile
+    except Exception:
+        return redirect('jobs:board')
+
+    # Filter
+    status_filter = request.GET.get('status', '')
+    job_filter    = request.GET.get('job', '')
+
+    apps = (Application.objects
+            .filter(job__recruiter=profile)
+            .select_related('job', 'applicant', 'resume')
+            .order_by('-applied_at'))
+
+    if status_filter:
+        apps = apps.filter(status=status_filter)
+    if job_filter:
+        apps = apps.filter(job_id=job_filter)
+
+    from screening.models import MatchScore
+    score_map = {
+        ms.candidate_id: ms
+        for ms in MatchScore.objects.filter(job__recruiter=profile)
+    }
+    for app in apps:
+        app.match_score = score_map.get(app.applicant_id)
+
+    jobs_list = profile.jobs.order_by('-created_at')
+    counts = {
+        'total':       apps.count(),
+        'pending':     apps.filter(status='pending').count(),
+        'shortlisted': apps.filter(status='shortlisted').count(),
+        'hired':       apps.filter(status='hired').count(),
+        'rejected':    apps.filter(status='rejected').count(),
+    }
+
+    return render(request, 'applications/all_applications.html', {
+        'applications':           apps,
+        'jobs_list':              jobs_list,
+        'counts':                 counts,
+        'status_filter':          status_filter,
+        'job_filter':             job_filter,
+        'total_application_count': counts['total'],
+        'profile':                profile,
     })
 
 
@@ -260,4 +341,46 @@ def update_application_status(request, pk):
                        link='/applications/my-applications/',
                        from_user=recruiter_user)
 
+    next_url = request.POST.get('next') or request.GET.get('next')
+    if next_url and next_url.startswith('/'):
+        return redirect(next_url)
     return redirect('applications:applicants', pk=app.job_id)
+
+
+# ---------------------------------------------------------------------------
+# Resume Download (recruiter only — forces browser download)
+# ---------------------------------------------------------------------------
+
+@login_required
+def download_resume(request, pk, resume_type):
+    """Serve an applicant's resume as a forced download for the recruiter."""
+    app = get_object_or_404(Application, pk=pk)
+
+    if not _is_recruiter(request.user):
+        raise Http404
+
+    try:
+        if app.job.recruiter != request.user.recruiter_profile:
+            raise Http404
+    except Exception:
+        raise Http404
+
+    if resume_type == 'profile':
+        if not app.resume or not app.resume.file:
+            raise Http404
+        file_field = app.resume.file
+        filename   = app.resume.original_filename or os.path.basename(app.resume.file.name)
+    elif resume_type == 'uploaded':
+        if not app.resume_file:
+            raise Http404
+        file_field = app.resume_file
+        filename   = os.path.basename(app.resume_file.name)
+    else:
+        raise Http404
+
+    content_type, _ = mimetypes.guess_type(filename)
+    content_type = content_type or 'application/octet-stream'
+
+    response = FileResponse(file_field.open('rb'), content_type=content_type)
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response

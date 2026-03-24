@@ -1,0 +1,130 @@
+{% extends 'jobseeker/base_profile.html' %}
+{% block title %}Resume Builder{% endblock %}
+{% block nav_builder %}active{% endblock %}
+
+{% block extra_css %}
+.page-hero {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4f46e5 100%);
+  border-radius: var(--radius-xl); padding: 28px 32px;
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;
+}
+.resume-card {
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-xl); overflow: hidden;
+  transition: border-color .2s, box-shadow .2s;
+  display: flex; flex-direction: column;
+}
+.resume-card:hover { border-color: var(--indigo); box-shadow: 0 4px 20px rgba(79,70,229,.1); }
+.rc-thumb {
+  height: 120px; display: flex; align-items: center; justify-content: center;
+  font-size: 2.5rem; position: relative;
+}
+.rc-classic { background: linear-gradient(135deg, #1e3a5f, #0f172a); }
+.rc-modern  { background: linear-gradient(135deg, #064e3b, #065f46); }
+.rc-sidebar { background: linear-gradient(135deg, #4c1d95, #5b21b6); }
+.tpl-label {
+  position: absolute; bottom: 8px; right: 10px;
+  font-size: .65rem; font-weight: 700; color: rgba(255,255,255,.8);
+  background: rgba(0,0,0,.35); padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: .06em;
+}
+.rc-body { padding: 16px 18px; flex: 1; }
+.rc-title { font-size: .92rem; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
+.rc-date  { font-size: .72rem; color: var(--gray-400); }
+.rc-footer {
+  padding: 12px 18px; border-top: 1px solid var(--gray-100);
+  display: flex; gap: 8px; align-items: center;
+}
+.card-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
+@media (max-width: 900px) { .card-grid { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 560px) { .card-grid { grid-template-columns: 1fr; } }
+{% endblock %}
+
+{% block main_content %}
+
+<div class="page-hero">
+  <div>
+    <h2 style="color:#fff;font-size:1.3rem;font-weight:800;margin-bottom:4px;">&#9998; Resume Builder</h2>
+    <p style="color:rgba(255,255,255,.65);font-size:.875rem;">
+      Build beautiful, ATS-optimized resumes from your profile data
+    </p>
+  </div>
+  <a href="{% url 'resume:builder_create' %}" class="btn btn-primary" style="background:#fff;color:var(--indigo);border-color:#fff;">
+    + Create New Resume
+  </a>
+</div>
+
+<!-- TEMPLATE INFO STRIP -->
+<div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:16px 20px;">
+  <div style="font-size:.78rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Available Templates</div>
+  <div style="display:flex;gap:14px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:#eff6ff;border-radius:var(--radius);border:1.5px solid #bfdbfe;">
+      <span style="font-size:1.1rem;">&#128196;</span>
+      <div><div style="font-size:.82rem;font-weight:700;color:#1e40af;">Classic Professional</div><div style="font-size:.7rem;color:#1d4ed8;">★★★★★ ATS Score &bull; Traditional &bull; All industries</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--green-pale);border-radius:var(--radius);border:1.5px solid #6ee7b7;">
+      <span style="font-size:1.1rem;">&#127775;</span>
+      <div><div style="font-size:.82rem;font-weight:700;color:#065f46;">Modern Clean</div><div style="font-size:.7rem;color:#059669;">★★★★☆ ATS Score &bull; Contemporary &bull; Tech / Startups</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:#f5f3ff;border-radius:var(--radius);border:1.5px solid #c4b5fd;">
+      <span style="font-size:1.1rem;">&#127959;</span>
+      <div><div style="font-size:.82rem;font-weight:700;color:#5b21b6;">Executive Sidebar</div><div style="font-size:.7rem;color:#6d28d9;">★★★☆☆ ATS Score &bull; Visual &bull; Creative / Senior roles</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- RESUME CARDS -->
+{% if built_resumes %}
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:#eef2ff;">&#128220;</div>
+      <div>
+        <div class="section-title">Your Resumes</div>
+        <div class="section-sub">{{ built_resumes.count }} resume{{ built_resumes.count|pluralize }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="card-grid">
+      {% for br in built_resumes %}
+      <div class="resume-card">
+        <div class="rc-thumb rc-{{ br.template_name }}">
+          {% if br.template_name == 'classic' %}&#128196;{% elif br.template_name == 'modern' %}&#127775;{% else %}&#127959;{% endif %}
+          <span class="tpl-label">{{ br.get_template_name_display }}</span>
+        </div>
+        <div class="rc-body">
+          <div class="rc-title">{{ br.title }}</div>
+          <div class="rc-date">Updated {{ br.updated_at|date:"M d, Y" }}</div>
+          {% if br.summary %}
+          <div style="font-size:.75rem;color:var(--gray-500);margin-top:6px;font-style:italic;">{{ br.summary|truncatechars:80 }}</div>
+          {% endif %}
+        </div>
+        <div class="rc-footer">
+          <a href="{% url 'resume:builder_preview' br.pk %}" class="btn btn-primary btn-sm">&#128065; Preview &amp; Print</a>
+          <a href="{% url 'resume:builder_edit' br.pk %}" class="btn btn-gray btn-sm">&#9998; Edit</a>
+          <form method="post" action="{% url 'resume:builder_delete' br.pk %}"
+                style="margin-left:auto;" onsubmit="return confirm('Delete this resume?')">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm">&#128465;</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% else %}
+<div class="section-card">
+  <div class="empty-state">
+    <div class="empty-icon">&#9998;</div>
+    <div class="empty-title">No resumes built yet</div>
+    <div class="empty-desc">Create your first resume in under 2 minutes using your profile data.</div>
+    <a href="{% url 'resume:builder_create' %}" class="btn btn-primary" style="background:var(--indigo);border-color:var(--indigo);">
+      &#9998; Build My First Resume
+    </a>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

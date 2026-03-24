@@ -419,6 +419,11 @@
         <span class="nav-icon">&#128196;</span> Resumes
         <span class="nav-count">{{ request.user.resumes.count }}</span>
       </a>
+      <a href="{% url 'resume:builder_list' %}"
+         class="nav-item {% block nav_builder %}{% endblock %}">
+        <span class="nav-icon">&#9998;</span> Resume Builder
+        <span class="nav-count">{{ request.user.built_resumes.count }}</span>
+      </a>
     </nav>
 
     <!-- Missing Items -->
