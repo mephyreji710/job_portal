@@ -238,7 +238,7 @@ def builder_create(request):
             br = form.save(commit=False)
             br.user = request.user
             br.save()
-            messages.success(request, f"Resume \"{br.title}\" created\!")
+            messages.success(request, f'Resume "{br.title}" created!')
             return redirect("resume:builder_preview", pk=br.pk)
     else:
         # Pre-fill contact from profile
