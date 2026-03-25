@@ -8,12 +8,12 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --accent: #1d4ed8; --navy: #0f172a;
-      --gray-700: #374151; --gray-500: #6b7280; --gray-200: #e5e7eb; --gray-100: #f3f4f6;
+      --accent: #1a1a1a; --navy: #111111; --gray-700: #333333;
+      --gray-500: #555555; --gray-200: #cccccc; --gray-100: #f5f5f5;
       --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
     }
     body { font-family: var(--font); background: #f0f4f8; color: var(--navy); }
-    .toolbar { background: var(--navy); color: #fff; padding: 12px 28px; display: flex; align-items: center; justify-content: space-between; gap: 12px; position: sticky; top: 0; z-index: 100; }
+    .toolbar { background: #1e293b; color: #fff; padding: 12px 28px; display: flex; align-items: center; justify-content: space-between; gap: 12px; position: sticky; top: 0; z-index: 100; }
     .toolbar-brand { font-size: .88rem; font-weight: 700; opacity: .8; }
     .toolbar-actions { display: flex; gap: 10px; }
     .tb-btn { padding: 7px 18px; border-radius: 8px; font-size: .83rem; font-weight: 700; cursor: pointer; border: none; font-family: var(--font); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
@@ -21,47 +21,62 @@
     .tb-edit  { background: rgba(255,255,255,.15); color: #fff; }
     .tb-back  { background: rgba(255,255,255,.1); color: rgba(255,255,255,.8); }
     .page-wrap { max-width: 860px; margin: 28px auto 60px; padding: 0 20px; }
-    .resume { background: #fff; padding: 52px 56px; box-shadow: 0 8px 40px rgba(0,0,0,.12); font-size: 10.5pt; line-height: 1.5; color: var(--navy); }
-    .r-name { font-size: 28pt; font-weight: 700; color: var(--navy); letter-spacing: -0.5px; }
-    .r-headline { font-size: 11pt; color: var(--accent); font-weight: 600; margin-top: 4px; }
-    .r-contact { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 9.5pt; color: var(--gray-700); border-top: 2.5px solid var(--accent); border-bottom: 1px solid var(--gray-200); padding: 8px 0; }
-    .r-contact span { display: inline-flex; align-items: center; gap: 4px; }
-    .r-section { margin-top: 30px; }
-    .r-section-title { font-size: 10pt; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--navy); border-bottom: 1.5px solid var(--accent); padding-bottom: 3px; margin-bottom: 10px; }
+    .resume { background: #fff; padding: 52px 56px; box-shadow: 0 8px 40px rgba(0,0,0,.12); font-size: 10.5pt; line-height: 1.55; color: var(--navy); }
+
+    /* Header */
+    .r-name { font-size: 24pt; font-weight: 700; color: #000; letter-spacing: -0.3px; }
+    .r-headline { font-size: 11pt; color: var(--gray-500); margin-top: 3px; }
+    .r-contact { margin-top: 8px; padding-bottom: 10px; border-bottom: 2px solid #000; font-size: 9.5pt; color: var(--gray-700); display: flex; flex-wrap: wrap; gap: 3px 16px; }
+
+    /* Sections */
+    .r-section { margin-top: 22px; }
+    .r-section-title {
+      font-size: 9.5pt; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: #000;
+      border-bottom: 1px solid #000; padding-bottom: 3px; margin-bottom: 10px;
+    }
     .r-summary { font-size: 10pt; color: var(--gray-700); line-height: 1.65; }
+
+    /* Experience */
     .exp-item { margin-bottom: 14px; }
-    .exp-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 4px; }
-    .exp-title { font-size: 10.5pt; font-weight: 700; color: var(--navy); }
-    .exp-date  { font-size: 9.5pt; color: var(--accent); font-weight: 600; white-space: nowrap; }
-    .exp-company { font-size: 9.5pt; color: var(--gray-700); font-style: italic; }
-    .exp-desc { font-size: 9.5pt; color: var(--gray-700); margin-top: 5px; line-height: 1.6; white-space: pre-line; }
-    .edu-item { margin-bottom: 10px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 2px; }
-    .edu-degree { font-size: 10.5pt; font-weight: 700; color: var(--navy); }
-    .edu-school { font-size: 9.5pt; color: var(--gray-700); font-style: italic; }
-    .edu-year   { font-size: 9.5pt; color: var(--accent); font-weight: 600; }
-    .skills-grid { display: flex; flex-wrap: wrap; gap: 5px 12px; }
-    .skill-pill { font-size: 9.5pt; color: var(--navy); display: inline-flex; align-items: center; gap: 5px; }
-    .skill-pill::before { content: '\2022'; color: var(--accent); font-size: 1.1em; }
-    .cert-item { margin-bottom: 8px; display: flex; justify-content: space-between; flex-wrap: wrap; }
-    .cert-name { font-size: 10pt; font-weight: 600; color: var(--navy); }
-    .cert-org  { font-size: 9.5pt; color: var(--gray-700); font-style: italic; }
-    .cert-date { font-size: 9.5pt; color: var(--accent); font-weight: 600; }
+    .exp-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 2px; }
+    .exp-title { font-size: 10.5pt; font-weight: 700; color: #000; }
+    .exp-date  { font-size: 9.5pt; color: var(--gray-700); font-weight: 600; white-space: nowrap; }
+    .exp-company { font-size: 9.5pt; color: var(--gray-700); }
+    .exp-desc { font-size: 9.5pt; color: var(--gray-700); margin-top: 4px; line-height: 1.6; white-space: pre-line; }
+
+    /* Education */
+    .edu-item { margin-bottom: 8px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 2px; }
+    .edu-degree { font-size: 10.5pt; font-weight: 700; color: #000; }
+    .edu-school { font-size: 9.5pt; color: var(--gray-700); }
+    .edu-year   { font-size: 9.5pt; color: var(--gray-700); font-weight: 600; }
+
+    /* Skills — plain text for ATS */
+    .skills-text { font-size: 10pt; color: var(--gray-700); line-height: 1.8; }
+    .skill-sep { color: var(--gray-500); }
+
+    /* Certs */
+    .cert-item { margin-bottom: 6px; display: flex; justify-content: space-between; flex-wrap: wrap; }
+    .cert-name { font-size: 10pt; font-weight: 600; color: #000; }
+    .cert-org  { font-size: 9.5pt; color: var(--gray-700); }
+    .cert-date { font-size: 9.5pt; color: var(--gray-700); }
+
     @media print {
       body { background: #fff !important; }
       .toolbar { display: none !important; }
       .page-wrap { margin: 0; padding: 0; max-width: 100%; }
-      .resume { box-shadow: none; padding: 28px 32px; }
+      .resume { box-shadow: none; padding: 30px 36px; }
       a { color: inherit; text-decoration: none; }
       .exp-item, .edu-item { page-break-inside: avoid; }
       @page { size: A4; margin: 0; }
     }
-    @media (max-width: 600px) { .resume { padding: 28px 20px; } .page-wrap { padding: 0 10px; } }
+    @media (max-width: 600px) { .resume { padding: 28px 18px; } .page-wrap { padding: 0 10px; } }
   </style>
   <style>:root { --accent: {{ accent }}; --font: {{ font_stack }}; }</style>
 </head>
 <body>
 <div class="toolbar">
-  <span class="toolbar-brand">&#128196; Classic Professional — {{ br.title }}</span>
+  <span class="toolbar-brand">&#9632; ATS Minimal — {{ br.title }}</span>
   <div class="toolbar-actions">
     <a href="{% url 'resume:builder_edit' br.pk %}" class="tb-btn tb-edit">&#9998; Edit</a>
     <a href="{% url 'resume:builder_list' %}" class="tb-btn tb-back">&#8592; My Resumes</a>
@@ -73,12 +88,13 @@
   <div class="r-name">{{ name }}</div>
   {% if headline %}<div class="r-headline">{{ headline }}</div>{% endif %}
   <div class="r-contact">
-    {% if email %}<span>&#9993; {{ email }}</span>{% endif %}
-    {% if phone %}<span>&#128222; {{ phone }}</span>{% endif %}
-    {% if location %}<span>&#128205; {{ location }}</span>{% endif %}
-    {% if linkedin %}<span>&#128101; {{ linkedin }}</span>{% endif %}
-    {% if website %}<span>&#127760; {{ website }}</span>{% endif %}
+    {% if email %}<span>{{ email }}</span>{% endif %}
+    {% if phone %}<span>{{ phone }}</span>{% endif %}
+    {% if location %}<span>{{ location }}</span>{% endif %}
+    {% if linkedin %}<span>{{ linkedin }}</span>{% endif %}
+    {% if website %}<span>{{ website }}</span>{% endif %}
   </div>
+
   {% for sec in sections %}
     {% if sec == 'summary' and summary %}
     <div class="r-section">
@@ -94,17 +110,25 @@
         <div class="exp-header">
           <div>
             <div class="exp-title">{{ exp.job_title }}</div>
-            <div class="exp-company">{{ exp.company }}{% if exp.location %} &middot; {{ exp.location }}{% endif %} &middot; {{ exp.get_employment_type_display }}</div>
+            <div class="exp-company">{{ exp.company }}{% if exp.location %}, {{ exp.location }}{% endif %} &mdash; {{ exp.get_employment_type_display }}</div>
           </div>
           <div class="exp-date">
             {{ exp.start_date|date:"M Y" }} &ndash;
             {% if exp.is_current %}Present{% elif exp.end_date %}{{ exp.end_date|date:"M Y" }}{% else %}Present{% endif %}
-            <span style="margin-left:6px;font-size:.85em;color:#6b7280;">({{ exp.get_duration }})</span>
+            ({{ exp.get_duration }})
           </div>
         </div>
         {% if exp.description %}<div class="exp-desc">{{ exp.description }}</div>{% endif %}
       </div>
       {% endfor %}
+    </div>
+    {% endif %}
+    {% if sec == 'skills' and skills %}
+    <div class="r-section">
+      <div class="r-section-title">Skills</div>
+      <div class="skills-text">
+        {% for skill in skills %}{{ skill.name }}{% if not forloop.last %}<span class="skill-sep"> &middot; </span>{% endif %}{% endfor %}
+      </div>
     </div>
     {% endif %}
     {% if sec == 'education' and education %}
@@ -114,22 +138,11 @@
       <div class="edu-item">
         <div>
           <div class="edu-degree">{{ edu.get_degree_display }} in {{ edu.field_of_study }}</div>
-          <div class="edu-school">{{ edu.institution }}{% if edu.grade %} &middot; {{ edu.grade }}{% endif %}</div>
-          {% if edu.description %}<div style="font-size:9pt;color:#6b7280;margin-top:2px;">{{ edu.description|truncatechars:100 }}</div>{% endif %}
+          <div class="edu-school">{{ edu.institution }}{% if edu.grade %} &mdash; {{ edu.grade }}{% endif %}</div>
         </div>
         <div class="edu-year">{{ edu.start_year }} &ndash; {% if edu.is_current %}Present{% elif edu.end_year %}{{ edu.end_year }}{% else %}Present{% endif %}</div>
       </div>
       {% endfor %}
-    </div>
-    {% endif %}
-    {% if sec == 'skills' and skills %}
-    <div class="r-section">
-      <div class="r-section-title">Skills</div>
-      <div class="skills-grid">
-        {% for skill in skills %}
-        <span class="skill-pill">{{ skill.name }}{% if skill.proficiency != 'intermediate' %} ({{ skill.get_proficiency_display }}){% endif %}</span>
-        {% endfor %}
-      </div>
     </div>
     {% endif %}
     {% if sec == 'certs' and certs %}
@@ -139,7 +152,7 @@
       <div class="cert-item">
         <div>
           <div class="cert-name">{{ cert.name }}</div>
-          <div class="cert-org">{{ cert.issuing_organization }}{% if cert.credential_id %} &middot; ID: {{ cert.credential_id }}{% endif %}</div>
+          <div class="cert-org">{{ cert.issuing_organization }}{% if cert.credential_id %} &mdash; ID: {{ cert.credential_id }}{% endif %}</div>
         </div>
         <div class="cert-date">{{ cert.issue_date|date:"M Y" }}{% if cert.expiry_date %} &ndash; {{ cert.expiry_date|date:"M Y" }}{% endif %}</div>
       </div>

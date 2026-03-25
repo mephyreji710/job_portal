@@ -28,6 +28,8 @@ textarea.fc { resize: vertical; min-height: 100px; }
 .tpl-classic { background: linear-gradient(135deg,#1e3a5f,#0f172a); }
 .tpl-modern  { background: linear-gradient(135deg,#064e3b,#065f46); }
 .tpl-sidebar { background: linear-gradient(135deg,#4c1d95,#5b21b6); }
+.tpl-minimal { background: linear-gradient(135deg,#1f2937,#374151); }
+.tpl-techdev { background: linear-gradient(135deg,#064e3b,#065f46); border-top: 3px solid #10b981; }
 .tpl-info { padding: 10px 12px; background: var(--gray-50); }
 .tpl-name { font-size: .82rem; font-weight: 700; color: var(--gray-800); }
 .tpl-desc { font-size: .7rem; color: var(--gray-400); margin-top: 2px; }
@@ -154,6 +156,34 @@ textarea.fc { resize: vertical; min-height: 100px; }
             <div class="tpl-name">Executive Sidebar</div>
             <div class="tpl-desc">Two-column with sidebar for skills</div>
             <div class="tpl-ats">★★★☆☆ Good for creative roles</div>
+          </div>
+        </div>
+        <div class="checked-badge">&#10003;</div>
+      </label>
+
+      <label class="tpl-option">
+        <input type="radio" name="template_name" value="minimal"
+               {% if form.template_name.value == 'minimal' %}checked{% endif %}>
+        <div class="tpl-card">
+          <div class="tpl-thumb tpl-minimal">&#9632;</div>
+          <div class="tpl-info">
+            <div class="tpl-name">ATS Minimal</div>
+            <div class="tpl-desc">Pure text, zero decoration, maximum parse score</div>
+            <div class="tpl-ats">★★★★★ Highest ATS score</div>
+          </div>
+        </div>
+        <div class="checked-badge">&#10003;</div>
+      </label>
+
+      <label class="tpl-option">
+        <input type="radio" name="template_name" value="techdev"
+               {% if form.template_name.value == 'techdev' %}checked{% endif %}>
+        <div class="tpl-card">
+          <div class="tpl-thumb tpl-techdev">&#128187;</div>
+          <div class="tpl-info">
+            <div class="tpl-name">Tech &amp; Developer</div>
+            <div class="tpl-desc">Dark header, code-style labels, skill tags</div>
+            <div class="tpl-ats">★★★★☆ Great for tech roles</div>
           </div>
         </div>
         <div class="checked-badge">&#10003;</div>
@@ -329,6 +359,22 @@ textarea.fc { resize: vertical; min-height: 100px; }
     <div class="fh">Write what makes you unique. Include your years of experience, key skills, and career goals. This is the first thing recruiters read.</div>
     {{ form.summary }}
     {% for e in form.summary.errors %}<div class="fe">{{ e }}</div>{% endfor %}
+  </div>
+</div>
+
+<!-- ══ ADDITIONAL INFORMATION ═════════════════════════════════════════════ -->
+<div class="form-card">
+  <div class="fc-head">
+    <div class="fc-icon" style="background:#f0fdf4;">&#128279;</div>
+    <div>
+      <div class="fc-title">Additional Information <span style="font-size:.72rem;color:var(--gray-400);font-weight:500;">(Optional)</span></div>
+      <div class="fc-sub">Extra links, languages, awards, or anything else you want on your resume</div>
+    </div>
+  </div>
+  <div class="fc-body">
+    <div class="fh">Examples: GitHub · Languages · Driving licence · Volunteer work · References available on request</div>
+    {{ form.personal_details }}
+    {% for e in form.personal_details.errors %}<div class="fe">{{ e }}</div>{% endfor %}
   </div>
 </div>
 

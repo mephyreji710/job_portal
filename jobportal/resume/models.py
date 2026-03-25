@@ -134,10 +134,14 @@ class BuiltResume(models.Model):
     TEMPLATE_CLASSIC = 'classic'
     TEMPLATE_MODERN  = 'modern'
     TEMPLATE_SIDEBAR = 'sidebar'
+    TEMPLATE_MINIMAL = 'minimal'
+    TEMPLATE_TECHDEV = 'techdev'
     TEMPLATE_CHOICES = [
         (TEMPLATE_CLASSIC, 'Classic Professional'),
         (TEMPLATE_MODERN,  'Modern Clean'),
         (TEMPLATE_SIDEBAR, 'Executive Sidebar'),
+        (TEMPLATE_MINIMAL, 'ATS Minimal'),
+        (TEMPLATE_TECHDEV, 'Tech & Developer'),
     ]
 
     user          = models.ForeignKey(
@@ -180,6 +184,10 @@ class BuiltResume(models.Model):
         max_length=120, blank=True,
         default='summary,experience,skills,education,certs',
         help_text='Comma-separated section keys controlling display order')
+
+    personal_details = models.TextField(
+        blank=True,
+        help_text='Optional extra info: GitHub, awards, languages, references, etc.')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

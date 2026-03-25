@@ -32,6 +32,7 @@ class BuiltResumeForm(forms.ModelForm):
         model  = BuiltResume
         fields = [
             'title', 'template_name', 'summary',
+            'personal_details',
             'custom_name', 'custom_email', 'custom_phone',
             'custom_location', 'custom_linkedin', 'custom_website',
             'accent_color', 'font_family', 'section_order',
@@ -54,6 +55,13 @@ class BuiltResumeForm(forms.ModelForm):
             'custom_location': forms.TextInput(attrs={'class': 'fc', 'placeholder': 'City, State, Country'}),
             'custom_linkedin': forms.URLInput(attrs={'class': 'fc', 'placeholder': 'linkedin.com/in/yourprofile'}),
             'custom_website':  forms.URLInput(attrs={'class': 'fc', 'placeholder': 'yourportfolio.com'}),
+            'personal_details': forms.Textarea(attrs={
+                'class': 'fc', 'rows': 3,
+                'placeholder': (
+                    'e.g. GitHub: github.com/you  |  Languages: English (Native), Spanish (B2)  '
+                    '|  Driving licence: Full  |  References available on request'
+                ),
+            }),
             'accent_color':    forms.TextInput(attrs={'type': 'color', 'class': 'color-input'}),
             'font_family':     forms.RadioSelect(),
             'section_order':   forms.HiddenInput(),
@@ -70,5 +78,6 @@ class BuiltResumeForm(forms.ModelForm):
             'custom_website': 'Website / Portfolio',
             'accent_color':   'Accent Colour',
             'font_family':    'Font Style',
+            'personal_details': 'Additional Information (Optional)',
             'section_order':  'Section Order',
         }

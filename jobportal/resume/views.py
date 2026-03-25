@@ -314,6 +314,8 @@ def builder_preview(request, pk):
         'classic': '#1d4ed8',
         'modern':  '#0891b2',
         'sidebar': '#6366f1',
+        'minimal': '#1a1a1a',
+        'techdev': '#10b981',
     }
     accent = br.accent_color or DEFAULT_ACCENTS.get(br.template_name, '#4f46e5')
 
@@ -330,6 +332,8 @@ def builder_preview(request, pk):
         "classic": "resume/preview_classic.html",
         "modern":  "resume/preview_modern.html",
         "sidebar": "resume/preview_sidebar.html",
+        "minimal": "resume/preview_minimal.html",
+        "techdev": "resume/preview_techdev.html",
     }
     tpl = template_map.get(br.template_name, "resume/preview_classic.html")
     return render(request, tpl, {
@@ -348,10 +352,11 @@ def builder_preview(request, pk):
         "education":  profile.education.all(),
         "certs":      profile.certifications.all(),
         # customisation
-        "accent":     accent,
-        "font_stack": font_stack,
-        "font_url":   font_url,
-        "sections":   sections,
+        "accent":           accent,
+        "font_stack":       font_stack,
+        "font_url":         font_url,
+        "sections":         sections,
+        "personal_details": br.personal_details,
     })
 
 
