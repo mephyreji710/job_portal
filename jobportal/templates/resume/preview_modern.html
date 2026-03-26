@@ -21,8 +21,8 @@
     .tb-print { background: var(--accent); color: #fff; }
     .tb-edit  { background: rgba(255,255,255,.15); color: #fff; }
     .tb-back  { background: rgba(255,255,255,.1); color: rgba(255,255,255,.8); }
-    .page-wrap { max-width: 860px; margin: 28px auto 60px; padding: 0 20px; }
-    .resume { background: #fff; box-shadow: 0 8px 40px rgba(0,0,0,.12); font-size: 10.5pt; line-height: 1.55; }
+    .page-wrap { padding: 28px 20px 60px; display: flex; justify-content: center; }
+    .resume { background: #fff; box-shadow: 0 8px 40px rgba(0,0,0,.12); font-size: 10.5pt; line-height: 1.55; width: 210mm; min-height: 297mm; }
     .r-top-bar { height: 8px; background: linear-gradient(90deg, var(--accent-dark), var(--accent), #67e8f9); }
     .r-header { padding: 36px 48px 24px; border-bottom: 1.5px solid var(--gray-200); display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
     .r-name     { font-size: 26pt; font-weight: 800; color: var(--navy); letter-spacing: -0.5px; }
@@ -65,7 +65,8 @@
       .exp-item { page-break-inside: avoid; }
       @page { size: A4; margin: 0; }
     }
-    @media (max-width: 600px) {
+    @media (max-width: 794px) {
+      .resume { width: 100%; min-height: auto; }
       .r-header { padding: 24px 20px 18px; }
       .r-body   { padding: 20px 20px 32px; }
       .r-contact { text-align: left; }

@@ -20,8 +20,8 @@
     .tb-print { background: var(--indigo); color: #fff; }
     .tb-edit  { background: rgba(255,255,255,.15); color: #fff; }
     .tb-back  { background: rgba(255,255,255,.1); color: rgba(255,255,255,.8); }
-    .page-wrap { max-width: 900px; margin: 28px auto 60px; padding: 0 20px; }
-    .resume { background: #fff; box-shadow: 0 8px 40px rgba(0,0,0,.14); display: flex; min-height: 900px; }
+    .page-wrap { padding: 28px 20px 60px; display: flex; justify-content: center; }
+    .resume { background: #fff; box-shadow: 0 8px 40px rgba(0,0,0,.14); display: flex; width: 210mm; min-height: 297mm; }
     .r-sidebar { width: 260px; flex-shrink: 0; background: var(--sb-bg); padding: 40px 24px; display: flex; flex-direction: column; gap: 24px; }
     .sb-name     { font-size: 18pt; font-weight: 800; color: #fff; line-height: 1.2; }
     .sb-headline { font-size: 9.5pt; color: var(--accent); font-weight: 600; margin-top: 5px; }
@@ -59,7 +59,7 @@
       -webkit-print-color-adjust: exact; print-color-adjust: exact;
       @page { size: A4 landscape; margin: 0; }
     }
-    @media (max-width: 700px) { .resume { flex-direction: column; } .r-sidebar { width: 100%; } .r-main { padding: 24px 20px; } }
+    @media (max-width: 794px) { .resume { width: 100%; min-height: auto; flex-direction: column; } .r-sidebar { width: 100%; } .r-main { padding: 24px 20px; } }
   </style>
   <style>:root { --accent: {{ accent }}; --indigo: {{ accent }}; --font: {{ font_stack }}; }</style>
 </head>

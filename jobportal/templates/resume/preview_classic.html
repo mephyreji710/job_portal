@@ -20,8 +20,8 @@
     .tb-print { background: var(--accent); color: #fff; }
     .tb-edit  { background: rgba(255,255,255,.15); color: #fff; }
     .tb-back  { background: rgba(255,255,255,.1); color: rgba(255,255,255,.8); }
-    .page-wrap { max-width: 860px; margin: 28px auto 60px; padding: 0 20px; }
-    .resume { background: #fff; padding: 52px 56px; box-shadow: 0 8px 40px rgba(0,0,0,.12); font-size: 10.5pt; line-height: 1.5; color: var(--navy); }
+    .page-wrap { padding: 28px 20px 60px; display: flex; justify-content: center; }
+    .resume { background: #fff; padding: 52px 56px; box-shadow: 0 8px 40px rgba(0,0,0,.12); font-size: 10.5pt; line-height: 1.5; color: var(--navy); width: 210mm; min-height: 297mm; }
     .r-name { font-size: 28pt; font-weight: 700; color: var(--navy); letter-spacing: -0.5px; }
     .r-headline { font-size: 11pt; color: var(--accent); font-weight: 600; margin-top: 4px; }
     .r-contact { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 9.5pt; color: var(--gray-700); border-top: 2.5px solid var(--accent); border-bottom: 1px solid var(--gray-200); padding: 8px 0; }
@@ -55,7 +55,7 @@
       .exp-item, .edu-item { page-break-inside: avoid; }
       @page { size: A4; margin: 0; }
     }
-    @media (max-width: 600px) { .resume { padding: 28px 20px; } .page-wrap { padding: 0 10px; } }
+    @media (max-width: 794px) { .resume { width: 100%; min-height: auto; padding: 28px 20px; } .page-wrap { padding: 10px; } }
   </style>
   <style>:root { --accent: {{ accent }}; --font: {{ font_stack }}; }</style>
 </head>
