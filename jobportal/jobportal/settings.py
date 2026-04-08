@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'notifications',
     'analytics',
     'feedback',
+    'assessment',
 ]
 
 # ---------------------------------------------------------------------------
@@ -48,7 +49,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',          # <-- static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -56,6 +56,13 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+try:
+    import whitenoise  # noqa: F401
+    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+except ImportError:
+    pass
 
 ROOT_URLCONF = 'jobportal.urls'
 
@@ -82,14 +89,21 @@ WSGI_APPLICATION = 'jobportal.wsgi.application'
 # Database — uses DATABASE_URL env var on Railway, SQLite locally
 # ---------------------------------------------------------------------------
 
-import dj_database_url
-
-DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
-    )
-}
+try:
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+            conn_max_age=600,
+        )
+    }
+except ImportError:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # ---------------------------------------------------------------------------
 # Password validation
@@ -119,8 +133,6 @@ STATIC_URL  = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'          # collected by collectstatic
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# WhiteNoise: serve compressed, cached static files
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL  = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

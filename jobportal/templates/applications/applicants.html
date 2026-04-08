@@ -58,6 +58,8 @@
   </div>
   <div style="display:flex;gap:8px;">
     <a href="{% url 'screening:candidates' job.pk %}" class="btn btn-primary btn-sm">&#127942; AI Rankings ({{ job.match_scores.count }})</a>
+    <a href="{% url 'assessment:manage' job.pk %}" class="btn btn-sm"
+       style="background:#7c3aed;color:#fff;border-color:#7c3aed;">&#128221; {% if job_has_assessment %}Edit Assessment{% else %}Create Assessment{% endif %}</a>
     <a href="{% url 'jobs:preview' job.pk %}" class="btn btn-gray btn-sm" style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.8);">&#128269; Job Preview</a>
     <a href="{% url 'jobs:manage' %}" class="btn btn-gray btn-sm" style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.8);">&#8592; All Jobs</a>
   </div>
@@ -225,6 +227,25 @@
            class="btn btn-primary btn-sm" style="background:var(--indigo);font-size:.72rem;">&#128197; Schedule Interview</a>
         {% endif %}
         {% endwith %}
+
+        {# Send Assessment #}
+        {% if app.status == 'shortlisted' and job_has_assessment %}
+          {% if app.pk in apps_with_attempt %}
+          <a href="{% url 'assessment:detail' app._attempt.pk %}"
+             class="btn btn-sm" style="background:#f5f3ff;color:#7c3aed;border:1.5px solid #c4b5fd;font-size:.72rem;">
+            &#128202; View Result
+          </a>
+          {% else %}
+          <form method="post" action="{% url 'assessment:send' app.pk %}" style="margin:0;">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <button type="submit" class="btn btn-sm"
+                    style="background:#7c3aed;color:#fff;border-color:#7c3aed;font-size:.72rem;">
+              &#128221; Send Assessment
+            </button>
+          </form>
+          {% endif %}
+        {% endif %}
 
         {# Rate candidate #}
         {% if app.status != 'pending' %}

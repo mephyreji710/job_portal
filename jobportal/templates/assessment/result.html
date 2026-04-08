@@ -1,0 +1,147 @@
+{% if is_recruiter %}{% extends 'recruiter/base_recruiter.html' %}{% else %}{% extends 'jobseeker/base_profile.html' %}{% endif %}
+{% block title %}Assessment Result — {{ attempt.assessment.job.title }}{% endblock %}
+
+{% block extra_css %}
+.result-wrap { max-width: 820px; {% if not is_recruiter %}margin: 0 auto;{% endif %} }
+
+.result-header {
+  border-radius: var(--radius-xl); padding: 28px 32px; margin-bottom: 24px;
+  text-align: center;
+}
+.result-header.passed { background: linear-gradient(135deg, #064e3b, #059669); }
+.result-header.failed { background: linear-gradient(135deg, #7f1d1d, #dc2626); }
+
+.score-circle {
+  width: 100px; height: 100px; border-radius: 50%;
+  background: rgba(255,255,255,.2); border: 3px solid rgba(255,255,255,.4);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+}
+.score-num { font-size: 2rem; font-weight: 900; color: #fff; line-height: 1; }
+.score-den { font-size: .8rem; font-weight: 700; color: rgba(255,255,255,.7); }
+
+.q-result {
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-lg); padding: 18px 22px; margin-bottom: 12px;
+}
+.q-result.correct { border-left: 4px solid #10b981; }
+.q-result.wrong   { border-left: 4px solid #ef4444; }
+.q-result.skipped { border-left: 4px solid #9ca3af; }
+
+.ans-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 999px; font-size: .72rem; font-weight: 700;
+}
+.badge-correct { background: #d1fae5; color: #065f46; }
+.badge-wrong   { background: #fee2e2; color: #991b1b; }
+.badge-correct-ans { background: #dbeafe; color: #1e40af; }
+.badge-skipped { background: var(--gray-100); color: var(--gray-500); }
+{% endblock %}
+
+{% block main_content %}
+<div class="result-wrap">
+
+  <!-- Score Header -->
+  <div class="result-header {% if attempt.passed %}passed{% else %}failed{% endif %}">
+    <div class="score-circle">
+      <span class="score-num">{{ attempt.score }}</span>
+      <span class="score-den">/ {{ attempt.total_questions }}</span>
+    </div>
+    {% if attempt.passed %}
+    <h2 style="color:#fff;font-size:1.4rem;font-weight:900;margin-bottom:6px;">&#9989; Assessment Passed!</h2>
+    <p style="color:rgba(255,255,255,.8);font-size:.9rem;">
+      Congratulations — advancing to the next round.
+    </p>
+    {% else %}
+    <h2 style="color:#fff;font-size:1.4rem;font-weight:900;margin-bottom:6px;">&#10060; Not Passed</h2>
+    <p style="color:rgba(255,255,255,.8);font-size:.9rem;">
+      Minimum required: {{ attempt.assessment.pass_mark }} / {{ attempt.total_questions }}
+    </p>
+    {% endif %}
+    <div style="margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <span style="background:rgba(255,255,255,.15);color:#fff;padding:4px 14px;border-radius:999px;font-size:.78rem;font-weight:700;">
+        &#128197; {{ attempt.completed_at|date:"M d, Y · H:i" }}
+      </span>
+      {% if is_recruiter %}
+      <span style="background:rgba(255,255,255,.15);color:#fff;padding:4px 14px;border-radius:999px;font-size:.78rem;font-weight:700;">
+        &#128100; {{ attempt.application.applicant.get_full_name|default:attempt.application.applicant.email }}
+      </span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Back links -->
+  <div style="display:flex;justify-content:flex-end;margin-bottom:16px;gap:8px;">
+    {% if is_recruiter %}
+    <a href="{% url 'applications:applicants' attempt.application.job.pk %}" class="btn btn-outline btn-sm">
+      &#8592; Back to Applicants
+    </a>
+    {% else %}
+    <a href="{% url 'applications:my_applications' %}" class="btn btn-outline btn-sm">
+      &#8592; My Applications
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- Question breakdown -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-title-wrap">
+        <div class="section-icon" style="background:#f5f3ff;color:#7c3aed;">&#128221;</div>
+        <div>
+          <div class="section-title">Question Breakdown</div>
+          <div class="section-sub">
+            Score: {{ attempt.score }}/{{ attempt.total_questions }} &nbsp;|&nbsp; Review all answers below
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section-body">
+
+      {% for ans in answers %}
+      <div class="q-result {% if ans.is_correct %}correct{% elif ans.selected_option %}wrong{% else %}skipped{% endif %}">
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <div style="font-size:.75rem;font-weight:800;color:var(--gray-400);min-width:24px;padding-top:2px;">
+            {{ forloop.counter }}
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:.9rem;font-weight:700;color:var(--gray-900);margin-bottom:8px;">
+              {{ ans.question.text }}
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+              {% if ans.selected_option %}
+              <span class="ans-badge {% if ans.is_correct %}badge-correct{% else %}badge-wrong{% endif %}">
+                {% if ans.is_correct %}&#9989;{% else %}&#10060;{% endif %}
+                Your answer: {{ ans.selected_option }} —
+                {% if ans.selected_option == 'A' %}{{ ans.question.option_a }}
+                {% elif ans.selected_option == 'B' %}{{ ans.question.option_b }}
+                {% elif ans.selected_option == 'C' %}{{ ans.question.option_c }}
+                {% elif ans.selected_option == 'D' %}{{ ans.question.option_d }}
+                {% endif %}
+              </span>
+              {% else %}
+              <span class="ans-badge badge-skipped">&#9711; Skipped</span>
+              {% endif %}
+              {% if not ans.is_correct %}
+              <span class="ans-badge badge-correct-ans">
+                &#10003; Correct: {{ ans.question.correct_option }} —
+                {% if ans.question.correct_option == 'A' %}{{ ans.question.option_a }}
+                {% elif ans.question.correct_option == 'B' %}{{ ans.question.option_b }}
+                {% elif ans.question.correct_option == 'C' %}{{ ans.question.option_c }}
+                {% elif ans.question.correct_option == 'D' %}{{ ans.question.option_d }}
+                {% endif %}
+              </span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <p style="color:var(--gray-400);font-size:.875rem;">No answers recorded.</p>
+      {% endfor %}
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -169,6 +169,17 @@ def my_applications(request):
         Feedback.objects.filter(from_user=request.user, feedback_type=Feedback.TYPE_C2CO)
         .values_list('application_id', flat=True)
     )
+    from assessment.models import AssessmentAttempt
+    attempt_map = {
+        a.application_id: a
+        for a in AssessmentAttempt.objects.filter(
+            application__applicant=request.user
+        ).select_related('assessment')
+    }
+    apps = list(apps)
+    for app in apps:
+        app._attempt = attempt_map.get(app.pk)
+
     return render(request, 'applications/my_applications.html', {
         'applications':      apps,
         'counts':            counts,
@@ -223,6 +234,20 @@ def all_applications(request):
         'rejected':    apps.filter(status='rejected').count(),
     }
 
+    from assessment.models import AssessmentAttempt
+    attempt_by_app = {
+        a.application_id: a
+        for a in AssessmentAttempt.objects.filter(application__job__recruiter=profile)
+    }
+    apps_with_attempt = set(attempt_by_app.keys())
+    jobs_with_assessment = set(
+        profile.assessments.filter(questions__isnull=False)
+        .values_list('job_id', flat=True)
+    )
+    apps = list(apps)
+    for app in apps:
+        app._attempt = attempt_by_app.get(app.pk)
+
     return render(request, 'applications/all_applications.html', {
         'applications':           apps,
         'jobs_list':              jobs_list,
@@ -231,6 +256,8 @@ def all_applications(request):
         'job_filter':             job_filter,
         'total_application_count': counts['total'],
         'profile':                profile,
+        'apps_with_attempt':      apps_with_attempt,
+        'jobs_with_assessment':   jobs_with_assessment,
     })
 
 
@@ -264,15 +291,24 @@ def job_applicants(request, pk):
         ms.candidate_id: ms
         for ms in MatchScore.objects.filter(job=job)
     }
-    # Attach score to each application for template use
-    for app in apps:
-        app.match_score = score_map.get(app.applicant_id)
-
     from feedback.models import Feedback
     rated_candidate_ids = set(
         Feedback.objects.filter(feedback_type=Feedback.TYPE_CO2C, application__job=job)
         .values_list('application_id', flat=True)
     )
+
+    # Assessment: check if job has one and which apps already have an attempt
+    try:
+        job_has_assessment = job.assessment.question_count > 0
+    except Exception:
+        job_has_assessment = False
+
+    from assessment.models import AssessmentAttempt
+    attempt_by_app = {
+        a.application_id: a
+        for a in AssessmentAttempt.objects.filter(application__job=job)
+    }
+    apps_with_attempt = set(attempt_by_app.keys())
 
     counts = {
         'total':       apps.count(),
@@ -281,11 +317,19 @@ def job_applicants(request, pk):
         'hired':       apps.filter(status='hired').count(),
         'rejected':    apps.filter(status='rejected').count(),
     }
+
+    apps = list(apps)
+    for app in apps:
+        app.match_score = score_map.get(app.applicant_id)
+        app._attempt = attempt_by_app.get(app.pk)
+
     return render(request, 'applications/applicants.html', {
-        'job':                job,
-        'applications':       apps,
-        'counts':             counts,
+        'job':                 job,
+        'applications':        apps,
+        'counts':              counts,
         'rated_candidate_ids': rated_candidate_ids,
+        'job_has_assessment':  job_has_assessment,
+        'apps_with_attempt':   apps_with_attempt,
     })
 
 

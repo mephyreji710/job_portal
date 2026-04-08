@@ -143,6 +143,45 @@
         </div>
         {% endif %}
         {% endwith %}
+
+        {# Assessment block #}
+        {% with attempt=app._attempt %}
+        {% if attempt %}
+        <div style="margin-top:10px;border-radius:0 10px 10px 0;padding:12px 16px;font-size:.82rem;
+          {% if attempt.status == 'passed' %}background:#f0fdf4;border-left:3px solid #10b981;
+          {% elif attempt.status == 'failed' %}background:#fef2f2;border-left:3px solid #ef4444;
+          {% else %}background:#f5f3ff;border-left:3px solid #7c3aed;{% endif %}">
+          <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;
+            {% if attempt.status == 'passed' %}color:#059669;
+            {% elif attempt.status == 'failed' %}color:#dc2626;
+            {% else %}color:#7c3aed;{% endif %}">
+            &#128221; Assessment
+          </div>
+          {% if attempt.status == 'pending' or attempt.status == 'in_progress' %}
+          <div style="color:var(--gray-700);font-weight:600;margin-bottom:6px;">
+            {{ attempt.assessment.title }} &bull; {{ attempt.assessment.time_limit_minutes }} min &bull; 25 questions
+          </div>
+          <a href="{% url 'assessment:take' attempt.pk %}"
+             style="display:inline-flex;align-items:center;gap:6px;padding:7px 18px;
+                    background:#7c3aed;color:#fff;border-radius:8px;font-size:.82rem;
+                    font-weight:700;text-decoration:none;">
+            &#9654; Take Assessment Now
+          </a>
+          {% elif attempt.status == 'passed' %}
+          <div style="color:#065f46;font-weight:700;">
+            &#9989; Passed — {{ attempt.score }}/{{ attempt.total_questions }} &nbsp;
+            <a href="{% url 'assessment:my_result' attempt.pk %}" style="color:#059669;font-size:.78rem;">View details</a>
+          </div>
+          {% elif attempt.status == 'failed' %}
+          <div style="color:#991b1b;font-weight:700;">
+            &#10060; Did not pass — {{ attempt.score }}/{{ attempt.total_questions }} &nbsp;
+            <a href="{% url 'assessment:my_result' attempt.pk %}" style="color:#dc2626;font-size:.78rem;">View details</a>
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
       </div>
 
       <!-- Status + actions -->

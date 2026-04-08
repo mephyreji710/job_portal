@@ -1,0 +1,172 @@
+{% extends 'recruiter/base_recruiter.html' %}
+{% block title %}Assessment — {{ job.title }}{% endblock %}
+{% block nav_jobs %}active{% endblock %}
+
+{% block extra_css %}
+.page-header {
+  background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 60%, #4f46e5 100%);
+  border-radius: var(--radius-xl); padding: 24px 28px;
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+}
+.q-block {
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 14px;
+  transition: border-color .2s;
+}
+.q-block:hover { border-color: #7c3aed; }
+.q-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #7c3aed; color: #fff; font-size: .78rem; font-weight: 800;
+  flex-shrink: 0;
+}
+.q-label { font-size: .7rem; font-weight: 700; color: var(--gray-400);
+           text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+.q-input {
+  width: 100%; padding: 8px 12px; border: 1.5px solid var(--gray-200);
+  border-radius: 8px; font-size: .875rem; font-family: var(--font);
+  color: var(--gray-800); background: var(--gray-50); resize: vertical;
+}
+.q-input:focus { outline: none; border-color: #7c3aed; background: var(--white); }
+.opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.opt-wrap { display: flex; align-items: center; gap: 6px; }
+.opt-letter {
+  width: 22px; height: 22px; border-radius: 50%;
+  font-size: .7rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.meta-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+{% endblock %}
+
+{% block main_content %}
+
+<div class="page-header">
+  <div>
+    <h2 style="color:#fff;font-size:1.2rem;font-weight:800;margin-bottom:4px;">&#128221; Assessment Builder</h2>
+    <p style="color:rgba(255,255,255,.65);font-size:.875rem;">{{ job.title }} &bull; {{ assessment.question_count }}/25 questions saved</p>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a href="{% url 'applications:applicants' job.pk %}" class="btn btn-gray btn-sm"
+       style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.85);">&#8592; Back to Applicants</a>
+  </div>
+</div>
+
+<form method="post">
+{% csrf_token %}
+
+<!-- Assessment Meta -->
+<div class="section-card" style="margin-bottom:16px;">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:#f5f3ff;color:#7c3aed;">&#9881;</div>
+      <div>
+        <div class="section-title">Assessment Settings</div>
+        <div class="section-sub">Configure the quiz title, pass mark, and time limit</div>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="meta-grid" style="margin-bottom:14px;">
+      <div>
+        <div class="q-label">Assessment Title</div>
+        <input type="text" name="title" value="{{ assessment.title }}" class="q-input" required>
+      </div>
+      <div>
+        <div class="q-label">Pass Mark (out of 25)</div>
+        <input type="number" name="pass_mark" value="{{ assessment.pass_mark }}" min="1" max="25" class="q-input" required>
+      </div>
+      <div>
+        <div class="q-label">Time Limit (minutes)</div>
+        <input type="number" name="time_limit_minutes" value="{{ assessment.time_limit_minutes }}" min="5" max="180" class="q-input" required>
+      </div>
+    </div>
+    <div>
+      <div class="q-label">Instructions for Candidates (optional)</div>
+      <textarea name="instructions" class="q-input" rows="2"
+        placeholder="e.g. Read each question carefully. No external resources allowed.">{{ assessment.instructions }}</textarea>
+    </div>
+  </div>
+</div>
+
+<!-- Questions -->
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:#f5f3ff;color:#7c3aed;">&#128221;</div>
+      <div>
+        <div class="section-title">Questions <span style="color:#7c3aed;">({{ assessment.question_count }}/25)</span></div>
+        <div class="section-sub">Multiple choice — A, B, C, D. Select the correct answer for each question.</div>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+
+    {% for q in questions %}
+    <div class="q-block">
+      <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div class="q-num">{{ forloop.counter }}</div>
+        <div style="flex:1;">
+
+          <!-- Question text -->
+          <div class="q-label">Question {{ forloop.counter }}</div>
+          <textarea name="q_text" class="q-input" rows="2"
+            placeholder="Enter question {{ forloop.counter }}...">{% if q %}{{ q.text }}{% endif %}</textarea>
+
+          <!-- Options -->
+          <div class="opt-grid" style="margin-top:10px;">
+            <div class="opt-wrap">
+              <div class="opt-letter" style="background:#dbeafe;color:#1e40af;">A</div>
+              <input type="text" name="q_option_a" class="q-input" placeholder="Option A"
+                value="{% if q %}{{ q.option_a }}{% endif %}" style="margin:0;">
+            </div>
+            <div class="opt-wrap">
+              <div class="opt-letter" style="background:#d1fae5;color:#065f46;">B</div>
+              <input type="text" name="q_option_b" class="q-input" placeholder="Option B"
+                value="{% if q %}{{ q.option_b }}{% endif %}" style="margin:0;">
+            </div>
+            <div class="opt-wrap">
+              <div class="opt-letter" style="background:#fef3c7;color:#92400e;">C</div>
+              <input type="text" name="q_option_c" class="q-input" placeholder="Option C"
+                value="{% if q %}{{ q.option_c }}{% endif %}" style="margin:0;">
+            </div>
+            <div class="opt-wrap">
+              <div class="opt-letter" style="background:#fce7f3;color:#9d174d;">D</div>
+              <input type="text" name="q_option_d" class="q-input" placeholder="Option D"
+                value="{% if q %}{{ q.option_d }}{% endif %}" style="margin:0;">
+            </div>
+          </div>
+
+          <!-- Correct answer radio -->
+          <div style="margin-top:10px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+            <span style="font-size:.72rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;">Correct:</span>
+            <label style="display:flex;align-items:center;gap:5px;font-size:.8rem;font-weight:600;color:var(--gray-700);cursor:pointer;">
+              <input type="radio" name="q_correct" value="A" {% if q and q.correct_option == 'A' %}checked{% elif not q %}checked{% endif %}> A
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:.8rem;font-weight:600;color:var(--gray-700);cursor:pointer;">
+              <input type="radio" name="q_correct" value="B" {% if q and q.correct_option == 'B' %}checked{% endif %}> B
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:.8rem;font-weight:600;color:var(--gray-700);cursor:pointer;">
+              <input type="radio" name="q_correct" value="C" {% if q and q.correct_option == 'C' %}checked{% endif %}> C
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:.8rem;font-weight:600;color:var(--gray-700);cursor:pointer;">
+              <input type="radio" name="q_correct" value="D" {% if q and q.correct_option == 'D' %}checked{% endif %}> D
+            </label>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+  </div>
+</div>
+
+<div style="display:flex;justify-content:flex-end;gap:10px;padding-top:4px;padding-bottom:20px;">
+  <a href="{% url 'applications:applicants' job.pk %}" class="btn btn-gray">Cancel</a>
+  <button type="submit" class="btn btn-primary" style="background:#7c3aed;border-color:#7c3aed;">
+    &#128190; Save Assessment
+  </button>
+</div>
+
+</form>
+{% endblock %}

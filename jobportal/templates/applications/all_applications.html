@@ -292,6 +292,25 @@
       {% endif %}
       {% endwith %}
       {% endif %}
+
+      {# Assessment button #}
+      {% if app.status == 'shortlisted' and app.job.pk in jobs_with_assessment %}
+        {% if app.pk in apps_with_attempt %}
+        <a href="{% url 'assessment:detail' app._attempt.pk %}"
+           class="btn btn-sm" style="background:#f5f3ff;color:#7c3aed;border:1.5px solid #c4b5fd;font-size:.72rem;">
+          &#128202; Assessment Result
+        </a>
+        {% else %}
+        <form method="post" action="{% url 'assessment:send' app.pk %}" style="margin:0;">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button type="submit" class="btn btn-sm"
+                  style="background:#7c3aed;color:#fff;border-color:#7c3aed;font-size:.72rem;">
+            &#128221; Send Assessment
+          </button>
+        </form>
+        {% endif %}
+      {% endif %}
     </div>
 
   </div><!-- /card-body -->

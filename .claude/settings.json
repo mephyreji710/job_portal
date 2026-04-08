@@ -11,7 +11,10 @@
       "Bash(python manage.py makemigrations jobseeker)",
       "Bash(env/Scripts/pip list)",
       "Bash(env/Scripts/pip install pdfplumber python-docx)",
-      "Bash(python manage.py startapp resume)"
+      "Bash(python manage.py startapp resume)",
+      "Bash(\"c:\\\\Users\\\\PRO\\\\Desktop\\\\hiriez backend\\\\project\\\\env\\\\Scripts\\\\pip.exe\" install dj-database-url)",
+      "Bash(where python)",
+      "Bash(\"c:/Users/PRO/Desktop/hiriez backend/project/env/Scripts/python.exe\" manage.py check)"
     ],
     "additionalDirectories": [
       "c:\\Users\\PRO\\.claude\\projects\\c--Users-PRO-Desktop-job-portal-project"

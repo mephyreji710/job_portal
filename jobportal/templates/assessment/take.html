@@ -1,0 +1,164 @@
+{% extends 'jobseeker/base_profile.html' %}
+{% block title %}Assessment — {{ attempt.assessment.job.title }}{% endblock %}
+
+{% block extra_css %}
+.quiz-wrap { max-width: 820px; margin: 0 auto; }
+
+.quiz-header {
+  background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 60%, #4f46e5 100%);
+  border-radius: var(--radius-xl); padding: 24px 28px; margin-bottom: 20px;
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+}
+
+/* Timer */
+#timer-box {
+  background: rgba(255,255,255,.15); border-radius: 12px; padding: 10px 20px;
+  text-align: center; min-width: 110px;
+}
+#timer-display { font-size: 1.5rem; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
+.timer-label { font-size: .65rem; font-weight: 700; color: rgba(255,255,255,.65); text-transform: uppercase; letter-spacing: .06em; }
+#timer-box.urgent { background: rgba(239,68,68,.4); }
+
+/* Question cards */
+.q-card {
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-lg); padding: 22px 24px; margin-bottom: 14px;
+  transition: border-color .2s;
+}
+.q-card:focus-within { border-color: #7c3aed; }
+.q-num-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: #7c3aed; color: #fff; font-size: .75rem; font-weight: 800;
+  margin-right: 10px; flex-shrink: 0;
+}
+.q-text { font-size: .95rem; font-weight: 700; color: var(--gray-900); line-height: 1.5; }
+.opts { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.opt-label {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px;
+  cursor: pointer; transition: border-color .15s, background .15s;
+}
+.opt-label:hover { border-color: #7c3aed; background: #f5f3ff; }
+.opt-label input[type=radio] { display: none; }
+.opt-label input[type=radio]:checked + .opt-pill { background: #7c3aed; color: #fff; }
+.opt-label:has(input:checked) { border-color: #7c3aed; background: #f5f3ff; }
+.opt-pill {
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+  background: var(--gray-100); color: var(--gray-600);
+  font-size: .72rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s, color .15s;
+}
+.opt-text { font-size: .875rem; color: var(--gray-700); font-weight: 500; }
+
+.instructions-box {
+  background: #f5f3ff; border-left: 4px solid #7c3aed;
+  border-radius: 0 10px 10px 0; padding: 12px 16px;
+  margin-bottom: 18px; font-size: .85rem; color: var(--gray-700);
+}
+{% endblock %}
+
+{% block main_content %}
+<div class="quiz-wrap">
+
+  <div class="quiz-header">
+    <div>
+      <h2 style="color:#fff;font-size:1.15rem;font-weight:800;margin-bottom:4px;">
+        &#128221; {{ attempt.assessment.title }}
+      </h2>
+      <p style="color:rgba(255,255,255,.65);font-size:.875rem;">
+        {{ attempt.assessment.job.title }} &bull;
+        {{ attempt.assessment.job.recruiter.company_name }} &bull;
+        {{ attempt.total_questions }} questions &bull;
+        Pass mark: {{ attempt.assessment.pass_mark }}/{{ attempt.total_questions }}
+      </p>
+    </div>
+    <div id="timer-box">
+      <div id="timer-display">--:--</div>
+      <div class="timer-label">Remaining</div>
+    </div>
+  </div>
+
+  {% if attempt.assessment.instructions %}
+  <div class="instructions-box">
+    <strong>&#128203; Instructions:</strong> {{ attempt.assessment.instructions }}
+  </div>
+  {% endif %}
+
+  <form method="post" id="quiz-form">
+    {% csrf_token %}
+
+    {% for q in questions %}
+    <div class="q-card" id="q-{{ forloop.counter }}">
+      <div style="display:flex;align-items:flex-start;">
+        <span class="q-num-badge">{{ forloop.counter }}</span>
+        <div class="q-text">{{ q.text }}</div>
+      </div>
+      <div class="opts">
+        <label class="opt-label">
+          <input type="radio" name="q_{{ q.pk }}" value="A">
+          <span class="opt-pill">A</span>
+          <span class="opt-text">{{ q.option_a }}</span>
+        </label>
+        <label class="opt-label">
+          <input type="radio" name="q_{{ q.pk }}" value="B">
+          <span class="opt-pill">B</span>
+          <span class="opt-text">{{ q.option_b }}</span>
+        </label>
+        <label class="opt-label">
+          <input type="radio" name="q_{{ q.pk }}" value="C">
+          <span class="opt-pill">C</span>
+          <span class="opt-text">{{ q.option_c }}</span>
+        </label>
+        <label class="opt-label">
+          <input type="radio" name="q_{{ q.pk }}" value="D">
+          <span class="opt-pill">D</span>
+          <span class="opt-text">{{ q.option_d }}</span>
+        </label>
+      </div>
+    </div>
+    {% endfor %}
+
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 0 24px;">
+      <span style="font-size:.82rem;color:var(--gray-400);">
+        &#128204; Answer all questions before submitting
+      </span>
+      <button type="submit" class="btn btn-primary"
+              style="background:#7c3aed;border-color:#7c3aed;padding:10px 28px;font-size:.95rem;">
+        &#9989; Submit Assessment
+      </button>
+    </div>
+  </form>
+
+</div>
+
+<script>
+(function () {
+  var remaining = {{ remaining_seconds }};
+  var display = document.getElementById('timer-display');
+  var box = document.getElementById('timer-box');
+  var form = document.getElementById('quiz-form');
+
+  function format(s) {
+    var m = Math.floor(s / 60);
+    var sec = s % 60;
+    return (m < 10 ? '0' : '') + m + ':' + (sec < 10 ? '0' : '') + sec;
+  }
+
+  function tick() {
+    if (remaining <= 0) {
+      display.textContent = '00:00';
+      form.submit();
+      return;
+    }
+    display.textContent = format(remaining);
+    if (remaining <= 120) { box.classList.add('urgent'); }
+    remaining--;
+    setTimeout(tick, 1000);
+  }
+
+  tick();
+})();
+</script>
+{% endblock %}
