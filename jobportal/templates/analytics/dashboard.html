@@ -1,5 +1,5 @@
 {% extends 'accounts/base.html' %}
-{% block title %}Analytics — TalentBridge{% endblock %}
+{% block title %}Analytics — Hireiz{% endblock %}
 
 {% block extra_css %}
 .an-wrap  { padding: 32px; }
@@ -116,8 +116,8 @@
       <div class="kpi-label">Hire Rate</div>
       <div class="kpi-sub">{{ total_hired }} hired total</div>
     </div>
-    <div class="kpi" style="border-top-color:#8b5cf6;">
-      <div class="kpi-val" style="color:#8b5cf6;">{{ interview_rate }}%</div>
+    <div class="kpi" style="border-top-color:#F07060;">
+      <div class="kpi-val" style="color:#F07060;">{{ interview_rate }}%</div>
       <div class="kpi-label">Interview Rate</div>
       <div class="kpi-sub">of applicants reached</div>
     </div>
@@ -199,7 +199,7 @@
         <div class="h-bar-row">
           <div class="h-bar-label">{{ skill.name }}</div>
           <div class="h-bar-track">
-            <div class="h-bar-fill" style="width:{{ skill.pct }}%;background:{% cycle '#4f46e5' '#0891b2' '#10b981' '#d97706' '#8b5cf6' '#2563eb' '#06b6d4' '#059669' '#f59e0b' '#7c3aed' %};"></div>
+            <div class="h-bar-fill" style="width:{{ skill.pct }}%;background:{% cycle '#E84530' '#0891b2' '#10b981' '#d97706' '#F07060' '#E84530' '#06b6d4' '#059669' '#f59e0b' '#E84530' %};"></div>
           </div>
           <div class="h-bar-count">{{ skill.count }}</div>
         </div>
@@ -247,10 +247,10 @@
           <div class="rate-label">Interview</div>
           <div class="rate-track"><div class="rate-fill" style="width:{{ interview_rate }}%;background:var(--indigo);"></div></div>
         </div>
-        <div class="rate-card" style="border-top-color:#8b5cf6;">
-          <div class="rate-val" style="color:#8b5cf6;">{{ hire_rate }}%</div>
+        <div class="rate-card" style="border-top-color:#F07060;">
+          <div class="rate-val" style="color:#F07060;">{{ hire_rate }}%</div>
           <div class="rate-label">Hire</div>
-          <div class="rate-track"><div class="rate-fill" style="width:{{ hire_rate }}%;background:#8b5cf6;"></div></div>
+          <div class="rate-track"><div class="rate-fill" style="width:{{ hire_rate }}%;background:#F07060;"></div></div>
         </div>
       </div>
 

@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sign In — TalentBridge</title>
+  <title>Sign In — Hireiz</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --navy: #0f1724; --navy-mid: #162032; --blue: #2563eb; --blue-dark: #1d4ed8;
-      --blue-light: #60a5fa; --blue-pale: #eff6ff; --indigo: #4f46e5;
+      --navy: #0f1724; --navy-mid: #162032; --blue: #E84530; --blue-dark: #C73A26;
+      --blue-light: #F07060; --blue-pale: #FFF0EE; --indigo: #E84530;
       --green: #10b981; --green-pale: #ecfdf5;
       --red: #ef4444; --red-pale: #fef2f2;
       --orange: #f59e0b; --orange-pale: #fffbeb;
@@ -35,27 +35,17 @@
       content: '';
       position: absolute; top: -100px; right: -80px;
       width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(37,99,235,0.25) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(232,69,48,0.25) 0%, transparent 70%);
     }
     .auth-brand::after {
       content: '';
       position: absolute; bottom: -60px; left: -60px;
       width: 300px; height: 300px;
-      background: radial-gradient(circle, rgba(79,70,229,0.2) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(232,69,48,0.2) 0%, transparent 70%);
     }
     .brand-top { position: relative; z-index: 1; }
-    .brand-logo {
-      display: flex; align-items: center; gap: 12px;
-      color: var(--white); font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px;
-    }
-    .brand-logo-icon {
-      width: 46px; height: 46px;
-      background: linear-gradient(135deg, var(--blue), var(--indigo));
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.3rem;
-    }
-    .brand-logo .accent { color: var(--blue-light); }
+    .brand-logo { display: flex; align-items: center; }
+    .brand-logo img { height: 48px; width: auto; object-fit: contain; }
     .brand-middle { position: relative; z-index: 1; }
     .brand-tagline {
       font-size: 2.1rem; font-weight: 800;
@@ -117,7 +107,7 @@
     }
     .form-control:focus {
       border-color: var(--blue);
-      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+      box-shadow: 0 0 0 3px rgba(232,69,48,0.12);
     }
     .form-control.error { border-color: var(--red); }
     .field-error { color: var(--red); font-size: 0.8rem; margin-top: 5px; }
@@ -171,7 +161,7 @@
     .alert-error   { background: var(--red-pale);   border-color: var(--red);   color: #991b1b; }
     .alert-success { background: var(--green-pale);  border-color: var(--green); color: #065f46; }
     .alert-warning { background: var(--orange-pale); border-color: var(--orange); color: #92400e; }
-    .alert-info    { background: var(--blue-pale);  border-color: var(--blue);  color: #1e40af; }
+    .alert-info    { background: var(--blue-pale);  border-color: var(--blue);  color: #9a3420; }
 
     /* ===== RESPONSIVE ===== */
     @media (max-width: 900px) {
@@ -190,8 +180,7 @@
       .auth-brand::before, .auth-brand::after { display: none; }
       .brand-top { flex-shrink: 0; }
       .brand-middle, .brand-bottom { display: none; }
-      .brand-logo { font-size: 1.15rem; }
-      .brand-logo-icon { width: 36px; height: 36px; font-size: 1rem; border-radius: 9px; }
+      .brand-logo img { height: 36px; }
       .auth-form-panel {
         flex: 1; width: 100%;
         padding: 28px 20px 40px;
@@ -214,8 +203,7 @@
   <div class="auth-brand">
     <div class="brand-top">
       <div class="brand-logo">
-        <div class="brand-logo-icon">&#128188;</div>
-        Talent<span class="accent">Bridge</span>
+        <img src="/static/images/logo.png" alt="Hireiz">
       </div>
     </div>
 
@@ -245,7 +233,7 @@
     </div>
 
     <div class="brand-bottom">
-      <p style="color:rgba(255,255,255,0.5); font-size:0.8rem; margin-bottom:12px;">Who uses TalentBridge?</p>
+      <p style="color:rgba(255,255,255,0.5); font-size:0.8rem; margin-bottom:12px;">Who uses Hireiz?</p>
       <div class="brand-roles">
         <span class="brand-role-tag">&#128100; Job Seekers</span>
         <span class="brand-role-tag">&#127970; Recruiters</span>

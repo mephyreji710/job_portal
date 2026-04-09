@@ -71,5 +71,5 @@ class Interview(models.Model):
         }.get(self.status, 'var(--gray-100)')
 
     def type_icon(self):
-        return {'video': '&#128249;', 'phone': '&#128222;', 'onsite': '&#127970;'}.get(
-            self.interview_type, '&#128197;')
+        return {'video': '📹', 'phone': '📞', 'onsite': '🏢'}.get(
+            self.interview_type, '📅')

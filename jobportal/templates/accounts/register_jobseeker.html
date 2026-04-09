@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Job Seeker Registration — TalentBridge</title>
+  <title>Job Seeker Registration — Hireiz</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --navy: #0f1724; --blue: #2563eb; --blue-dark: #1d4ed8;
-      --blue-light: #60a5fa; --blue-pale: #eff6ff; --indigo: #4f46e5;
+      --navy: #0f1724; --blue: #E84530; --blue-dark: #C73A26;
+      --blue-light: #F07060; --blue-pale: #FFF0EE; --indigo: #E84530;
       --red: #ef4444; --red-pale: #fef2f2;
       --green: #10b981; --green-pale: #ecfdf5;
       --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
@@ -58,8 +58,8 @@
       color: rgba(255,255,255,0.6); font-size: 0.875rem;
     }
     .step-item.active {
-      background: rgba(37,99,235,0.2);
-      border: 1px solid rgba(37,99,235,0.3);
+      background: rgba(232,69,48,0.2);
+      border: 1px solid rgba(232,69,48,0.3);
       color: var(--white);
     }
     .step-num {
@@ -71,8 +71,8 @@
     }
     .step-item.active .step-num { background: var(--blue); color: var(--white); }
     .tips-box {
-      background: rgba(37,99,235,0.12);
-      border: 1px solid rgba(37,99,235,0.25);
+      background: rgba(232,69,48,0.12);
+      border: 1px solid rgba(232,69,48,0.25);
       border-radius: 12px; padding: 18px;
       margin-top: auto;
     }
@@ -119,7 +119,7 @@
     }
     .form-control:focus {
       border-color: var(--blue);
-      box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+      box-shadow: 0 0 0 3px rgba(232,69,48,0.1);
     }
     .form-control.error { border-color: var(--red); }
     textarea.form-control { resize: vertical; min-height: 80px; }
@@ -209,9 +209,9 @@
 <body>
 
 <div class="top-bar">
-  <a class="brand" href="/">
-    <div class="brand-icon">&#128188;</div>
-    Talent<span class="accent">Bridge</span>
+  <a class="brand" href="/"><img src="/static/images/logo.png" alt="Hireiz" style="height:40px;width:auto;object-fit:contain;">
+    
+    
   </a>
   <div class="top-bar-right">
     Already have an account? <a href="{% url 'accounts:login' %}">Sign in</a>

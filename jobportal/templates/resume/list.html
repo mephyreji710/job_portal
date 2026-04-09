@@ -1,148 +1,407 @@
 {% extends 'jobseeker/base_profile.html' %}
-{% block title %}My Resumes{% endblock %}
+{% block title %}My Resumes — Hireiz{% endblock %}
 {% block nav_resume %}active{% endblock %}
 
 {% block extra_css %}
+/* ══ Page hero ══ */
+.res-hero {
+  background: linear-gradient(135deg, var(--navy) 0%, #1a2d4a 60%, #0f1f36 100%);
+  border-radius: 20px;
+  padding: 32px 36px;
+  margin-bottom: 24px;
+  position: relative; overflow: hidden;
+}
+.res-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 500px 300px at 95% -20%, rgba(232,69,48,.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+.res-hero-inner { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+.res-hero-text {}
+.res-eyebrow { font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(232,69,48,.85); margin-bottom: 7px; }
+.res-hero-title { font-size: 1.6rem; font-weight: 800; color: #fff; letter-spacing: -.03em; margin-bottom: 5px; }
+.res-hero-sub { font-size: .85rem; color: rgba(255,255,255,.5); }
+
+/* Hero stats */
+.res-hero-stats { display: flex; gap: 0; border-left: 1px solid rgba(255,255,255,.08); }
+.rhs { padding: 4px 20px; border-right: 1px solid rgba(255,255,255,.08); text-align: center; }
+.rhs-val { font-size: 1.5rem; font-weight: 800; color: #fff; line-height: 1; }
+.rhs-lbl { font-size: .65rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: rgba(255,255,255,.4); margin-top: 2px; }
+
+/* Hero actions */
+.res-hero-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+.hero-btn-primary {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 20px; border-radius: 11px;
+  background: var(--blue); color: #fff;
+  font-size: .82rem; font-weight: 700;
+  text-decoration: none; border: none; cursor: pointer; font-family: var(--font);
+  transition: background .2s;
+}
+.hero-btn-primary:hover { background: var(--blue-dark); color: #fff; text-decoration: none; }
+.hero-btn-ghost {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 18px; border-radius: 11px;
+  background: rgba(255,255,255,.08); color: rgba(255,255,255,.8);
+  border: 1px solid rgba(255,255,255,.12);
+  font-size: .82rem; font-weight: 700;
+  text-decoration: none; transition: background .2s;
+}
+.hero-btn-ghost:hover { background: rgba(255,255,255,.15); color: #fff; text-decoration: none; }
+
+/* ══ Section label ══ */
+.sec-label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+.sec-label { font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--gray-400); }
+
+/* ══ Resume cards ══ */
+.resume-list { display: flex; flex-direction: column; gap: 12px; }
+
 .resume-card {
-  border: 1.5px solid var(--gray-200); border-radius: var(--radius-lg);
-  padding: 18px 20px; display: flex; gap: 16px; align-items: flex-start;
-  transition: border-color 0.2s, box-shadow 0.2s; position: relative;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 18px;
+  overflow: hidden;
+  transition: box-shadow .2s, border-color .2s, transform .15s;
 }
-.resume-card:hover { border-color: var(--indigo); box-shadow: var(--shadow-md); }
-.resume-card.primary { border-color: var(--indigo); background: var(--indigo-pale); }
-.resume-file-icon {
-  width: 48px; height: 56px; border-radius: 8px; flex-shrink: 0;
+.resume-card:hover { box-shadow: 0 6px 24px -6px rgba(0,0,0,.10); transform: translateY(-1px); }
+.resume-card.is-primary { border-color: var(--blue); border-width: 2px; }
+
+.rc-inner { display: flex; align-items: flex-start; gap: 0; }
+
+/* File type indicator strip */
+.rc-strip {
+  width: 5px; flex-shrink: 0;
+  align-self: stretch;
+}
+.strip-pdf  { background: #ef4444; }
+.strip-docx { background: var(--blue); }
+.strip-other{ background: var(--gray-400); }
+
+/* File icon block */
+.rc-icon-block {
+  width: 72px; flex-shrink: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  font-size: 0.65rem; font-weight: 800; letter-spacing: 0.03em;
-  padding-top: 8px; position: relative;
+  padding: 20px 8px;
+  gap: 4px;
 }
-.icon-pdf  { background: #fee2e2; color: #dc2626; }
-.icon-docx { background: #dbeafe; color: #1d4ed8; }
-.resume-info { flex: 1; min-width: 0; }
-.resume-name { font-size: 0.95rem; font-weight: 700; color: var(--gray-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.resume-meta { font-size: 0.78rem; color: var(--gray-400); margin-top: 3px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.resume-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+.rc-file-icon {
+  width: 40px; height: 48px;
+  border-radius: 8px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-end;
+  padding-bottom: 6px;
+  position: relative;
+}
+.rc-file-icon::before {
+  content: '';
+  position: absolute; top: 0; right: 0;
+  border-style: solid;
+  border-width: 0 10px 10px 0;
+}
+.icon-pdf  { background: #fee2e2; }
+.icon-pdf::before  { border-color: transparent #fff #fff transparent; }
+.icon-docx { background: #FFF0EE; }
+.icon-docx::before { border-color: transparent #fff #fff transparent; }
+.icon-other { background: var(--gray-100); }
+.rc-ext { font-size: .6rem; font-weight: 900; letter-spacing: .05em; }
+.ext-pdf  { color: #dc2626; }
+.ext-docx { color: var(--blue-dark); }
 
-.status-pill {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 2px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700;
-}
-.status-parsed  { background: var(--green-pale); color: var(--green-dark); }
-.status-pending { background: var(--orange-pale); color: #b45309; }
-.status-failed  { background: var(--red-pale); color: #b91c1c; }
-.primary-badge {
-  background: var(--indigo); color: #fff;
-  padding: 2px 10px; border-radius: 999px; font-size: 0.7rem; font-weight: 700;
+/* Main info */
+.rc-info { flex: 1; min-width: 0; padding: 18px 20px 16px; }
+
+.rc-title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 5px; }
+.rc-filename { font-size: .95rem; font-weight: 800; color: var(--gray-900); }
+
+/* Badges */
+.badge-primary { background: var(--blue); color: #fff; padding: 2px 10px; border-radius: 999px; font-size: .68rem; font-weight: 700; }
+.badge-parsed  { background: #d1fae5; color: #065f46; padding: 2px 9px; border-radius: 999px; font-size: .68rem; font-weight: 700; display: inline-flex; align-items: center; gap: 3px; }
+.badge-pending { background: #fffbeb; color: #92400e; padding: 2px 9px; border-radius: 999px; font-size: .68rem; font-weight: 700; }
+.badge-failed  { background: #fee2e2; color: #991b1b; padding: 2px 9px; border-radius: 999px; font-size: .68rem; font-weight: 700; }
+
+/* Meta row */
+.rc-meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: .775rem; color: var(--gray-400); margin-bottom: 10px; }
+.rc-meta span { display: flex; align-items: center; gap: 4px; }
+
+/* Parsed stats */
+.rc-stats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.rc-stat-chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 8px;
+  font-size: .72rem; font-weight: 700;
+  background: var(--gray-50); border: 1px solid var(--gray-100); color: var(--gray-700);
 }
 
-.stats-mini { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
-.stat-chip {
-  display: flex; align-items: center; gap: 4px;
-  font-size: 0.75rem; color: var(--gray-500); padding: 2px 0;
+/* Error */
+.rc-error { margin-bottom: 10px; font-size: .775rem; color: #dc2626; display: flex; align-items: flex-start; gap: 5px; background: #fef2f2; padding: 8px 12px; border-radius: 8px; }
+
+/* Actions */
+.rc-actions { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+.rc-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 14px; border-radius: 9px; font-size: .78rem; font-weight: 700;
+  text-decoration: none; border: 1.5px solid transparent;
+  cursor: pointer; font-family: var(--font); transition: all .15s;
+}
+.rc-btn-view    { background: var(--blue-pale); color: var(--blue-dark); border-color: transparent; }
+.rc-btn-view:hover { background: #fde0db; text-decoration: none; color: var(--blue-dark); }
+.rc-btn-primary-set { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+.rc-btn-primary-set:hover { background: #fef3c7; text-decoration: none; }
+.rc-btn-reparse { background: var(--gray-100); color: var(--gray-700); }
+.rc-btn-reparse:hover { background: var(--gray-200); text-decoration: none; color: var(--gray-700); }
+.rc-btn-delete  { background: transparent; color: #dc2626; border-color: #fecaca; }
+.rc-btn-delete:hover { background: #fee2e2; text-decoration: none; color: #dc2626; }
+
+/* ══ Builder banner ══ */
+.builder-banner {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #E84530 100%);
+  border-radius: 18px;
+  padding: 26px 30px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  margin-top: 28px;
+}
+.builder-banner-text {}
+.bb-label { font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.5); margin-bottom: 5px; }
+.bb-title { font-size: 1.15rem; font-weight: 800; color: #fff; margin-bottom: 4px; }
+.bb-desc { font-size: .82rem; color: rgba(255,255,255,.55); }
+.bb-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 11px 22px; border-radius: 12px;
+  background: rgba(255,255,255,.12); color: #fff;
+  border: 1.5px solid rgba(255,255,255,.2);
+  font-size: .85rem; font-weight: 700;
+  text-decoration: none; white-space: nowrap;
+  transition: background .2s;
+}
+.bb-btn:hover { background: rgba(255,255,255,.22); color: #fff; text-decoration: none; }
+
+/* ══ Empty state ══ */
+.empty-box {
+  text-align: center; padding: 64px 24px;
+  background: var(--white); border: 1px solid var(--gray-200);
+  border-radius: 20px;
+}
+.empty-icon-wrap { margin-bottom: 16px; color: var(--gray-300); }
+.empty-title { font-size: 1.05rem; font-weight: 700; color: var(--gray-800); margin-bottom: 6px; }
+.empty-desc  { font-size: .875rem; color: var(--gray-400); margin-bottom: 22px; }
+
+/* ══ Responsive ══ */
+@media (max-width: 768px) {
+  .res-hero { padding: 24px 22px; }
+  .res-hero-inner { flex-direction: column; align-items: flex-start; }
+  .res-hero-stats { border-left: none; border-top: 1px solid rgba(255,255,255,.08); padding-top: 16px; margin-top: 16px; }
+  .res-hero-title { font-size: 1.35rem; }
+  .builder-banner { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 540px) {
+  .rc-icon-block { display: none; }
+  .rc-info { padding: 14px 16px 12px; }
+  .rc-filename { font-size: .88rem; }
+  .res-hero-stats { flex-wrap: wrap; }
+  .rhs { min-width: 80px; }
+}
+@media (max-width: 400px) {
+  .rc-actions { gap: 5px; }
+  .rc-btn { padding: 5px 10px; font-size: .72rem; }
 }
 {% endblock %}
 
 {% block main_content %}
 
-<div class="section-card">
-  <div class="section-header">
-    <div class="section-title-wrap">
-      <div class="section-icon" style="background:var(--indigo-pale);">&#128196;</div>
-      <div>
-        <div class="section-title">My Resumes</div>
-        <div class="section-sub">{{ resumes|length }} resume{{ resumes|length|pluralize }} uploaded</div>
+<!-- ══ HERO ══ -->
+<div class="res-hero">
+  <div class="res-hero-inner">
+    <div class="res-hero-text">
+      <div class="res-eyebrow">Resume Hub</div>
+      <div class="res-hero-title">My Resumes</div>
+      <div class="res-hero-sub">Upload, manage, and AI-parse your CVs. Set a primary resume for job applications.</div>
+      <div class="res-hero-actions">
+        <a href="{% url 'resume:upload' %}" class="hero-btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload Resume
+        </a>
+        <a href="{% url 'resume:builder_list' %}" class="hero-btn-ghost">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Resume Builder
+        </a>
       </div>
     </div>
-    <a href="{% url 'resume:upload' %}" class="btn btn-primary btn-sm">&#43; Upload New</a>
-  </div>
-  <div class="section-body">
 
-    {% if resumes %}
-    <div style="display:flex;flex-direction:column;gap:12px;">
-      {% for resume in resumes %}
-      <div class="resume-card {% if resume.is_primary %}primary{% endif %}">
-
-        <!-- File Icon -->
-        <div class="resume-file-icon {% if resume.file_type == 'pdf' %}icon-pdf{% else %}icon-docx{% endif %}">
-          &#128196;<br>{{ resume.file_type|upper }}
+    <div class="res-hero-stats">
+      <div class="rhs">
+        <div class="rhs-val">{{ resumes|length }}</div>
+        <div class="rhs-lbl">Uploaded</div>
+      </div>
+      <div class="rhs">
+        <div class="rhs-val" style="color:#34d399;">
+          {% with parsed_count=resumes|length %}{{ resumes|length }}{% endwith %}
+          {{ resumes|dictsortreversed:"status"|first|default:"—" }}
         </div>
+        <div class="rhs-lbl">Parsed</div>
+      </div>
+    </div>
+  </div>
+</div>
 
-        <!-- Info -->
-        <div class="resume-info">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <span class="resume-name">{{ resume.original_filename }}</span>
-            {% if resume.is_primary %}<span class="primary-badge">&#9733; Primary</span>{% endif %}
-            <span class="status-pill status-{{ resume.status }}">
-              {% if resume.status == 'parsed' %}&#10003; Parsed
-              {% elif resume.status == 'pending' %}&#8987; Pending
-              {% else %}&#10007; Failed{% endif %}
+<!-- ══ RESUME LIST ══ -->
+{% if resumes %}
+<div class="sec-label-row">
+  <div class="sec-label">{{ resumes|length }} Resume{{ resumes|length|pluralize }}</div>
+  <a href="{% url 'resume:upload' %}" style="display:inline-flex;align-items:center;gap:5px;font-size:.78rem;font-weight:700;color:var(--blue);text-decoration:none;">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Upload New
+  </a>
+</div>
+
+<div class="resume-list">
+  {% for resume in resumes %}
+  <div class="resume-card {% if resume.is_primary %}is-primary{% endif %}">
+    <div class="rc-inner">
+
+      <!-- Colour strip -->
+      <div class="rc-strip {% if resume.file_type == 'pdf' %}strip-pdf{% elif resume.file_type == 'docx' %}strip-docx{% else %}strip-other{% endif %}"></div>
+
+      <!-- File icon -->
+      <div class="rc-icon-block">
+        <div class="rc-file-icon {% if resume.file_type == 'pdf' %}icon-pdf{% elif resume.file_type == 'docx' %}icon-docx{% else %}icon-other{% endif %}">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{% if resume.file_type == 'pdf' %}#dc2626{% elif resume.file_type == 'docx' %}#C73A26{% else %}#9ca3af{% endif %}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:2px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span class="rc-ext {% if resume.file_type == 'pdf' %}ext-pdf{% elif resume.file_type == 'docx' %}ext-docx{% endif %}">{{ resume.file_type|upper }}</span>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="rc-info">
+        <div class="rc-title-row">
+          <span class="rc-filename">{{ resume.original_filename }}</span>
+          {% if resume.is_primary %}<span class="badge-primary">★ Primary</span>{% endif %}
+          {% if resume.status == 'parsed' %}
+            <span class="badge-parsed">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Parsed
             </span>
-          </div>
-
-          <div class="resume-meta">
-            <span>&#128197; {{ resume.uploaded_at|date:"M d, Y" }}</span>
-            <span>&#183;</span>
-            <span>&#128190; {{ resume.get_file_size_display }}</span>
-            {% if resume.raw_text %}
-            <span>&#183;</span>
-            <span>&#128221; {{ resume.word_count }} words</span>
-            {% endif %}
-          </div>
-
-          {% if resume.status == 'parsed' and resume.parsed %}
-          <div class="stats-mini">
-            <span class="stat-chip">&#9889; {{ resume.parsed.tech_skill_count }} tech skills</span>
-            <span class="stat-chip">&#128100; {{ resume.parsed.soft_skill_count }} soft skills</span>
-            {% if resume.parsed.estimated_experience_years %}
-            <span class="stat-chip">&#128188; {{ resume.parsed.estimated_experience_years }}yr exp</span>
-            {% endif %}
-            {% if resume.parsed.education_level %}
-            <span class="stat-chip">&#127979; {{ resume.parsed.get_education_level_display }}</span>
-            {% endif %}
-          </div>
+          {% elif resume.status == 'pending' %}
+            <span class="badge-pending">⏳ Pending</span>
+          {% else %}
+            <span class="badge-failed">✗ Failed</span>
           {% endif %}
-
-          {% if resume.status == 'failed' and resume.parse_error %}
-          <div style="margin-top:6px;font-size:0.78rem;color:var(--red);">&#9888; {{ resume.parse_error|truncatechars:120 }}</div>
-          {% endif %}
-
-          <div class="resume-actions">
-            <a href="{% url 'resume:detail' resume.pk %}" class="btn btn-outline btn-sm">&#128269; View Details</a>
-
-            {% if not resume.is_primary %}
-            <form method="post" action="{% url 'resume:set_primary' resume.pk %}" style="display:inline;">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-gray btn-sm">&#9733; Set Primary</button>
-            </form>
-            {% endif %}
-
-            <form method="post" action="{% url 'resume:reparse' resume.pk %}" style="display:inline;">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-gray btn-sm">&#8635; Re-parse</button>
-            </form>
-
-            <form method="post" action="{% url 'resume:delete' resume.pk %}" style="display:inline;"
-                  onsubmit="return confirm('Delete {{ resume.original_filename|escapejs }}? This cannot be undone.')">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-danger btn-sm">&#128465; Delete</button>
-            </form>
-          </div>
         </div>
 
+        <div class="rc-meta">
+          <span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            {{ resume.uploaded_at|date:"M d, Y" }}
+          </span>
+          <span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            {{ resume.get_file_size_display }}
+          </span>
+          {% if resume.raw_text %}
+          <span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+            {{ resume.word_count }} words
+          </span>
+          {% endif %}
+        </div>
+
+        {% if resume.status == 'parsed' and resume.parsed %}
+        <div class="rc-stats">
+          <span class="rc-stat-chip">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            {{ resume.parsed.tech_skill_count }} tech skills
+          </span>
+          <span class="rc-stat-chip">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            {{ resume.parsed.soft_skill_count }} soft skills
+          </span>
+          {% if resume.parsed.estimated_experience_years %}
+          <span class="rc-stat-chip">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#E84530" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+            {{ resume.parsed.estimated_experience_years }}yr exp
+          </span>
+          {% endif %}
+          {% if resume.parsed.education_level %}
+          <span class="rc-stat-chip">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+            {{ resume.parsed.get_education_level_display }}
+          </span>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        {% if resume.status == 'failed' and resume.parse_error %}
+        <div class="rc-error">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          {{ resume.parse_error|truncatechars:120 }}
+        </div>
+        {% endif %}
+
+        <div class="rc-actions">
+          <a href="{% url 'resume:detail' resume.pk %}" class="rc-btn rc-btn-view">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            View Details
+          </a>
+
+          {% if not resume.is_primary %}
+          <form method="post" action="{% url 'resume:set_primary' resume.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="rc-btn rc-btn-primary-set">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              Set Primary
+            </button>
+          </form>
+          {% endif %}
+
+          <form method="post" action="{% url 'resume:reparse' resume.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="rc-btn rc-btn-reparse">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Re-parse
+            </button>
+          </form>
+
+          <form method="post" action="{% url 'resume:delete' resume.pk %}" style="display:inline;"
+                onsubmit="return confirm('Delete {{ resume.original_filename|escapejs }}? This cannot be undone.')">
+            {% csrf_token %}
+            <button type="submit" class="rc-btn rc-btn-delete">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+              Delete
+            </button>
+          </form>
+        </div>
       </div>
-      {% endfor %}
-    </div>
 
-    {% else %}
-    <div class="empty-state">
-      <div class="empty-icon">&#128196;</div>
-      <div class="empty-title">No resumes uploaded yet</div>
-      <div class="empty-desc">Upload your resume to auto-extract skills, keywords, and experience data.</div>
-      <a href="{% url 'resume:upload' %}" class="btn btn-primary">&#128640; Upload Resume</a>
     </div>
-    {% endif %}
-
   </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<!-- Empty state -->
+<div class="empty-box">
+  <div class="empty-icon-wrap">
+    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+  </div>
+  <div class="empty-title">No resumes uploaded yet</div>
+  <div class="empty-desc">Upload your resume to auto-extract skills, experience, and keywords used in AI job matching.</div>
+  <a href="{% url 'resume:upload' %}" class="hero-btn-primary" style="display:inline-flex;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    Upload Your Resume
+  </a>
+</div>
+{% endif %}
+
+<!-- ══ RESUME BUILDER BANNER ══ -->
+<div class="builder-banner">
+  <div class="builder-banner-text">
+    <div class="bb-label">Alternatively</div>
+    <div class="bb-title">Build a resume from scratch</div>
+    <div class="bb-desc">Use our resume builder to create a polished, ATS-friendly resume with Classic, Modern, or Sidebar templates.</div>
+  </div>
+  <a href="{% url 'resume:builder_list' %}" class="bb-btn">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    Open Resume Builder
+  </a>
 </div>
 
 {% endblock %}

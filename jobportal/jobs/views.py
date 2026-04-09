@@ -19,7 +19,7 @@ def _get_recruiter_profile(request):
         return None
     profile, _ = RecruiterProfile.objects.get_or_create(
         user=request.user,
-        defaults={'company_name': request.user.get_full_name() or request.user.username},
+        defaults={'company_name': 'My Company'},
     )
     return profile
 
@@ -61,19 +61,41 @@ def job_board(request):
 
     # Pass saved job IDs for the current job seeker so cards show the right bookmark state
     saved_ids = set()
+    user_location = ''
+    nationality_code = 'other'
     if request.user.is_authenticated and getattr(request.user, 'role', None) == 'job_seeker':
         saved_ids = set(SavedJob.objects.filter(user=request.user).values_list('job_id', flat=True))
+        try:
+            prof = request.user.js_profile
+            user_location = prof.location or ''
+            nat = (prof.nationality or '').lower().strip()
+            if nat in ('indian', 'india'):
+                nationality_code = 'india'
+            elif nat in ('canadian', 'canada'):
+                nationality_code = 'canada'
+        except Exception:
+            pass
+
+    if nationality_code == 'india':
+        popular_locs = ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Pune', 'Noida', 'Gurgaon', 'Remote']
+    elif nationality_code == 'canada':
+        popular_locs = ['Toronto', 'Vancouver', 'Calgary', 'Montreal', 'Ottawa', 'Edmonton', 'Mississauga', 'Remote']
+    else:
+        popular_locs = ['Remote', 'New York, USA', 'London, UK', 'Singapore', 'Dubai, UAE', 'Sydney, Australia', 'Toronto, Canada', 'Mumbai', 'Berlin, Germany']
 
     return render(request, 'jobs/job_board.html', {
-        'jobs':           qs,
-        'total':          qs.count(),
-        'q':              q,
-        'filter_type':    job_type,
-        'filter_location':location,
-        'filter_exp':     exp_level,
-        'job_type_choices':   JobPost.JOB_TYPE_CHOICES,
-        'experience_choices': JobPost.EXPERIENCE_CHOICES,
-        'saved_ids':          saved_ids,
+        'jobs':             qs,
+        'total':            qs.count(),
+        'q':                q,
+        'filter_type':      job_type,
+        'filter_location':  location,
+        'filter_exp':       exp_level,
+        'job_type_choices':     JobPost.JOB_TYPE_CHOICES,
+        'experience_choices':   JobPost.EXPERIENCE_CHOICES,
+        'saved_ids':            saved_ids,
+        'user_location':        user_location,
+        'nationality_code':     nationality_code,
+        'popular_locations':    popular_locs,
     })
 
 

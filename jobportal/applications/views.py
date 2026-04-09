@@ -153,17 +153,23 @@ def my_applications(request):
     if not _is_job_seeker(request.user):
         return redirect('jobs:board')
 
-    apps = (Application.objects
-            .filter(applicant=request.user)
-            .select_related('job', 'job__recruiter')
-            .order_by('-applied_at'))
+    all_apps = (Application.objects
+                .filter(applicant=request.user)
+                .select_related('job', 'job__recruiter')
+                .prefetch_related('tasks')
+                .order_by('-applied_at'))
 
     counts = {
-        'total':       apps.count(),
-        'pending':     apps.filter(status='pending').count(),
-        'shortlisted': apps.filter(status='shortlisted').count(),
-        'hired':       apps.filter(status='hired').count(),
+        'total':       all_apps.count(),
+        'pending':     all_apps.filter(status='pending').count(),
+        'shortlisted': all_apps.filter(status='shortlisted').count(),
+        'rejected':    all_apps.filter(status='rejected').count(),
+        'hired':       all_apps.filter(status='hired').count(),
     }
+
+    status_filter = request.GET.get('status', '')
+    apps = all_apps.filter(status=status_filter) if status_filter else all_apps
+
     from feedback.models import Feedback
     rated_company_ids = set(
         Feedback.objects.filter(from_user=request.user, feedback_type=Feedback.TYPE_C2CO)
@@ -184,6 +190,7 @@ def my_applications(request):
         'applications':      apps,
         'counts':            counts,
         'rated_company_ids': rated_company_ids,
+        'status_filter':     status_filter,
     })
 
 
@@ -280,10 +287,19 @@ def job_applicants(request, pk):
     except Exception:
         return redirect('jobs:manage')
 
-    apps = (Application.objects
-            .filter(job=job)
-            .select_related('applicant')
-            .order_by('-applied_at'))
+    status_filter = request.GET.get('status', '')
+    apps_qs = (Application.objects
+               .filter(job=job)
+               .select_related('applicant')
+               .prefetch_related(
+                   'tasks',
+                   'assessment',
+                   'assessment__attempt',
+                   'assessment__attempt__documents',
+               ))
+    if status_filter:
+        apps_qs = apps_qs.filter(status=status_filter)
+    apps = apps_qs.order_by('-applied_at')
 
     # Pre-fetch match scores for this job to link in template
     from screening.models import MatchScore

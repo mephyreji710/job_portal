@@ -366,7 +366,34 @@ def recruiter_dashboard(request):
         messages.error(request, 'Access denied.')
         return _role_redirect(request.user)
     profile = getattr(request.user, 'recruiter_profile', None)
-    return render(request, 'accounts/recruiter_dashboard.html', {'profile': profile})
+
+    from jobs.models import JobPost
+    from applications.models import Application
+    from interviews.models import Interview
+    from django.utils import timezone
+
+    active_jobs = 0
+    total_applications = 0
+    shortlisted = 0
+    upcoming_interviews = 0
+
+    if profile:
+        job_ids = list(profile.jobs.values_list('id', flat=True))
+        active_jobs = profile.jobs.filter(status=JobPost.STATUS_ACTIVE).count()
+        total_applications = Application.objects.filter(job__in=job_ids).count()
+        shortlisted = Application.objects.filter(job__in=job_ids, status='shortlisted').count()
+        upcoming_interviews = Interview.objects.filter(
+            application__job__in=job_ids,
+            scheduled_at__gte=timezone.now(),
+        ).exclude(status__in=['cancelled', 'completed']).count()
+
+    return render(request, 'accounts/recruiter_dashboard.html', {
+        'profile':             profile,
+        'active_jobs':         active_jobs,
+        'total_applications':  total_applications,
+        'shortlisted':         shortlisted,
+        'upcoming_interviews': upcoming_interviews,
+    })
 
 
 @login_required(login_url='/accounts/login/')

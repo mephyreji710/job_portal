@@ -36,11 +36,12 @@ INSTALLED_APPS = [
     'jobs',
     'screening',
     'applications',
+    'assessments',
     'interviews',
     'notifications',
     'analytics',
     'feedback',
-    'assessment',
+    'tasks',
 ]
 
 # ---------------------------------------------------------------------------

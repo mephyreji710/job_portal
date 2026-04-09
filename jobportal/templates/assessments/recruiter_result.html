@@ -1,0 +1,278 @@
+{% extends 'recruiter/base_recruiter.html' %}
+{% block title %}Assessment Results — {{ assessment.application.applicant.email }}{% endblock %}
+{% block nav_applications %}active{% endblock %}
+
+{% block extra_css %}
+.result-header {
+  background: linear-gradient(135deg, #9a3420 0%, #C73A26 100%);
+  border-radius: var(--radius-xl); padding: 24px 28px; margin-bottom: 20px;
+}
+.score-big {
+  font-size: 2.5rem; font-weight: 900; color: #fff; line-height: 1;
+}
+.congrats-banner {
+  background: linear-gradient(135deg, #065f46 0%, #10b981 100%);
+  border-radius: var(--radius-lg); padding: 16px 22px; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 14px;
+}
+.q-result-card {
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-lg); padding: 18px 22px; margin-bottom: 12px;
+}
+.q-result-card.correct { border-left: 4px solid #10b981; }
+.q-result-card.wrong   { border-left: 4px solid #ef4444; }
+.q-sheet-card {
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-lg); padding: 18px 22px; margin-bottom: 12px;
+}
+.opt-row {
+  display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+  border-radius: 8px; font-size: .875rem; margin-bottom: 6px;
+}
+.opt-row.selected-correct { background: #d1fae5; color: #065f46; font-weight: 700; }
+.opt-row.selected-wrong   { background: #fee2e2; color: #991b1b; }
+.opt-row.correct-answer   { background: #d1fae5; color: #065f46; font-weight: 700; }
+.opt-row.normal           { color: var(--gray-500); }
+.opt-row.sheet-correct    { background: #ecfdf5; color: #065f46; font-weight: 700; border: 1px solid #a7f3d0; }
+.opt-row.sheet-normal     { color: var(--gray-600); }
+.opt-letter {
+  width: 22px; height: 22px; border-radius: 6px; background: rgba(0,0,0,.07);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: .72rem; font-weight: 800; flex-shrink: 0;
+}
+{% endblock %}
+
+{% block main_content %}
+
+<!-- Header -->
+<div class="result-header">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;">
+    <div>
+      <div style="font-size:.72rem;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">
+        Assessment Results
+      </div>
+      <div style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:4px;">{{ assessment.title }}</div>
+      <div style="font-size:.875rem;color:rgba(255,255,255,.65);">
+        Candidate: <strong style="color:#fff;">
+        {% if assessment.application.full_name %}{{ assessment.application.full_name }}
+        {% else %}{{ assessment.application.applicant.email }}{% endif %}
+        </strong>
+        &bull; {{ assessment.application.job.title }}
+        &bull; {{ assessment.question_count }} questions
+        {% if assessment.time_limit_mins > 0 %}&bull; {{ assessment.time_limit_mins }} min limit{% endif %}
+      </div>
+    </div>
+
+    {% if attempt and attempt.is_completed %}
+    <div style="text-align:right;">
+      <div class="score-big">{{ attempt.score|floatformat:0 }}%</div>
+      <div style="color:rgba(255,255,255,.65);font-size:.8rem;margin-top:3px;">
+        {{ attempt.correct_count }}/{{ attempt.total_count }} correct &bull;
+        <span style="color:{% if attempt.score >= 80 %}#6ee7b7{% elif attempt.score >= 60 %}#93c5fd{% elif attempt.score >= 40 %}#fcd34d{% else %}#fca5a5{% endif %};">
+          {{ attempt.score_label }}
+        </span>
+      </div>
+      <div style="color:rgba(255,255,255,.5);font-size:.72rem;margin-top:4px;">
+        Completed {{ attempt.completed_at|date:"M d, Y \a\t H:i" }}
+      </div>
+    </div>
+    {% else %}
+    <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 16px;text-align:center;">
+      <div style="color:rgba(255,255,255,.5);font-size:.78rem;font-weight:700;">&#9201; Awaiting Submission</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% if attempt and attempt.is_completed %}
+
+  <!-- 20/25 Congratulations -->
+  {% if attempt.correct_count >= 20 %}
+  <div class="congrats-banner">
+    <div style="font-size:2rem;flex-shrink:0;">&#127881;</div>
+    <div>
+      <div style="font-size:.95rem;font-weight:900;color:#fff;margin-bottom:3px;">
+        Excellent Candidate! {{ attempt.correct_count }}/{{ attempt.total_count }} Correct
+      </div>
+      <div style="font-size:.82rem;color:rgba(255,255,255,.85);">
+        This candidate scored in the top tier ({{ attempt.score|floatformat:0 }}%).
+        {% if attempt.correct_count == 25 %}A perfect score!{% endif %}
+        Consider fast-tracking their application.
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Stats -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+    <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:14px;text-align:center;">
+      <div style="font-size:1.5rem;font-weight:900;color:#E84530;">{{ attempt.score|floatformat:0 }}%</div>
+      <div style="font-size:.72rem;color:var(--gray-400);font-weight:600;margin-top:3px;">Score</div>
+    </div>
+    <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:14px;text-align:center;">
+      <div style="font-size:1.5rem;font-weight:900;color:#10b981;">{{ attempt.correct_count }}</div>
+      <div style="font-size:.72rem;color:var(--gray-400);font-weight:600;margin-top:3px;">Correct</div>
+    </div>
+    <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:14px;text-align:center;">
+      <div style="font-size:1.5rem;font-weight:900;color:#ef4444;">{{ attempt.wrong_count }}</div>
+      <div style="font-size:.72rem;color:var(--gray-400);font-weight:600;margin-top:3px;">Incorrect</div>
+    </div>
+    <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:14px;text-align:center;">
+      <div style="font-size:1.5rem;font-weight:900;color:var(--gray-700);">{{ attempt.total_count }}</div>
+      <div style="font-size:.72rem;color:var(--gray-400);font-weight:600;margin-top:3px;">Total</div>
+    </div>
+  </div>
+
+  <!-- Detailed Answer Review -->
+  <div style="font-size:.9rem;font-weight:800;color:var(--gray-700);margin-bottom:14px;">&#128202; Detailed Answer Review</div>
+
+  {% for answer in answers %}
+  <div class="q-result-card {% if answer.is_correct %}correct{% else %}wrong{% endif %}">
+    <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+      <div style="width:28px;height:28px;border-radius:50%;background:{% if answer.is_correct %}#10b981{% else %}#ef4444{% endif %};
+                  color:#fff;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;flex-shrink:0;">
+        {% if answer.is_correct %}&#10003;{% else %}&#10005;{% endif %}
+      </div>
+      <div>
+        <div style="font-size:.7rem;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Question {{ forloop.counter }}</div>
+        <div style="font-size:.9rem;font-weight:700;color:var(--gray-900);">{{ answer.question.question_text }}</div>
+      </div>
+    </div>
+
+    {% for opt in 'abcd' %}
+    <div class="opt-row {% if opt == answer.selected_option and answer.is_correct %}selected-correct{% elif opt == answer.selected_option and not answer.is_correct %}selected-wrong{% elif opt == answer.question.correct_answer and not answer.is_correct %}correct-answer{% else %}normal{% endif %}">
+      <span class="opt-letter">{{ opt|upper }}</span>
+      <span>
+        {% if opt == 'a' %}{{ answer.question.option_a }}
+        {% elif opt == 'b' %}{{ answer.question.option_b }}
+        {% elif opt == 'c' %}{{ answer.question.option_c }}
+        {% else %}{{ answer.question.option_d }}{% endif %}
+      </span>
+      {% if opt == answer.selected_option and answer.is_correct %}
+      <span style="margin-left:auto;font-size:.72rem;font-weight:700;color:#10b981;">&#10003; Candidate's answer (correct)</span>
+      {% elif opt == answer.selected_option and not answer.is_correct %}
+      <span style="margin-left:auto;font-size:.72rem;font-weight:700;color:#ef4444;">&#10005; Candidate's answer</span>
+      {% elif opt == answer.question.correct_answer and not answer.is_correct %}
+      <span style="margin-left:auto;font-size:.72rem;font-weight:700;color:#10b981;">&#10003; Correct answer</span>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+
+{% else %}
+
+  <!-- Not yet attempted: show "awaiting" + the quiz sheet so recruiter can review it -->
+  <div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:12px;">
+    <div style="font-size:1.5rem;flex-shrink:0;">&#9201;</div>
+    <div>
+      <div style="font-size:.9rem;font-weight:800;color:#92400e;margin-bottom:2px;">Awaiting Candidate Submission</div>
+      <div style="font-size:.82rem;color:#b45309;">
+        The candidate has not completed the assessment yet. They were notified when you sent it.
+        Below is the quiz sheet you created for your reference.
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz Sheet for recruiter reference -->
+  <div style="font-size:.9rem;font-weight:800;color:var(--gray-700);margin-bottom:14px;">&#128221; Quiz Sheet ({{ assessment.question_count }} Questions)</div>
+
+  {% for question in assessment.questions.all %}
+  <div class="q-sheet-card">
+    <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+      <div style="width:28px;height:28px;border-radius:50%;background:#E84530;
+                  color:#fff;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;flex-shrink:0;">
+        {{ forloop.counter }}
+      </div>
+      <div style="font-size:.9rem;font-weight:700;color:var(--gray-900);">{{ question.question_text }}</div>
+    </div>
+    {% for opt in 'abcd' %}
+    <div class="opt-row {% if opt == question.correct_answer %}sheet-correct{% else %}sheet-normal{% endif %}">
+      <span class="opt-letter">{{ opt|upper }}</span>
+      <span>
+        {% if opt == 'a' %}{{ question.option_a }}
+        {% elif opt == 'b' %}{{ question.option_b }}
+        {% elif opt == 'c' %}{{ question.option_c }}
+        {% else %}{{ question.option_d }}{% endif %}
+      </span>
+      {% if opt == question.correct_answer %}
+      <span style="margin-left:auto;font-size:.72rem;font-weight:700;color:#10b981;">&#10003; Correct</span>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+
+{% endif %}
+
+{% if attempt and attempt.is_completed %}
+<!-- Document Verification Section -->
+{% if has_docs %}
+<!-- Docs submitted -->
+<div style="background:#f0fdf4;border:1.5px solid #10b981;border-radius:var(--radius-lg);padding:16px 20px;margin-top:20px;
+            display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span style="font-size:1.5rem;">&#128194;</span>
+    <div>
+      <div style="font-size:.88rem;font-weight:800;color:#065f46;">Documents Submitted</div>
+      <div style="font-size:.78rem;color:#047857;">
+        Candidate has uploaded all verification documents. Click to review them.
+      </div>
+    </div>
+  </div>
+  <a href="{% url 'assessments:recruiter_docs' attempt.pk %}"
+     class="btn btn-primary" style="background:#059669;font-size:.82rem;">
+    &#128194; View All Documents
+  </a>
+</div>
+
+{% elif assessment.doc_requested %}
+<!-- Doc request sent, awaiting upload -->
+<div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:var(--radius-lg);padding:16px 20px;margin-top:20px;
+            display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+  <span style="font-size:1.5rem;flex-shrink:0;">&#9201;</span>
+  <div style="flex:1;">
+    <div style="font-size:.88rem;font-weight:800;color:#92400e;">Awaiting Document Upload</div>
+    <div style="font-size:.78rem;color:#b45309;">
+      You requested document verification. Waiting for the candidate to upload their documents.
+    </div>
+  </div>
+  <span style="background:#fef3c7;color:#92400e;padding:4px 12px;border-radius:999px;font-size:.75rem;font-weight:700;flex-shrink:0;">
+    &#128203; Requested
+  </span>
+</div>
+
+{% else %}
+<!-- Recruiter can request docs -->
+<div style="background:#FFF0EE;border:1.5px solid #c4b5fd;border-radius:var(--radius-lg);padding:16px 20px;margin-top:20px;
+            display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span style="font-size:1.5rem;flex-shrink:0;">&#128203;</span>
+    <div>
+      <div style="font-size:.88rem;font-weight:800;color:#9a3420;">Document Verification</div>
+      <div style="font-size:.78rem;color:#C73A26;line-height:1.5;">
+        If this role requires verification, request the candidate to upload their
+        Work Experience, Certificates, and Criminal Record Check.
+      </div>
+    </div>
+  </div>
+  <form method="post" action="{% url 'assessments:request_docs' assessment.pk %}" style="margin:0;flex-shrink:0;">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary" style="background:#E84530;font-size:.82rem;white-space:nowrap;"
+            onclick="return confirm('Send a document verification request to this candidate?')">
+      &#128203; Request Documents
+    </button>
+  </form>
+</div>
+{% endif %}
+{% endif %}
+
+<!-- Footer actions -->
+<div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;">
+  <a href="{% url 'applications:all_applications' %}" class="btn btn-gray">&#8592; All Applications</a>
+  <a href="{% url 'applications:applicants' assessment.application.job.pk %}" class="btn btn-primary" style="background:#E84530;">
+    &#128640; All Applicants for {{ assessment.application.job.title }}
+  </a>
+</div>
+
+{% endblock %}

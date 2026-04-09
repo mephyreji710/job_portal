@@ -36,6 +36,14 @@
 }
 .toggle-switch input:checked + .toggle-slider { background: var(--green); }
 .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+/* Language tag preview */
+.lang-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 12px; border-radius: 999px;
+  background: var(--blue-pale); color: var(--blue-dark);
+  font-size: .78rem; font-weight: 700; border: 1.5px solid rgba(232,69,48,.15);
+}
 {% endblock %}
 
 {% block main_content %}
@@ -132,9 +140,29 @@
         <span class="field-hint">Max 1200 characters</span>
       </div>
       <div class="form-group">
-        <label class="form-label" for="id_location">Location</label>
+        <label class="form-label" for="id_location">Location <span class="opt">(City, Country)</span></label>
         <input type="text" id="id_location" name="location" class="form-control"
-          value="{{ form.location.value|default:'' }}" placeholder="City, Country" />
+          value="{{ form.location.value|default:'' }}" placeholder="e.g. Bangalore, India" />
+      </div>
+
+      <!-- ADDRESS & LANGUAGES -->
+      <div class="section-divider">Address &amp; Languages</div>
+      <div class="form-group">
+        <label class="form-label" for="id_address">Full Address <span class="opt">(optional)</span></label>
+        <textarea id="id_address" name="address" class="form-control" rows="3"
+          placeholder="e.g. 12 Main Street, Koramangala, Bangalore 560034, Karnataka, India">{{ form.address.value|default:'' }}</textarea>
+        <span class="field-hint">Street, area, city, state, PIN/ZIP, country</span>
+        {% for e in form.address.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="id_languages">Languages Known <span class="opt">(optional)</span></label>
+        <input type="text" id="id_languages" name="languages" class="form-control"
+          value="{{ form.languages.value|default:'' }}"
+          placeholder="e.g. English, Hindi, Tamil, French" />
+        <span class="field-hint">Separate each language with a comma</span>
+        {% for e in form.languages.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        <!-- Language tag preview -->
+        <div id="lang-preview" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;"></div>
       </div>
 
       <!-- ONLINE PRESENCE -->
@@ -203,4 +231,24 @@
     </form>
   </div>
 </div>
+
+<script>
+(function() {
+  const input   = document.getElementById('id_languages');
+  const preview = document.getElementById('lang-preview');
+  if (!input || !preview) return;
+
+  function renderTags() {
+    const langs = input.value.split(',').map(s => s.trim()).filter(Boolean);
+    preview.innerHTML = langs.map(l =>
+      `<span class="lang-tag">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        ${l}
+      </span>`
+    ).join('');
+  }
+  input.addEventListener('input', renderTags);
+  renderTags(); // render on load if value exists
+})();
+</script>
 {% endblock %}

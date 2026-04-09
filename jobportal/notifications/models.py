@@ -10,10 +10,10 @@ class Notification(models.Model):
     TYPE_INTERVIEW         = 'interview'
     TYPE_INTERVIEW_CONFIRM = 'interview_confirmed'
     TYPE_INTERVIEW_CANCEL  = 'interview_cancelled'
-    TYPE_ASSESSMENT        = 'assessment'
-    TYPE_ASSESSMENT_PASSED = 'assessment_passed'
-    TYPE_ASSESSMENT_FAILED = 'assessment_failed'
+    TYPE_ASSESSMENT        = 'assessment_sent'
     TYPE_ASSESSMENT_DONE   = 'assessment_done'
+    TYPE_DOCS_SUBMITTED    = 'docs_submitted'
+    TYPE_DOCS_REQUESTED    = 'docs_requested'
 
     TYPE_CHOICES = [
         (TYPE_APP_RECEIVED,      'Application Received'),
@@ -23,24 +23,24 @@ class Notification(models.Model):
         (TYPE_INTERVIEW,         'Interview Scheduled'),
         (TYPE_INTERVIEW_CONFIRM, 'Interview Confirmed'),
         (TYPE_INTERVIEW_CANCEL,  'Interview Cancelled'),
-        (TYPE_ASSESSMENT,        'Assessment Assigned'),
-        (TYPE_ASSESSMENT_PASSED, 'Assessment Passed'),
-        (TYPE_ASSESSMENT_FAILED, 'Assessment Failed'),
+        (TYPE_ASSESSMENT,        'Assessment Sent'),
         (TYPE_ASSESSMENT_DONE,   'Assessment Completed'),
+        (TYPE_DOCS_SUBMITTED,    'Documents Submitted'),
+        (TYPE_DOCS_REQUESTED,    'Document Verification Requested'),
     ]
 
     ICON = {
-        TYPE_APP_RECEIVED:      '&#128232;',
-        TYPE_SHORTLISTED:       '&#11088;',
-        TYPE_REJECTED:          '&#10005;',
-        TYPE_HIRED:             '&#127881;',
-        TYPE_INTERVIEW:         '&#128197;',
-        TYPE_INTERVIEW_CONFIRM: '&#10003;',
-        TYPE_INTERVIEW_CANCEL:  '&#10005;',
-        TYPE_ASSESSMENT:        '&#128221;',
-        TYPE_ASSESSMENT_PASSED: '&#9989;',
-        TYPE_ASSESSMENT_FAILED: '&#10060;',
-        TYPE_ASSESSMENT_DONE:   '&#128202;',
+        TYPE_APP_RECEIVED:      '📨',
+        TYPE_SHORTLISTED:       '⭐',
+        TYPE_REJECTED:          '✕',
+        TYPE_HIRED:             '🎉',
+        TYPE_INTERVIEW:         '📅',
+        TYPE_INTERVIEW_CONFIRM: '✓',
+        TYPE_INTERVIEW_CANCEL:  '✕',
+        TYPE_ASSESSMENT:        '📝',
+        TYPE_ASSESSMENT_DONE:   '📊',
+        TYPE_DOCS_SUBMITTED:    '📂',
+        TYPE_DOCS_REQUESTED:    '📋',
     }
 
     user        = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
@@ -62,7 +62,7 @@ class Notification(models.Model):
 
     @property
     def icon(self):
-        return self.ICON.get(self.notif_type, '&#128276;')
+        return self.ICON.get(self.notif_type, '🔔')
 
     @property
     def color(self):
@@ -75,9 +75,9 @@ class Notification(models.Model):
             self.TYPE_INTERVIEW_CONFIRM: 'var(--green)',
             self.TYPE_INTERVIEW_CANCEL:  '#dc2626',
             self.TYPE_ASSESSMENT:        '#7c3aed',
-            self.TYPE_ASSESSMENT_PASSED: '#059669',
-            self.TYPE_ASSESSMENT_FAILED: '#dc2626',
-            self.TYPE_ASSESSMENT_DONE:   '#0284c7',
+            self.TYPE_ASSESSMENT_DONE:   '#0891b2',
+            self.TYPE_DOCS_SUBMITTED:    '#059669',
+            self.TYPE_DOCS_REQUESTED:    '#b45309',
         }
         return mapping.get(self.notif_type, 'var(--blue)')
 
@@ -92,8 +92,8 @@ class Notification(models.Model):
             self.TYPE_INTERVIEW_CONFIRM: '#f0fdf4',
             self.TYPE_INTERVIEW_CANCEL:  '#fef2f2',
             self.TYPE_ASSESSMENT:        '#f5f3ff',
-            self.TYPE_ASSESSMENT_PASSED: '#f0fdf4',
-            self.TYPE_ASSESSMENT_FAILED: '#fef2f2',
-            self.TYPE_ASSESSMENT_DONE:   '#e0f2fe',
+            self.TYPE_ASSESSMENT_DONE:   '#ecfeff',
+            self.TYPE_DOCS_SUBMITTED:    '#f0fdf4',
+            self.TYPE_DOCS_REQUESTED:    '#fffbeb',
         }
         return mapping.get(self.notif_type, '#f8fafc')

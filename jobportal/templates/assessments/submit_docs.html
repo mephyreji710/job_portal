@@ -1,0 +1,267 @@
+{% extends 'jobseeker/base_profile.html' %}
+{% block title %}Submit Documents — Step {{ meta.number }} of 3{% endblock %}
+{% block nav_resume %}active{% endblock %}
+
+{% block extra_css %}
+.doc-header {
+  background: linear-gradient(135deg, #065f46 0%, #059669 50%, #10b981 100%);
+  border-radius: var(--radius-xl); padding: 24px 28px; margin-bottom: 24px;
+}
+.steps-bar {
+  display: flex; align-items: center; background: var(--white);
+  border: 1.5px solid var(--gray-200); border-radius: var(--radius-lg);
+  padding: 16px 20px; margin-bottom: 24px; overflow-x: auto; gap: 0;
+}
+.step-circle {
+  width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--gray-200);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .78rem; font-weight: 800; color: var(--gray-400);
+  background: var(--white); flex-shrink: 0;
+}
+.step-circle.done    { background: #10b981; border-color: #10b981; color: #fff; }
+.step-circle.current { background: #059669; border-color: #059669; color: #fff; box-shadow: 0 0 0 3px #d1fae5; }
+.step-label { font-size: .78rem; font-weight: 700; color: var(--gray-400); }
+.step-label.done    { color: #10b981; }
+.step-label.current { color: #059669; }
+.step-sub { font-size: .65rem; font-weight: 600; }
+.connector { flex: 1; min-width: 20px; height: 2px; background: var(--gray-200); margin: 0 8px; }
+.connector.done { background: #10b981; }
+.upload-area {
+  border: 2px dashed var(--gray-300); border-radius: var(--radius-lg);
+  padding: 38px 24px; text-align: center; transition: all .2s; cursor: pointer;
+  background: var(--gray-50);
+}
+.upload-area:hover, .upload-area.drag-over { border-color: #10b981; background: #f0fdf4; }
+.file-item {
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  background: #f0fdf4; border: 1px solid #a7f3d0; border-radius: 8px;
+  font-size: .82rem; color: #065f46; margin-top: 6px;
+}
+.field-label { font-size: .72rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+.field-input {
+  width: 100%; padding: 9px 12px; border: 1.5px solid var(--gray-200); border-radius: 8px;
+  font-size: .875rem; font-family: var(--font); color: var(--gray-800);
+  background: var(--gray-50); outline: none; transition: border-color .15s; box-sizing: border-box;
+}
+.field-input:focus { border-color: #10b981; background: #fff; }
+
+/* Criminal-step extras */
+.record-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.record-type-card {
+  border: 2px solid var(--gray-200); border-radius: var(--radius-lg);
+  padding: 16px; cursor: pointer; transition: border-color .18s, background .18s;
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px;
+}
+.record-type-card:has(input:checked) { border-color: #059669; background: #f0fdf4; }
+.record-type-card input[type=radio] { display: none; }
+.record-type-icon { font-size: 2rem; }
+.record-type-title { font-size: .88rem; font-weight: 800; color: var(--gray-800); }
+.record-type-desc  { font-size: .72rem; color: var(--gray-500); line-height: 1.4; }
+
+.provider-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.provider-card {
+  border: 1.5px solid var(--gray-200); border-radius: var(--radius);
+  padding: 12px 14px; display: flex; flex-direction: column; gap: 4px;
+  transition: border-color .15s; text-decoration: none;
+}
+.provider-card:hover { border-color: #059669; text-decoration: none; }
+.provider-name  { font-size: .82rem; font-weight: 800; color: var(--gray-900); }
+.provider-link  { font-size: .72rem; color: #059669; font-weight: 600; }
+.disclaimer-box {
+  background: #fefce8; border: 1.5px solid #fde68a;
+  border-radius: var(--radius); padding: 12px 14px;
+  font-size: .75rem; color: #78350f; line-height: 1.6; margin-bottom: 20px;
+}
+
+@media (max-width: 500px) {
+  .record-type-grid { grid-template-columns: 1fr; }
+  .provider-grid    { grid-template-columns: 1fr; }
+}
+{% endblock %}
+
+{% block main_content %}
+<div style="max-width:680px;">
+
+<!-- Header -->
+<div class="doc-header">
+  <h2 style="color:#fff;font-size:1.1rem;font-weight:800;margin-bottom:4px;">&#128194; Document Submission</h2>
+  <p style="color:rgba(255,255,255,.7);font-size:.85rem;">
+    {{ attempt.assessment.application.job.title }} &bull;
+    {{ attempt.assessment.application.job.recruiter.company_name }}
+    &bull; Your score: {{ attempt.score|floatformat:0 }}%
+    ({{ attempt.correct_count }}/{{ attempt.total_count }})
+  </p>
+</div>
+
+<!-- Step indicator -->
+<div class="steps-bar">
+  {% for s in steps_list %}
+  <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+    <div class="step-circle {% if s.done %}done{% elif s.current %}current{% endif %}">
+      {% if s.done %}&#10003;{% else %}{{ s.number }}{% endif %}
+    </div>
+    <div>
+      <div class="step-label {% if s.done %}done{% elif s.current %}current{% endif %}">{{ s.label }}</div>
+      <div class="step-sub {% if s.done %}done{% elif s.current %}current{% endif %}"
+           style="color:{% if s.done %}#10b981{% elif s.current %}#059669{% else %}var(--gray-300){% endif %};">
+        {% if s.done %}Submitted{% elif s.current %}Current{% else %}Pending{% endif %}
+      </div>
+    </div>
+  </div>
+  {% if not forloop.last %}
+  <div class="connector {% if s.done %}done{% endif %}"></div>
+  {% endif %}
+  {% endfor %}
+</div>
+
+<!-- Upload Card -->
+<div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-xl);padding:28px;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+    <div style="width:48px;height:48px;border-radius:14px;background:#f0fdf4;border:1.5px solid #a7f3d0;
+                display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">
+      {{ meta.icon }}
+    </div>
+    <div>
+      <div style="font-size:1rem;font-weight:800;color:var(--gray-900);">Step {{ meta.number }} of 3: {{ meta.label }}</div>
+      <div style="font-size:.8rem;color:var(--gray-500);margin-top:3px;line-height:1.4;">{{ meta.instructions }}</div>
+    </div>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" id="docForm">
+    {% csrf_token %}
+
+    {% if step == 'criminal' %}
+    <!-- ── Record type selector ───────────────────────────── -->
+    <div class="field-label" style="margin-bottom:10px;">Select Record Type *</div>
+    <div class="record-type-grid" id="recordTypeGrid">
+      <label class="record-type-card">
+        <input type="radio" name="record_type" value="local" required>
+        <div class="record-type-icon">&#127968;</div>
+        <div class="record-type-title">Local Criminal Record</div>
+        <div class="record-type-desc">Issued by your local police station or national police authority in your country of residence.</div>
+      </label>
+      <label class="record-type-card">
+        <input type="radio" name="record_type" value="global">
+        <div class="record-type-icon">&#127760;</div>
+        <div class="record-type-title">Global Criminal Record</div>
+        <div class="record-type-desc">International background check covering multiple countries. Required for candidates with overseas history.</div>
+      </label>
+    </div>
+
+    <!-- ── Provider links ─────────────────────────────────── -->
+    <div style="background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:16px;">
+      <div style="font-size:.78rem;font-weight:800;color:var(--gray-600);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">
+        &#128270; Don't Have a Criminal Record Check?
+      </div>
+      <div class="provider-grid">
+        <a href="https://peopletrail.com/personal-background-check/" target="_blank" rel="noopener" class="provider-card">
+          <div class="provider-name">&#128196; PeopleTrail</div>
+          <div class="provider-link">peopletrail.com &#8599;</div>
+          <div style="font-size:.7rem;color:var(--gray-400);">Personal background check service</div>
+        </a>
+        <a href="https://www.goodhire.com/personal-background-check/" target="_blank" rel="noopener" class="provider-card">
+          <div class="provider-name">&#128203; GoodHire</div>
+          <div class="provider-link">goodhire.com &#8599;</div>
+          <div style="font-size:.7rem;color:var(--gray-400);">Fast &amp; secure background checks</div>
+        </a>
+        <a href="https://verifeo.com/services/background-check/criminal-record-check" target="_blank" rel="noopener" class="provider-card">
+          <div class="provider-name">&#128373; Verifeo</div>
+          <div class="provider-link">verifeo.com &#8599;</div>
+          <div style="font-size:.7rem;color:var(--gray-400);">Criminal record check specialists</div>
+        </a>
+        <a href="https://checkr.com/personal-background-checks" target="_blank" rel="noopener" class="provider-card">
+          <div class="provider-name">&#9989; Checkr</div>
+          <div class="provider-link">checkr.com &#8599;</div>
+          <div style="font-size:.7rem;color:var(--gray-400);">Trusted by thousands of employers</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ── Legal disclaimer ───────────────────────────────── -->
+    <div class="disclaimer-box">
+      <strong>&#9888; Disclaimer</strong><br>
+      We are not affiliated with the service providers listed above. Candidates are responsible for selecting and purchasing background check services independently. Please ensure the report includes criminal history verification and is issued in your legal name.
+    </div>
+    {% endif %}
+
+    <!-- Drop zone -->
+    <div class="field-label">Upload Files *</div>
+    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+      <div style="font-size:2.8rem;margin-bottom:8px;">&#128194;</div>
+      <div style="font-size:.92rem;font-weight:700;color:var(--gray-600);margin-bottom:4px;">Click to choose files</div>
+      <div style="font-size:.78rem;color:var(--gray-400);">or drag &amp; drop &bull; PDF, JPG, PNG, DOCX &bull; Max 15 MB each</div>
+      <input type="file" name="files" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display:none;">
+    </div>
+    <div id="fileList"></div>
+
+    <!-- Notes -->
+    <div style="margin-top:16px;">
+      <div class="field-label">Notes (optional)</div>
+      <textarea name="notes" class="field-input" rows="2" placeholder="Any additional context about these documents…"></textarea>
+    </div>
+
+    <div style="margin-top:22px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+      <a href="{% url 'applications:my_applications' %}" class="btn btn-gray">&#10005; Cancel</a>
+      <button type="submit" class="btn btn-primary" style="background:#059669;padding:10px 22px;">
+        {% if next_step_label %}
+        &#8594; Upload &amp; Continue to {{ next_step_label }}
+        {% else %}
+        &#10003; Upload &amp; Finish
+        {% endif %}
+      </button>
+    </div>
+  </form>
+</div>
+
+</div>
+
+<script>
+const fileInput  = document.getElementById('fileInput');
+const uploadArea = document.getElementById('uploadArea');
+const fileList   = document.getElementById('fileList');
+
+fileInput.addEventListener('change', showFiles);
+uploadArea.addEventListener('dragover',  e => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
+uploadArea.addEventListener('dragleave', ()=> uploadArea.classList.remove('drag-over'));
+uploadArea.addEventListener('drop', e => {
+  e.preventDefault(); uploadArea.classList.remove('drag-over');
+  fileInput.files = e.dataTransfer.files; showFiles();
+});
+
+function showFiles() {
+  fileList.innerHTML = '';
+  Array.from(fileInput.files).forEach(f => {
+    const d = document.createElement('div');
+    d.className = 'file-item';
+    d.innerHTML = `<span>&#128196;</span><span style="flex:1;">${f.name}</span><span style="color:#6b7280;font-size:.75rem;">${(f.size/1024/1024).toFixed(2)} MB</span>`;
+    fileList.appendChild(d);
+  });
+}
+
+/* Highlight selected record-type card */
+document.querySelectorAll('.record-type-card input[type=radio]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    document.querySelectorAll('.record-type-card').forEach(c => {
+      c.style.borderColor = '';
+      c.style.background  = '';
+    });
+    if (radio.checked) {
+      radio.closest('.record-type-card').style.borderColor = '#059669';
+      radio.closest('.record-type-card').style.background  = '#f0fdf4';
+    }
+  });
+});
+
+/* On submit: prepend record type to notes field */
+document.getElementById('docForm').addEventListener('submit', function() {
+  const selected = document.querySelector('input[name="record_type"]:checked');
+  if (!selected) return;
+  const label = selected.value === 'local' ? 'Local Criminal Record' : 'Global Criminal Record';
+  const notesField = this.querySelector('textarea[name="notes"]');
+  if (notesField) {
+    const existing = notesField.value.trim();
+    notesField.value = existing ? `[${label}] ${existing}` : `[${label}]`;
+  }
+});
+</script>
+{% endblock %}

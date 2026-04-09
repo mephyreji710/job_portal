@@ -1,0 +1,120 @@
+{% extends 'recruiter/base_recruiter.html' %}
+{% block title %}Submitted Documents — {{ attempt.applicant.email }}{% endblock %}
+{% block nav_applications %}active{% endblock %}
+
+{% block extra_css %}
+.doc-header {
+  background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+  border-radius: var(--radius-xl); padding: 24px 28px; margin-bottom: 20px;
+}
+.doc-section {
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-lg); margin-bottom: 16px; overflow: hidden;
+}
+.doc-section-header {
+  background: var(--gray-50); border-bottom: 1.5px solid var(--gray-100);
+  padding: 14px 20px; display: flex; align-items: center; gap: 10px;
+}
+.doc-row {
+  display: flex; align-items: center; gap: 12px; padding: 13px 20px;
+  border-bottom: 1px solid var(--gray-100); transition: background .15s;
+}
+.doc-row:last-child { border-bottom: none; }
+.doc-row:hover { background: var(--gray-50); }
+.file-icon {
+  width: 40px; height: 40px; border-radius: 10px; background: #f0fdf4;
+  border: 1.5px solid #a7f3d0; display: flex; align-items: center;
+  justify-content: center; font-size: 1.1rem; flex-shrink: 0;
+}
+.dl-btn {
+  display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px;
+  border-radius: 999px; font-size: .73rem; font-weight: 700; text-decoration: none;
+  background: #f0fdf4; color: #065f46; border: 1px solid #a7f3d0; transition: opacity .15s;
+  flex-shrink: 0;
+}
+.dl-btn:hover { opacity: .8; text-decoration: none; }
+{% endblock %}
+
+{% block main_content %}
+
+<!-- Header -->
+<div class="doc-header">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+    <div>
+      <div style="font-size:.72rem;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">
+        &#128194; Submitted Documents
+      </div>
+      <div style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:4px;">
+        {% if attempt.assessment.application.full_name %}{{ attempt.assessment.application.full_name }}
+        {% else %}{{ attempt.applicant.email }}{% endif %}
+      </div>
+      <div style="font-size:.875rem;color:rgba(255,255,255,.65);">
+        {{ attempt.assessment.application.job.title }} &bull;
+        Score: <strong style="color:#fff;">{{ attempt.score|floatformat:0 }}%
+        ({{ attempt.correct_count }}/{{ attempt.total_count }})</strong>
+        &bull; {{ total_files }} file{{ total_files|pluralize }} submitted
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">
+      <a href="{% url 'assessments:recruiter_result' attempt.assessment.pk %}"
+         class="btn btn-gray btn-sm" style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.8);">
+        &#128202; Assessment Results
+      </a>
+      <a href="{% url 'applications:all_applications' %}"
+         class="btn btn-gray btn-sm" style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.8);">
+        &#8592; All Applications
+      </a>
+    </div>
+  </div>
+</div>
+
+{% if groups_list %}
+
+<!-- Documents by group -->
+{% for group in groups_list %}
+<div class="doc-section">
+  <div class="doc-section-header">
+    <span style="font-size:1.4rem;">{{ group.icon }}</span>
+    <div>
+      <div style="font-size:.92rem;font-weight:800;color:var(--gray-800);">{{ group.label }}</div>
+      <div style="font-size:.72rem;color:var(--gray-400);">{{ group.docs|length }} file{{ group.docs|length|pluralize }}</div>
+    </div>
+    <span style="margin-left:auto;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:999px;background:#d1fae5;color:#065f46;">
+      &#10003; Submitted
+    </span>
+  </div>
+
+  {% for doc in group.docs %}
+  <div class="doc-row">
+    <div class="file-icon">&#128196;</div>
+    <div style="flex:1;min-width:0;">
+      <div style="font-size:.875rem;font-weight:700;color:var(--gray-800);
+                  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+        {{ doc.filename }}
+      </div>
+      {% if doc.notes %}
+      <div style="font-size:.75rem;color:var(--gray-500);margin-top:2px;font-style:italic;">{{ doc.notes }}</div>
+      {% endif %}
+      <div style="font-size:.7rem;color:var(--gray-400);margin-top:2px;">
+        &#128197; {{ doc.submitted_at|date:"M d, Y \a\t H:i" }}
+      </div>
+    </div>
+    <a href="{% url 'assessments:download_doc' doc.pk %}" class="dl-btn">
+      &#11015; Download
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% endfor %}
+
+{% else %}
+<div style="text-align:center;padding:60px 24px;background:var(--white);border-radius:var(--radius-xl);border:1.5px solid var(--gray-200);">
+  <div style="font-size:3rem;margin-bottom:12px;">&#128194;</div>
+  <div style="font-size:1rem;font-weight:800;color:var(--gray-700);margin-bottom:6px;">No Documents Yet</div>
+  <div style="font-size:.875rem;color:var(--gray-400);">
+    The candidate has not submitted any documents yet.
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

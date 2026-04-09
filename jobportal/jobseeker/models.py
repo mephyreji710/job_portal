@@ -39,7 +39,11 @@ class JobSeekerProfile(models.Model):
     gender = models.CharField(max_length=20, choices=GENDER_CHOICES, blank=True)
     location = models.CharField(max_length=100, blank=True,
                                 help_text='City, Country')
+    address = models.TextField(blank=True,
+                               help_text='Street address, city, state, postal code, country')
     nationality = models.CharField(max_length=60, blank=True)
+    languages = models.CharField(max_length=300, blank=True,
+                                 help_text='Comma-separated languages, e.g. English, Hindi, French')
 
     # Online Presence
     website = models.URLField(blank=True)
@@ -107,6 +111,10 @@ class JobSeekerProfile(models.Model):
         if pct < 70:
             return '#f59e0b'
         return '#10b981'
+
+    def get_languages_list(self):
+        """Return list of language strings from the comma-separated field."""
+        return [l.strip() for l in self.languages.split(',') if l.strip()]
 
     def __str__(self):
         return f"{self.user.get_full_name() or self.user.username} — Profile"

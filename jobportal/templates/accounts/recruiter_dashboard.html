@@ -1,133 +1,671 @@
 {% extends 'accounts/base.html' %}
-{% block title %}Recruiter Dashboard — TalentBridge{% endblock %}
+{% block title %}Recruiter Dashboard — Hireiz{% endblock %}
 
 {% block extra_css %}
-.main-content { padding: 32px; }
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 28px; }
-.profile-complete {
-  background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow);
-  padding: 24px; margin-bottom: 24px;
-  border-left: 4px solid var(--green);
+/* ── Reset main padding ── */
+.main-content { padding: 0 !important; background: #f4f5f7; min-height: calc(100vh - 64px); }
+
+/* ══════════════════════════════════════════
+   HERO
+══════════════════════════════════════════ */
+.dash-hero {
+  background: linear-gradient(135deg, #0a1628 0%, #0f2240 55%, #0a1628 100%);
+  padding: 48px 40px 0;
+  position: relative;
+  overflow: hidden;
 }
-.profile-complete.incomplete { border-color: var(--orange); }
-.feature-card {
-  background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow);
-  padding: 24px; border-top: 3px solid var(--gray-200);
-  display: flex; flex-direction: column; gap: 12px;
+.dash-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 700px 400px at 85% -10%, rgba(5,150,105,.18) 0%, transparent 65%),
+    radial-gradient(ellipse 400px 300px at -5% 110%, rgba(8,145,178,.12) 0%, transparent 60%);
+  pointer-events: none;
 }
-.feature-card.coming { border-top-color: var(--gray-300); }
-.feature-icon-box { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
-.feature-title { font-size: 1rem; font-weight: 700; color: var(--gray-900); }
-.feature-desc  { font-size: 0.85rem; color: var(--gray-500); line-height: 1.6; }
-.coming-badge { display: inline-block; background: var(--gray-100); color: var(--gray-500); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; }
+.dash-hero::after {
+  content: '';
+  position: absolute;
+  top: -120px; right: -80px;
+  width: 320px; height: 320px;
+  border-radius: 50%;
+  background: rgba(5,150,105,.06);
+  pointer-events: none;
+}
+
+/* Hero inner */
+.hero-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* Company logo / avatar */
+.hero-logo {
+  width: 80px; height: 80px;
+  border-radius: 18px;
+  border: 2px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.08);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; font-weight: 900; color: #fff;
+  flex-shrink: 0;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  backdrop-filter: blur(8px);
+}
+.hero-logo img { width:100%; height:100%; object-fit:cover; border-radius:16px; }
+
+/* Greeting */
+.hero-greeting { flex: 1; padding-top: 4px; }
+.hero-eyebrow {
+  font-size: .7rem; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: rgba(52,211,153,.85);
+  margin-bottom: 6px;
+}
+.hero-company {
+  font-size: 1.8rem; font-weight: 800;
+  color: #fff; letter-spacing: -.03em; line-height: 1.15;
+  margin-bottom: 4px;
+}
+.hero-welcome {
+  font-size: .875rem; color: rgba(255,255,255,.5);
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.hero-dot { width: 3px; height: 3px; border-radius: 50%; background: rgba(255,255,255,.25); }
+
+/* Hero CTA buttons */
+.hero-actions {
+  display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;
+}
+.hero-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-size: .82rem; font-weight: 700;
+  text-decoration: none;
+  transition: all .2s;
+}
+.hero-btn-primary {
+  background: #059669; color: #fff;
+  border: 1.5px solid #059669;
+}
+.hero-btn-primary:hover { background: #047857; border-color:#047857; color:#fff; text-decoration:none; }
+.hero-btn-ghost {
+  background: rgba(255,255,255,.08);
+  border: 1.5px solid rgba(255,255,255,.15);
+  color: rgba(255,255,255,.8);
+}
+.hero-btn-ghost:hover { background: rgba(255,255,255,.14); color:#fff; text-decoration:none; }
+
+/* Hero stats strip */
+.hero-stats {
+  display: flex;
+  max-width: 1100px;
+  margin: 36px auto 0;
+  position: relative; z-index: 1;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.hero-stat {
+  flex: 1;
+  padding: 20px 24px;
+  text-decoration: none;
+  display: flex; align-items: center; gap: 16px;
+  border-right: 1px solid rgba(255,255,255,.06);
+  transition: background .2s;
+}
+.hero-stat:last-child { border-right: none; }
+.hero-stat:hover { background: rgba(255,255,255,.03); text-decoration: none; }
+.hstat-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.hstat-val {
+  font-size: 1.65rem; font-weight: 900; color: #fff; line-height: 1;
+  margin-bottom: 2px;
+}
+.hstat-lbl {
+  font-size: .7rem; font-weight: 600; letter-spacing: .05em;
+  text-transform: uppercase; color: rgba(255,255,255,.4);
+}
+
+/* ══════════════════════════════════════════
+   PAGE BODY
+══════════════════════════════════════════ */
+.dash-body {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 40px 64px;
+}
+
+.section-label {
+  font-size: .68rem; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--gray-400);
+  margin-bottom: 14px;
+}
+
+/* ══════════════════════════════════════════
+   QUICK ACTIONS
+══════════════════════════════════════════ */
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 32px;
+}
+.qa-card {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 16px;
+  padding: 20px 18px;
+  text-decoration: none; color: inherit;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: box-shadow .2s, transform .2s, border-color .2s;
+  position: relative; overflow: hidden;
+}
+.qa-card::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+  background: var(--qa-accent, #059669);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .25s ease;
+}
+.qa-card:hover {
+  box-shadow: 0 10px 30px -8px rgba(0,0,0,.12);
+  transform: translateY(-2px);
+  border-color: var(--gray-300);
+  text-decoration: none; color: inherit;
+}
+.qa-card:hover::after { transform: scaleX(1); }
+.qa-icon {
+  width: 42px; height: 42px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+}
+.qa-title { font-size: .88rem; font-weight: 800; color: var(--gray-900); margin-bottom: 2px; }
+.qa-desc  { font-size: .76rem; color: var(--gray-500); line-height: 1.5; }
+.qa-arrow {
+  margin-top: auto;
+  font-size: .78rem; font-weight: 700;
+  color: var(--qa-accent, #059669);
+  display: flex; align-items: center; gap: 4px;
+}
+
+/* ══════════════════════════════════════════
+   MAIN GRID
+══════════════════════════════════════════ */
+.dash-main-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* ── Company card ── */
+.company-card {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.cc-top {
+  background: linear-gradient(160deg, #0a1628 0%, #0f2240 100%);
+  padding: 28px 22px 22px;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  position: relative;
+}
+.cc-logo {
+  width: 68px; height: 68px; border-radius: 16px;
+  border: 2px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; font-weight: 900; color: #fff;
+  overflow: hidden; margin-bottom: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.3);
+}
+.cc-logo img { width:100%; height:100%; object-fit:cover; border-radius:14px; }
+.cc-company { font-size: 1rem; font-weight: 800; color: #fff; margin-bottom: 3px; }
+.cc-recruiter { font-size: .78rem; color: rgba(255,255,255,.45); }
+.cc-status {
+  margin-top: 10px;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 999px;
+  font-size: .7rem; font-weight: 700;
+}
+.cc-status-ok   { background: rgba(5,150,105,.2); color: #34d399; }
+.cc-status-warn { background: rgba(245,158,11,.2); color: #fbbf24; }
+.cc-edit {
+  position: absolute; top: 12px; right: 12px;
+  width: 30px; height: 30px; border-radius: 8px;
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,.6); text-decoration: none;
+  transition: background .2s;
+}
+.cc-edit:hover { background: rgba(255,255,255,.18); color:#fff; text-decoration:none; }
+
+.cc-body { padding: 18px 20px; }
+.cc-row {
+  display: flex; align-items: flex-start; gap: 11px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+.cc-row:last-child { border-bottom: none; padding-bottom: 0; }
+.cc-row-icon {
+  width: 30px; height: 30px; border-radius: 7px;
+  background: var(--gray-50); border: 1px solid var(--gray-100);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.cc-row-label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--gray-400); margin-bottom: 1px; }
+.cc-row-val   { font-size: .85rem; font-weight: 600; color: var(--gray-800); }
+
+/* ── Right column ── */
+.dash-right { display: flex; flex-direction: column; gap: 20px; }
+
+/* Feature grid */
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.feat-card {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 18px;
+  padding: 22px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: box-shadow .2s, transform .2s;
+}
+.feat-card:hover {
+  box-shadow: 0 8px 28px -6px rgba(0,0,0,.10);
+  transform: translateY(-2px);
+}
+.feat-icon {
+  width: 46px; height: 46px; border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+}
+.feat-title { font-size: .95rem; font-weight: 800; color: var(--gray-900); }
+.feat-desc  { font-size: .8rem; color: var(--gray-500); line-height: 1.6; flex: 1; }
+.feat-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: .8rem; font-weight: 700;
+  text-decoration: none;
+  padding: 7px 14px; border-radius: 8px;
+  transition: opacity .15s;
+  align-self: flex-start; margin-top: 4px;
+}
+.feat-link:hover { opacity: .85; text-decoration: none; }
+.feat-link-ghost {
+  background: transparent;
+  border: 1.5px solid var(--gray-200);
+  color: var(--gray-600);
+  padding: 6px 13px;
+}
+.feat-links-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Utility links row */
+.util-links { display: flex; flex-wrap: wrap; gap: 10px; }
+.util-link {
+  display: flex; align-items: center; gap: 7px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  color: var(--gray-700);
+  font-size: .8rem; font-weight: 700;
+  text-decoration: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.util-link:hover { border-color: var(--gray-400); box-shadow: var(--shadow-sm); text-decoration: none; color: var(--gray-900); }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .dash-body { padding: 28px 28px 56px; }
+  .quick-grid { grid-template-columns: repeat(2, 1fr); }
+  .dash-main-grid { grid-template-columns: 1fr; }
+  .feature-grid { grid-template-columns: 1fr 1fr; }
+}
 @media (max-width: 768px) {
-  .grid-3 { grid-template-columns: 1fr 1fr; }
-  .grid-2 { grid-template-columns: 1fr; }
+  .dash-hero { padding: 32px 20px 0; }
+  .hero-top { flex-direction: column; align-items: center; text-align: center; }
+  .hero-logo { width: 68px; height: 68px; }
+  .hero-company { font-size: 1.4rem; }
+  .hero-welcome { justify-content: center; }
+  .hero-actions { justify-content: center; }
+  .hero-stats { flex-direction: column; }
+  .hero-stat { border-right: none; border-bottom: 1px solid rgba(255,255,255,.06); }
+  .hero-stat:last-child { border-bottom: none; }
+  .dash-body { padding: 20px 16px 48px; }
+  .quick-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .feature-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) {
-  .grid-3 { grid-template-columns: 1fr; }
+  .quick-grid { grid-template-columns: 1fr; }
+  .hero-stats { display: grid; grid-template-columns: 1fr 1fr; }
+  .hero-stat { border-right: 1px solid rgba(255,255,255,.06); border-bottom: 1px solid rgba(255,255,255,.06); }
+  .hero-stat:nth-child(2n) { border-right: none; }
+  .hero-stat:nth-last-child(-n+2):nth-child(odd):last-child { border-bottom: none; }
 }
 {% endblock %}
 
 {% block content %}
-<div class="main-content">
 
-  <!-- PAGE HEADER -->
-  <div class="page-header">
-    <div class="flex items-center gap-4">
-      <div class="avatar" style="width:52px;height:52px;font-size:1.3rem;background:linear-gradient(135deg,#059669,#0891b2);">
+<!-- ══ HERO ══ -->
+<div class="dash-hero">
+  <div class="hero-top">
+
+    <!-- Company logo -->
+    <div class="hero-logo">
+      {% if profile and profile.logo %}
+        <img src="{{ profile.logo.url }}" alt="{{ profile.company_name }}">
+      {% else %}
         {{ request.user.first_name|slice:":1"|upper }}{{ request.user.last_name|slice:":1"|upper }}
+      {% endif %}
+    </div>
+
+    <!-- Greeting -->
+    <div class="hero-greeting">
+      <div class="hero-eyebrow">Recruiter Dashboard</div>
+      <div class="hero-company">
+        {% if profile %}{{ profile.company_name }}{% else %}Welcome!{% endif %}
+      </div>
+      <div class="hero-welcome">
+        <span>{{ request.user.get_full_name|default:request.user.username }}</span>
+        <span class="hero-dot"></span>
+        <span>{{ request.user.email }}</span>
+        {% if profile and profile.industry %}
+          <span class="hero-dot"></span>
+          <span>{{ profile.get_industry_display }}</span>
+        {% endif %}
+      </div>
+      <div class="hero-actions">
+        <a href="{% url 'recruiter:jobs' %}" class="hero-btn hero-btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Post a Job
+        </a>
+        <a href="{% url 'recruiter:panel' %}" class="hero-btn hero-btn-ghost">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Company Panel
+        </a>
+        <a href="{% url 'recruiter:edit' %}" class="hero-btn hero-btn-ghost">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit Profile
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats strip -->
+  <div class="hero-stats">
+    <a class="hero-stat" href="{% url 'recruiter:jobs' %}">
+      <div class="hstat-icon" style="background:rgba(5,150,105,.15);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
       </div>
       <div>
-        <h1>Recruiter Dashboard</h1>
-        <p>Welcome back, {{ request.user.get_full_name|default:request.user.username }}!
-          {% if profile %}&nbsp;|&nbsp;&#127970; {{ profile.company_name }}{% endif %}
-        </p>
+        <div class="hstat-val">{{ active_jobs }}</div>
+        <div class="hstat-lbl">Active Jobs</div>
       </div>
-    </div>
-  </div>
-
-  <!-- WELCOME CARD -->
-  <div class="welcome-card" style="background:linear-gradient(135deg,#064e3b 0%,#065f46 50%,#0891b2 100%);margin-bottom:28px;">
-    <h2>&#127970; Find the Best Talent</h2>
-    <p>Post job listings and let our AI automatically screen and rank candidates by their resume match score.</p>
-    <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;">
-      <a href="{% url 'recruiter:panel' %}" class="btn btn-primary" style="background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);color:#fff;">&#127970; Company Panel</a>
-      <a href="{% url 'recruiter:jobs' %}"  class="btn btn-primary" style="background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);color:#fff;">&#128196; Active Jobs</a>
-    </div>
-  </div>
-
-  <!-- STAT CARDS -->
-  <div class="grid-3">
-    <div class="stat-card green">
-      <div class="stat-value" style="color:var(--green);">0</div>
-      <div class="stat-label">Active Job Postings</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">0</div>
-      <div class="stat-label">Total Applications</div>
-    </div>
-    <div class="stat-card indigo">
-      <div class="stat-value" style="color:var(--indigo);">0</div>
-      <div class="stat-label">Shortlisted Candidates</div>
-    </div>
-  </div>
-
-  <!-- PROFILE STATUS -->
-  {% if profile %}
-  <div class="profile-complete">
-    <div class="flex items-center gap-3">
-      <span style="font-size:1.5rem;">&#127970;</span>
+    </a>
+    <a class="hero-stat" href="{% url 'jobs:manage' %}">
+      <div class="hstat-icon" style="background:rgba(232,69,48,.15);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
       <div>
-        <strong>{{ profile.company_name }}</strong>
-        {% if profile.company_website %}&nbsp;&bull;&nbsp;<a href="{{ profile.company_website }}" target="_blank">{{ profile.company_website }}</a>{% endif %}
-        <p style="color:var(--gray-500);font-size:0.875rem;margin-top:2px;">Your company profile is set up. Keep it updated to attract candidates.</p>
+        <div class="hstat-val">{{ total_applications }}</div>
+        <div class="hstat-lbl">Applications</div>
       </div>
-    </div>
-  </div>
-  {% else %}
-  <div class="profile-complete incomplete">
-    <div class="flex items-center gap-3">
-      <span style="font-size:1.5rem;">&#9888;</span>
+    </a>
+    <a class="hero-stat" href="{% url 'jobs:manage' %}">
+      <div class="hstat-icon" style="background:rgba(8,145,178,.15);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
       <div>
-        <strong style="color:#92400e;">Company profile incomplete</strong>
-        <p style="color:#92400e;font-size:0.875rem;margin-top:2px;">Complete your company profile to start posting jobs.</p>
+        <div class="hstat-val">{{ shortlisted }}</div>
+        <div class="hstat-lbl">Shortlisted</div>
       </div>
-    </div>
+    </a>
+    <a class="hero-stat" href="{% url 'interviews:my_interviews' %}">
+      <div class="hstat-icon" style="background:rgba(245,158,11,.15);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <div>
+        <div class="hstat-val">{{ upcoming_interviews }}</div>
+        <div class="hstat-lbl">Interviews</div>
+      </div>
+    </a>
   </div>
-  {% endif %}
-
-  <!-- FEATURE CARDS -->
-  <div class="grid-2">
-    <div class="feature-card" style="border-top-color:var(--green);">
-      <div class="feature-icon-box" style="background:var(--green-pale);">&#127970;</div>
-      <div class="feature-title">Company Panel</div>
-      <p class="feature-desc">Manage your company profile, logo, HR team, and active job listings all in one dedicated panel.</p>
-      <a href="{% url 'recruiter:panel' %}" class="btn btn-primary btn-sm" style="align-self:flex-start;background:var(--green);border-color:var(--green);">Open Panel &#8594;</a>
-    </div>
-
-    <div class="feature-card" style="border-top-color:var(--indigo);">
-      <div class="feature-icon-box" style="background:#ede9fe;">&#129302;</div>
-      <div class="feature-title">AI Resume Screening</div>
-      <p class="feature-desc">Our AI automatically analyzes and ranks candidate resumes based on job requirements — saving you hours of manual screening.</p>
-      <a href="{% url 'screening:recruiter_overview' %}" class="btn btn-primary btn-sm" style="align-self:flex-start;background:var(--indigo);border-color:var(--indigo);">Open AI Screening &rarr;</a>
-    </div>
-
-    <div class="feature-card" style="border-top-color:var(--green);">
-      <div class="feature-icon-box" style="background:var(--green-pale);">&#128101;</div>
-      <div class="feature-title">Manage Applications</div>
-      <p class="feature-desc">Review all applicants for your job postings, update their status, shortlist candidates, and schedule interviews.</p>
-      <a href="{% url 'jobs:manage' %}" class="btn btn-primary btn-sm" style="align-self:flex-start;background:var(--green);border-color:var(--green);">Manage Jobs &rarr;</a>
-    </div>
-
-    <div class="feature-card" style="border-top-color:var(--orange);">
-      <div class="feature-icon-box" style="background:var(--orange-pale);">&#128202;</div>
-      <div class="feature-title">Analytics & Reports</div>
-      <p class="feature-desc">Track application metrics, view funnel analytics, and measure your recruitment performance over time.</p>
-      <a href="{% url 'analytics:dashboard' %}" class="btn btn-primary btn-sm" style="align-self:flex-start;background:var(--orange);border-color:var(--orange);">View Analytics &rarr;</a>
-    </div>
-  </div>
-
 </div>
+
+<!-- ══ BODY ══ -->
+<div class="dash-body">
+
+  <!-- QUICK ACTIONS -->
+  <div class="section-label">Quick Actions</div>
+  <div class="quick-grid">
+
+    <a class="qa-card" href="{% url 'recruiter:jobs' %}" style="--qa-accent:#059669;">
+      <div class="qa-icon" style="background:#ecfdf5;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <div>
+        <div class="qa-title">Post a Job</div>
+        <div class="qa-desc">Create a new listing and attract top candidates</div>
+      </div>
+      <div class="qa-arrow">Post now <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+
+    <a class="qa-card" href="{% url 'jobs:manage' %}" style="--qa-accent:#E84530;">
+      <div class="qa-icon" style="background:#FFF0EE;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E84530" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div>
+        <div class="qa-title">Manage Applicants</div>
+        <div class="qa-desc">Review, shortlist, and update candidate status</div>
+      </div>
+      <div class="qa-arrow">View all <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+
+    <a class="qa-card" href="{% url 'screening:recruiter_overview' %}" style="--qa-accent:#0891b2;">
+      <div class="qa-icon" style="background:#ecfeff;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div>
+        <div class="qa-title">AI Screening</div>
+        <div class="qa-desc">Auto-ranked candidates by resume match score</div>
+      </div>
+      <div class="qa-arrow">Open screening <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+
+    <a class="qa-card" href="{% url 'interviews:my_interviews' %}" style="--qa-accent:#f59e0b;">
+      <div class="qa-icon" style="background:#fffbeb;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <div>
+        <div class="qa-title">Schedule Interviews</div>
+        <div class="qa-desc">Book and manage candidate interview slots</div>
+      </div>
+      <div class="qa-arrow">Schedule <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="dash-main-grid">
+
+    <!-- ── Company card ── -->
+    <div class="company-card">
+      <div class="cc-top">
+        <a class="cc-edit" href="{% url 'recruiter:edit' %}" title="Edit company profile">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </a>
+        <div class="cc-logo">
+          {% if profile and profile.logo %}
+            <img src="{{ profile.logo.url }}" alt="{{ profile.company_name }}">
+          {% else %}
+            {{ request.user.first_name|slice:":1"|upper }}{{ request.user.last_name|slice:":1"|upper }}
+          {% endif %}
+        </div>
+        <div class="cc-company">{% if profile %}{{ profile.company_name }}{% else %}My Company{% endif %}</div>
+        <div class="cc-recruiter">{{ request.user.get_full_name|default:request.user.username }}</div>
+        {% if profile %}
+        <span class="cc-status cc-status-ok">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Profile Active
+        </span>
+        {% else %}
+        <span class="cc-status cc-status-warn">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Setup Required
+        </span>
+        {% endif %}
+      </div>
+
+      <div class="cc-body">
+        {% if profile %}
+
+        {% if profile.tagline %}
+        <div class="cc-row">
+          <div class="cc-row-icon">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gray-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div>
+            <div class="cc-row-label">Tagline</div>
+            <div class="cc-row-val" style="font-style:italic;font-weight:500;color:var(--gray-600);">{{ profile.tagline }}</div>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if profile.industry %}
+        <div class="cc-row">
+          <div class="cc-row-icon">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gray-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div>
+            <div class="cc-row-label">Industry</div>
+            <div class="cc-row-val">{{ profile.get_industry_display }}</div>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if profile.company_size %}
+        <div class="cc-row">
+          <div class="cc-row-icon">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gray-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div>
+            <div class="cc-row-label">Company Size</div>
+            <div class="cc-row-val">{{ profile.get_company_size_display }}</div>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if profile.location %}
+        <div class="cc-row">
+          <div class="cc-row-icon">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gray-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div>
+            <div class="cc-row-label">Location</div>
+            <div class="cc-row-val">{{ profile.location }}</div>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if profile.company_website %}
+        <div class="cc-row">
+          <div class="cc-row-icon">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gray-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+          <div>
+            <div class="cc-row-label">Website</div>
+            <a href="{{ profile.company_website }}" target="_blank" rel="noopener" class="cc-row-val" style="color:var(--blue);text-decoration:none;word-break:break-all;">{{ profile.company_website|truncatechars:30 }}</a>
+          </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div style="padding:16px 0;text-align:center;color:var(--gray-400);font-size:.875rem;">Profile not configured yet.</div>
+        {% endif %}
+
+        <a href="{% url 'recruiter:edit' %}" style="display:block;margin-top:14px;text-align:center;padding:10px;border-radius:10px;background:#ecfdf5;color:#059669;font-size:.82rem;font-weight:700;text-decoration:none;transition:background .2s;" onmouseover="this.style.background='#d1fae5'" onmouseout="this.style.background='#ecfdf5'">
+          Update Company Profile &rarr;
+        </a>
+      </div>
+    </div>
+
+    <!-- ── Right column ── -->
+    <div class="dash-right">
+      <div class="section-label">Recruitment Tools</div>
+      <div class="feature-grid">
+
+        <div class="feat-card">
+          <div class="feat-icon" style="background:#ecfdf5;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+          </div>
+          <div class="feat-title">Job Management</div>
+          <p class="feat-desc">Post, edit, and manage all your active job listings. Set requirements, salary, and experience levels.</p>
+          <div class="feat-links-row">
+            <a href="{% url 'recruiter:jobs' %}" class="feat-link" style="background:#059669;color:#fff;">Manage Jobs</a>
+            <a href="{% url 'jobs:board' %}" class="feat-link feat-link-ghost">Preview Board</a>
+          </div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon" style="background:#ecfeff;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="feat-title">AI Resume Screening</div>
+          <p class="feat-desc">Automatically rank candidates by resume match. Save hours of manual screening with AI-powered insights.</p>
+          <a href="{% url 'screening:recruiter_overview' %}" class="feat-link" style="background:#0891b2;color:#fff;">Open AI Screening</a>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon" style="background:#FFF0EE;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E84530" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="feat-title">Application Manager</div>
+          <p class="feat-desc">Review all applicants, update their pipeline status, shortlist top talent, and coordinate interviews.</p>
+          <a href="{% url 'jobs:manage' %}" class="feat-link" style="background:#E84530;color:#fff;">View Applicants</a>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon" style="background:#fffbeb;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </div>
+          <div class="feat-title">Analytics & Reports</div>
+          <p class="feat-desc">Track job views, application rates, pipeline funnel, and overall recruitment performance.</p>
+          <a href="{% url 'analytics:dashboard' %}" class="feat-link" style="background:#f59e0b;color:#fff;">View Analytics</a>
+        </div>
+
+      </div>
+
+      <!-- Utility links -->
+      <div class="util-links">
+        <a href="{% url 'recruiter:panel' %}" class="util-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Company Panel
+        </a>
+        <a href="{% url 'recruiter:team' %}" class="util-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          HR Team
+        </a>
+        <a href="{% url 'interviews:my_interviews' %}" class="util-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Interviews
+        </a>
+        {% if profile %}<a href="{% url 'feedback:company_reviews' profile.pk %}" class="util-link">{% else %}<a href="{% url 'recruiter:edit' %}" class="util-link">{% endif %}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Reviews
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 {% endblock %}

@@ -1,5 +1,5 @@
 {% extends 'accounts/base.html' %}
-{% block title %}{% if valid %}Email Verified{% else %}Invalid Link{% endif %} — TalentBridge{% endblock %}
+{% block title %}{% if valid %}Email Verified{% else %}Invalid Link{% endif %} — Hireiz{% endblock %}
 
 {% block extra_css %}
 .verified-wrap {
@@ -25,7 +25,7 @@
       <div class="verified-title" style="color:#065f46;">Email Verified!</div>
       <div class="verified-sub">
         Your account is now active. You've been logged in automatically.<br>
-        Welcome to TalentBridge, <strong>{{ user.first_name|default:user.username }}</strong>!
+        Welcome to Hireiz, <strong>{{ user.first_name|default:user.username }}</strong>!
       </div>
       <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
         {% if user.role == 'recruiter' %}

@@ -1,202 +1,306 @@
 {% extends 'recruiter/base_recruiter.html' %}
-{% block title %}My Job Listings{% endblock %}
+{% block title %}My Job Listings — Hireiz{% endblock %}
 {% block nav_jobs %}active{% endblock %}
 
 {% block extra_css %}
-.filter-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 20px; }
+.main-content { padding: 0 !important; background: #f4f5f7; }
+
+/* ── Hero ── */
+.mgr-hero {
+  background: linear-gradient(135deg, #0a1628 0%, #0f2240 60%, #0a1628 100%);
+  padding: 36px 40px 28px;
+  position: relative; overflow: hidden;
+}
+.mgr-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 600px 300px at 90% -10%, rgba(5,150,105,.18) 0%, transparent 65%);
+  pointer-events: none;
+}
+.mgr-hero-inner { max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+.mgr-hero-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; flex-wrap: wrap; }
+.mgr-eyebrow { font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(52,211,153,.8); margin-bottom: 6px; }
+.mgr-title { font-size: 1.7rem; font-weight: 800; color: #fff; letter-spacing: -.03em; margin-bottom: 4px; }
+.mgr-sub { font-size: .875rem; color: rgba(255,255,255,.5); }
+
+/* Stats strip */
+.mgr-stats { display: flex; gap: 0; margin-top: 28px; border-top: 1px solid rgba(255,255,255,.06); }
+.mgr-stat { flex: 1; padding: 16px 20px; border-right: 1px solid rgba(255,255,255,.06); }
+.mgr-stat:last-child { border-right: none; }
+.mgr-stat-val { font-size: 1.5rem; font-weight: 900; color: #fff; line-height: 1; margin-bottom: 2px; }
+.mgr-stat-lbl { font-size: .68rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: rgba(255,255,255,.4); }
+
+/* ── Body ── */
+.mgr-body { max-width: 1100px; margin: 0 auto; padding: 28px 40px 64px; }
+
+/* Filter tabs */
+.filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
 .filter-tab {
-  padding: 6px 16px; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+  padding: 6px 16px; border-radius: 999px; font-size: .8rem; font-weight: 600;
   border: 1.5px solid var(--gray-200); color: var(--gray-600); background: var(--white);
-  text-decoration: none; transition: all 0.15s; cursor: pointer;
+  text-decoration: none; transition: all .15s;
 }
-.filter-tab:hover { border-color: var(--green); color: var(--green-dark); text-decoration: none; }
-.filter-tab.active { background: var(--green); border-color: var(--green); color: #fff; }
-.tab-count { font-size: 0.72rem; margin-left: 4px; opacity: 0.8; }
+.filter-tab:hover { border-color: #059669; color: #059669; text-decoration: none; }
+.filter-tab.active { background: #059669; border-color: #059669; color: #fff; }
+.tab-count { font-size: .7rem; margin-left: 3px; opacity: .75; }
 
-.job-row {
+/* ── Job card ── */
+.job-card {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: 14px;
+  transition: box-shadow .2s;
+}
+.job-card:hover { box-shadow: 0 6px 20px -4px rgba(0,0,0,.10); }
+
+.jc-head {
   display: flex; align-items: flex-start; gap: 16px;
-  padding: 16px 20px; border: 1.5px solid var(--gray-200);
-  border-radius: var(--radius-lg); transition: border-color 0.2s;
+  padding: 20px 22px 16px;
 }
-.job-row:hover { border-color: var(--green); }
-.job-row + .job-row { margin-top: 10px; }
-
-.job-type-icon {
-  width: 44px; height: 44px; border-radius: 10px;
+.jc-icon {
+  width: 46px; height: 46px; border-radius: 12px;
+  background: #ecfdf5;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.2rem; flex-shrink: 0; background: var(--green-pale);
+  flex-shrink: 0;
 }
-.job-title   { font-size: 0.95rem; font-weight: 700; color: var(--gray-900); }
-.job-meta    { font-size: 0.78rem; color: var(--gray-400); margin-top: 3px; display: flex; gap: 8px; flex-wrap: wrap; }
-.job-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.jc-main { flex: 1; min-width: 0; }
+.jc-title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.jc-title { font-size: .975rem; font-weight: 800; color: var(--gray-900); }
+.jc-meta { font-size: .775rem; color: var(--gray-400); display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+.jc-meta span { display: flex; align-items: center; gap: 4px; }
+.jc-skills { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.jc-skill { padding: 2px 9px; border-radius: 5px; font-size: .7rem; font-weight: 600; background: #ecfdf5; color: #065f46; }
 
-.status-pill {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 2px 9px; border-radius: 999px; font-size: 0.72rem; font-weight: 700;
+/* Status pills */
+.s-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: .7rem; font-weight: 700; }
+.s-active  { background: #d1fae5; color: #065f46; }
+.s-draft   { background: var(--gray-100); color: var(--gray-500); }
+.s-paused  { background: #fffbeb; color: #92400e; }
+.s-closed  { background: #fee2e2; color: #991b1b; }
+
+/* Applicants strip — bottom of each card */
+.jc-applicants-strip {
+  border-top: 1px solid var(--gray-100);
+  padding: 14px 22px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: #fafbfc;
+  flex-wrap: wrap;
 }
-.s-active  { background: var(--green-pale);  color: var(--green-dark); }
-.s-draft   { background: var(--gray-100);    color: var(--gray-500); }
-.s-paused  { background: var(--orange-pale); color: #b45309; }
-.s-closed  { background: var(--red-pale);    color: #b91c1c; }
+.jc-appl-counts { display: flex; gap: 20px; flex-wrap: wrap; }
+.jc-appl-count { display: flex; flex-direction: column; align-items: center; }
+.jc-appl-count .val { font-size: 1.1rem; font-weight: 800; line-height: 1; }
+.jc-appl-count .lbl { font-size: .65rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--gray-400); margin-top: 1px; }
+.view-applicants-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 20px; border-radius: 10px;
+  background: #059669; color: #fff;
+  font-size: .82rem; font-weight: 700;
+  text-decoration: none;
+  transition: background .2s;
+  white-space: nowrap;
+}
+.view-applicants-btn:hover { background: #047857; color: #fff; text-decoration: none; }
+
+/* Job actions row */
+.jc-actions {
+  display: flex; gap: 7px; flex-wrap: wrap; padding: 0 22px 16px;
+}
+
+/* Empty state */
+.empty-state { text-align: center; padding: 80px 24px; background: var(--white); border: 1px solid var(--gray-200); border-radius: 18px; }
+.empty-icon { margin-bottom: 16px; color: var(--gray-300); }
+.empty-title { font-size: 1.05rem; font-weight: 700; color: var(--gray-800); margin-bottom: 6px; }
+.empty-desc { font-size: .875rem; color: var(--gray-400); margin-bottom: 20px; }
+
+/* Responsive */
 @media (max-width: 768px) {
-  .job-header-banner { flex-wrap: wrap !important; gap: 12px !important; padding: 18px 20px !important; }
-  .stat-strip { grid-template-columns: 1fr 1fr !important; }
+  .mgr-hero { padding: 28px 20px 0; }
+  .mgr-body { padding: 20px 16px 48px; }
+  .mgr-stats { flex-wrap: wrap; }
+  .mgr-stat { min-width: 50%; border-bottom: 1px solid rgba(255,255,255,.06); }
+  .jc-head { flex-direction: column; }
+  .jc-applicants-strip { flex-direction: column; align-items: flex-start; }
 }
 @media (max-width: 480px) {
-  .job-header-banner h2 { font-size: 1.05rem !important; }
-  .job-header-banner { padding: 16px !important; }
+  .mgr-title { font-size: 1.3rem; }
+  .mgr-stat { min-width: 100%; }
 }
 {% endblock %}
 
 {% block main_content %}
 
-<!-- HEADER -->
-<div class="job-header-banner" style="background:linear-gradient(135deg,#064e3b 0%,#065f46 50%,#0891b2 100%);border-radius:var(--radius-xl);padding:24px 28px;display:flex;justify-content:space-between;align-items:center;margin-bottom:0;">
-  <div>
-    <h2 style="color:#fff;font-size:1.25rem;font-weight:800;margin-bottom:4px;">My Job Listings</h2>
-    <p style="color:rgba(255,255,255,0.65);font-size:0.875rem;">{{ profile.company_name }} &bull; {{ counts.all }} total posting{{ counts.all|pluralize }}</p>
-  </div>
-  <a href="{% url 'jobs:new' %}" class="btn btn-primary">&#43; Post a Job</a>
-</div>
-
-<!-- STAT STRIP -->
-<div class="stat-strip" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
-  <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:14px 18px;text-align:center;">
-    <div style="font-size:1.6rem;font-weight:800;color:var(--green);">{{ counts.active }}</div>
-    <div style="font-size:0.75rem;color:var(--gray-400);font-weight:600;margin-top:2px;">Active</div>
-  </div>
-  <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:14px 18px;text-align:center;">
-    <div style="font-size:1.6rem;font-weight:800;color:var(--gray-500);">{{ counts.draft }}</div>
-    <div style="font-size:0.75rem;color:var(--gray-400);font-weight:600;margin-top:2px;">Draft</div>
-  </div>
-  <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:14px 18px;text-align:center;">
-    <div style="font-size:1.6rem;font-weight:800;color:var(--orange);">{{ counts.paused }}</div>
-    <div style="font-size:0.75rem;color:var(--gray-400);font-weight:600;margin-top:2px;">Paused</div>
-  </div>
-  <div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:14px 18px;text-align:center;">
-    <div style="font-size:1.6rem;font-weight:800;color:var(--red);">{{ counts.closed }}</div>
-    <div style="font-size:0.75rem;color:var(--gray-400);font-weight:600;margin-top:2px;">Closed</div>
-  </div>
-</div>
-
-<!-- JOBS LIST -->
-<div class="section-card">
-  <div class="section-header">
-    <div class="section-title-wrap">
-      <div class="section-icon" style="background:var(--green-pale);">&#128196;</div>
+<!-- HERO -->
+<div class="mgr-hero">
+  <div class="mgr-hero-inner">
+    <div class="mgr-hero-top">
       <div>
-        <div class="section-title">Job Postings</div>
-        <div class="section-sub">{{ jobs|length }} result{{ jobs|length|pluralize }}</div>
+        <div class="mgr-eyebrow">{{ profile.company_name }}</div>
+        <div class="mgr-title">Job Listings</div>
+        <div class="mgr-sub">{{ counts.all }} total posting{{ counts.all|pluralize }} — manage and review applicants below</div>
+      </div>
+      <a href="{% url 'jobs:new' %}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:12px;background:#059669;color:#fff;font-size:.875rem;font-weight:700;text-decoration:none;transition:background .2s;white-space:nowrap;" onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Post a Job
+      </a>
+    </div>
+
+    <div class="mgr-stats">
+      <div class="mgr-stat">
+        <div class="mgr-stat-val" style="color:#34d399;">{{ counts.active }}</div>
+        <div class="mgr-stat-lbl">Active</div>
+      </div>
+      <div class="mgr-stat">
+        <div class="mgr-stat-val" style="color:rgba(255,255,255,.6);">{{ counts.draft }}</div>
+        <div class="mgr-stat-lbl">Draft</div>
+      </div>
+      <div class="mgr-stat">
+        <div class="mgr-stat-val" style="color:#fbbf24;">{{ counts.paused }}</div>
+        <div class="mgr-stat-lbl">Paused</div>
+      </div>
+      <div class="mgr-stat">
+        <div class="mgr-stat-val" style="color:#f87171;">{{ counts.closed }}</div>
+        <div class="mgr-stat-lbl">Closed</div>
       </div>
     </div>
-    <a href="{% url 'jobs:new' %}" class="btn btn-primary btn-sm">&#43; New Job</a>
   </div>
-  <div class="section-body">
+</div>
 
-    <!-- Filter tabs -->
-    <div class="filter-tabs">
-      <a href="{% url 'jobs:manage' %}" class="filter-tab {% if not status_filter %}active{% endif %}">
-        All <span class="tab-count">({{ counts.all }})</span>
-      </a>
-      <a href="{% url 'jobs:manage' %}?status=active" class="filter-tab {% if status_filter == 'active' %}active{% endif %}">
-        Active <span class="tab-count">({{ counts.active }})</span>
-      </a>
-      <a href="{% url 'jobs:manage' %}?status=draft" class="filter-tab {% if status_filter == 'draft' %}active{% endif %}">
-        Draft <span class="tab-count">({{ counts.draft }})</span>
-      </a>
-      <a href="{% url 'jobs:manage' %}?status=paused" class="filter-tab {% if status_filter == 'paused' %}active{% endif %}">
-        Paused <span class="tab-count">({{ counts.paused }})</span>
-      </a>
-      <a href="{% url 'jobs:manage' %}?status=closed" class="filter-tab {% if status_filter == 'closed' %}active{% endif %}">
-        Closed <span class="tab-count">({{ counts.closed }})</span>
-      </a>
+<!-- BODY -->
+<div class="mgr-body">
+
+  <!-- Filter tabs -->
+  <div class="filter-tabs">
+    <a href="{% url 'jobs:manage' %}" class="filter-tab {% if not status_filter %}active{% endif %}">All <span class="tab-count">({{ counts.all }})</span></a>
+    <a href="{% url 'jobs:manage' %}?status=active"  class="filter-tab {% if status_filter == 'active' %}active{% endif %}">Active <span class="tab-count">({{ counts.active }})</span></a>
+    <a href="{% url 'jobs:manage' %}?status=draft"   class="filter-tab {% if status_filter == 'draft' %}active{% endif %}">Draft <span class="tab-count">({{ counts.draft }})</span></a>
+    <a href="{% url 'jobs:manage' %}?status=paused"  class="filter-tab {% if status_filter == 'paused' %}active{% endif %}">Paused <span class="tab-count">({{ counts.paused }})</span></a>
+    <a href="{% url 'jobs:manage' %}?status=closed"  class="filter-tab {% if status_filter == 'closed' %}active{% endif %}">Closed <span class="tab-count">({{ counts.closed }})</span></a>
+  </div>
+
+  {% if jobs %}
+  {% for job in jobs %}
+  <div class="job-card">
+
+    <!-- Job header -->
+    <div class="jc-head">
+      <div class="jc-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      </div>
+      <div class="jc-main">
+        <div class="jc-title-row">
+          <span class="jc-title">{{ job.title }}</span>
+          <span class="s-pill s-{{ job.status }}">
+            <svg width="6" height="6" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>
+            {{ job.get_status_display }}
+          </span>
+          {% if job.is_remote %}<span class="s-pill" style="background:#ecfeff;color:#0891b2;">Remote</span>{% endif %}
+        </div>
+        <div class="jc-meta">
+          <span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+            {{ job.get_job_type_display }}
+          </span>
+          {% if job.location %}
+          <span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {{ job.location }}
+          </span>
+          {% endif %}
+          {% with sal=job.get_salary_display %}{% if sal %}<span>{{ sal }}</span>{% endif %}{% endwith %}
+          <span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Posted {{ job.created_at|date:"M d, Y" }}
+          </span>
+          <span>{{ job.views_count }} view{{ job.views_count|pluralize }}</span>
+        </div>
+        {% if job.required_skills %}
+        <div class="jc-skills">
+          {% for skill in job.get_skills_list|slice:":6" %}
+          <span class="jc-skill">{{ skill }}</span>
+          {% endfor %}
+          {% if job.get_skills_list|length > 6 %}<span class="jc-skill" style="background:var(--gray-100);color:var(--gray-500);">+{{ job.get_skills_list|length|add:"-6" }}</span>{% endif %}
+        </div>
+        {% endif %}
+      </div>
     </div>
 
-    {% if jobs %}
-    <div>
-      {% for job in jobs %}
-      <div class="job-row">
-        <div class="job-type-icon">&#128196;</div>
-        <div style="flex:1;min-width:0;">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <span class="job-title">{{ job.title }}</span>
-            <span class="status-pill s-{{ job.status }}">&#9679; {{ job.get_status_display }}</span>
-            {% if job.is_remote %}<span class="status-pill" style="background:var(--blue-pale);color:var(--blue);">&#127760; Remote</span>{% endif %}
-          </div>
-          <div class="job-meta">
-            <span>&#128188; {{ job.get_job_type_display }}</span>
-            {% if job.location %}<span>&#128205; {{ job.location }}</span>{% endif %}
-            {% with sal=job.get_salary_display %}{% if sal %}<span>&#128181; {{ sal }}</span>{% endif %}{% endwith %}
-            <span>&#128197; {{ job.created_at|date:"M d, Y" }}</span>
-            <span>&#128065; {{ job.views_count }} view{{ job.views_count|pluralize }}</span>
-            <a href="{% url 'applications:applicants' job.pk %}" style="color:var(--indigo);font-weight:700;text-decoration:none;">
-              &#128640; {{ job.applications.count }} applied
-            </a>
-            <a href="{% url 'screening:candidates' job.pk %}" style="color:var(--blue);font-weight:700;text-decoration:none;">
-              &#127942; {{ job.match_scores.count }} scored
-            </a>
-          </div>
-          {% if job.required_skills %}
-          <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:5px;">
-            {% for skill in job.get_skills_list|slice:":5" %}
-            <span style="background:var(--green-pale);color:var(--green-dark);font-size:0.72rem;font-weight:600;padding:2px 8px;border-radius:999px;">{{ skill }}</span>
-            {% endfor %}
-            {% if job.get_skills_list|length > 5 %}
-            <span style="font-size:0.72rem;color:var(--gray-400);">+{{ job.get_skills_list|length|add:"-5" }} more</span>
-            {% endif %}
-          </div>
-          {% endif %}
-          <div class="job-actions">
-            <a href="{% url 'jobs:edit' job.pk %}" class="btn btn-gray btn-sm">&#9998; Edit</a>
-            <a href="{% url 'jobs:preview' job.pk %}" class="btn btn-outline btn-sm">&#128269; Preview</a>
+    <!-- Actions row -->
+    <div class="jc-actions">
+      <a href="{% url 'jobs:edit' job.pk %}" class="btn btn-gray btn-sm">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit
+      </a>
+      <a href="{% url 'jobs:preview' job.pk %}" class="btn btn-outline btn-sm">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Preview
+      </a>
+      <a href="{% url 'screening:candidates' job.pk %}" class="btn btn-outline btn-sm" style="border-color:#0891b2;color:#0891b2;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        AI Rankings ({{ job.match_scores.count }})
+      </a>
 
-            {% if job.status == 'draft' or job.status == 'paused' %}
-            <form method="post" action="{% url 'jobs:toggle_status' job.pk %}" style="display:inline;">
-              {% csrf_token %}<input type="hidden" name="action" value="activate">
-              <button type="submit" class="btn btn-primary btn-sm">&#9654; Activate</button>
-            </form>
-            {% endif %}
+      {% if job.status == 'draft' or job.status == 'paused' %}
+      <form method="post" action="{% url 'jobs:toggle_status' job.pk %}" style="display:inline;">
+        {% csrf_token %}<input type="hidden" name="action" value="activate">
+        <button type="submit" class="btn btn-primary btn-sm">Activate</button>
+      </form>
+      {% endif %}
+      {% if job.status == 'active' %}
+      <form method="post" action="{% url 'jobs:toggle_status' job.pk %}" style="display:inline;">
+        {% csrf_token %}<input type="hidden" name="action" value="pause">
+        <button type="submit" class="btn btn-gray btn-sm">Pause</button>
+      </form>
+      {% endif %}
+      {% if job.status != 'closed' %}
+      <form method="post" action="{% url 'jobs:toggle_status' job.pk %}" style="display:inline;">
+        {% csrf_token %}<input type="hidden" name="action" value="close">
+        <button type="submit" class="btn btn-danger btn-sm">Close</button>
+      </form>
+      {% endif %}
+      <form method="post" action="{% url 'jobs:delete' job.pk %}" style="display:inline;"
+            onsubmit="return confirm('Delete {{ job.title|escapejs }}? This cannot be undone.')">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+      </form>
+    </div>
 
-            {% if job.status == 'active' %}
-            <form method="post" action="{% url 'jobs:toggle_status' job.pk %}" style="display:inline;">
-              {% csrf_token %}<input type="hidden" name="action" value="pause">
-              <button type="submit" class="btn btn-gray btn-sm">&#9646;&#9646; Pause</button>
-            </form>
-            {% endif %}
-
-            {% if job.status != 'closed' %}
-            <form method="post" action="{% url 'jobs:toggle_status' job.pk %}" style="display:inline;">
-              {% csrf_token %}<input type="hidden" name="action" value="close">
-              <button type="submit" class="btn btn-danger btn-sm">&#10005; Close</button>
-            </form>
-            {% endif %}
-
-            <form method="post" action="{% url 'jobs:delete' job.pk %}" style="display:inline;"
-                  onsubmit="return confirm('Delete {{ job.title|escapejs }}? This cannot be undone.')">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-danger btn-sm">&#128465; Delete</button>
-            </form>
-          </div>
+    <!-- Applicants strip -->
+    <div class="jc-applicants-strip">
+      <div class="jc-appl-counts">
+        <div class="jc-appl-count">
+          <span class="val" style="color:#059669;">{{ job.applications.count }}</span>
+          <span class="lbl">Applied</span>
+        </div>
+        <div class="jc-appl-count">
+          <span class="val" style="color:#0891b2;">{{ job.match_scores.count }}</span>
+          <span class="lbl">AI Scored</span>
+        </div>
+        <div class="jc-appl-count">
+          <span class="val" style="color:#f59e0b;">{{ job.applications.filter.shortlisted|default:"—" }}</span>
+          <span class="lbl">Shortlisted</span>
         </div>
       </div>
-      {% endfor %}
+      <a href="{% url 'applications:applicants' job.pk %}" class="view-applicants-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        View Applicants &amp; Resumes
+      </a>
     </div>
-
-    {% else %}
-    <div class="empty-state">
-      <div class="empty-icon">&#128196;</div>
-      <div class="empty-title">
-        {% if status_filter %}No {{ status_filter }} jobs{% else %}No jobs posted yet{% endif %}
-      </div>
-      <div class="empty-desc">
-        {% if status_filter %}Try a different filter or post a new job.
-        {% else %}Create your first job listing to start finding talent.{% endif %}
-      </div>
-      <a href="{% url 'jobs:new' %}" class="btn btn-primary">&#43; Post a Job</a>
-    </div>
-    {% endif %}
 
   </div>
-</div>
+  {% endfor %}
 
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+    </div>
+    <div class="empty-title">{% if status_filter %}No {{ status_filter }} jobs{% else %}No jobs posted yet{% endif %}</div>
+    <div class="empty-desc">{% if status_filter %}Try a different filter.{% else %}Create your first listing to start receiving applications.{% endif %}</div>
+    <a href="{% url 'jobs:new' %}" class="btn btn-primary">+ Post a Job</a>
+  </div>
+  {% endif %}
+
+</div>
 {% endblock %}

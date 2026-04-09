@@ -1,0 +1,152 @@
+{% extends 'jobseeker/base_profile.html' %}
+{% block title %}Assessment Result{% endblock %}
+{% block nav_resume %}active{% endblock %}
+
+{% block extra_css %}
+.result-header {
+  background: linear-gradient(135deg, #9a3420 0%, #C73A26 100%);
+  border-radius: var(--radius-xl); padding: 36px 32px; margin-bottom: 20px; text-align: center;
+}
+.score-ring {
+  width: 140px; height: 140px; border-radius: 50%;
+  border: 8px solid rgba(255,255,255,.3);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; margin: 0 auto 18px auto;
+  background: rgba(255,255,255,.12);
+  box-shadow: 0 0 0 4px rgba(255,255,255,.08);
+}
+.score-num { font-size: 2.4rem; font-weight: 900; color: #fff; line-height: 1; }
+.score-pct { font-size: .78rem; color: rgba(255,255,255,.7); font-weight: 700; margin-top: 2px; }
+.score-label-pill {
+  display: inline-flex; padding: 5px 18px; border-radius: 999px;
+  font-size: .88rem; font-weight: 800; margin-top: 8px;
+}
+.congrats-banner {
+  background: linear-gradient(135deg, #065f46 0%, #10b981 100%);
+  border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 16px;
+}
+.stat-card {
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-lg); padding: 22px 16px; text-align: center;
+}
+.stat-num { font-size: 2rem; font-weight: 900; line-height: 1; margin-bottom: 6px; }
+.stat-label { font-size: .75rem; color: var(--gray-400); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+{% endblock %}
+
+{% block main_content %}
+<div style="max-width:600px;margin:0 auto;">
+
+<!-- Score Ring -->
+<div class="result-header">
+  <div class="score-ring">
+    <div class="score-num">{{ attempt.score|floatformat:0 }}</div>
+    <div class="score-pct">%</div>
+  </div>
+  <h2 style="color:#fff;font-size:1.2rem;font-weight:800;margin-bottom:6px;">Assessment Submitted!</h2>
+  <p style="color:rgba(255,255,255,.65);font-size:.875rem;margin-bottom:4px;">
+    {{ attempt.assessment.title }}
+  </p>
+  <p style="color:rgba(255,255,255,.5);font-size:.8rem;margin-bottom:12px;">
+    {{ attempt.assessment.application.job.title }} &bull; {{ attempt.assessment.application.job.recruiter.company_name }}
+  </p>
+  <span class="score-label-pill" style="background:{{ attempt.score_bg }};color:{{ attempt.score_color }};">
+    {{ attempt.score_label }}
+  </span>
+</div>
+
+<!-- 20/25 Congratulations Banner -->
+{% if attempt.correct_count >= 20 %}
+<div class="congrats-banner">
+  <div style="font-size:2.8rem;flex-shrink:0;">&#127881;</div>
+  <div>
+    <div style="font-size:1.05rem;font-weight:900;color:#fff;margin-bottom:5px;">
+      Congratulations! Outstanding Performance!
+    </div>
+    <div style="font-size:.875rem;color:rgba(255,255,255,.9);line-height:1.5;">
+      You scored <strong>{{ attempt.correct_count }} out of {{ attempt.total_count }}</strong>
+      — that's an excellent result!{% if attempt.correct_count == 25 %} Perfect score!{% endif %}
+      The recruiter has been notified of your achievement.
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Score Stats -->
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;">
+  <div class="stat-card">
+    <div class="stat-num" style="color:#10b981;">{{ attempt.correct_count }}</div>
+    <div class="stat-label">Correct</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="color:#ef4444;">{{ attempt.wrong_count }}</div>
+    <div class="stat-label">Incorrect</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="color:#E84530;">{{ attempt.total_count }}</div>
+    <div class="stat-label">Total Questions</div>
+  </div>
+</div>
+
+<!-- Score bar -->
+<div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:18px 22px;margin-bottom:24px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <span style="font-size:.82rem;font-weight:700;color:var(--gray-600);">Your Score</span>
+    <span style="font-size:.9rem;font-weight:900;color:{{ attempt.score_color }};">{{ attempt.score|floatformat:1 }}%</span>
+  </div>
+  <div style="background:var(--gray-100);border-radius:999px;height:10px;overflow:hidden;">
+    <div style="height:10px;border-radius:999px;background:{{ attempt.score_color }};width:{{ attempt.score|floatformat:0 }}%;transition:width 1s ease;"></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;margin-top:6px;">
+    <span style="font-size:.7rem;color:var(--gray-300);font-weight:600;">0%</span>
+    <span style="font-size:.7rem;color:var(--gray-300);font-weight:600;">100%</span>
+  </div>
+</div>
+
+<!-- Completed timestamp -->
+<div style="text-align:center;font-size:.78rem;color:var(--gray-400);margin-bottom:24px;">
+  &#9989; Submitted {{ attempt.completed_at|date:"F j, Y \a\t g:i A" }}
+</div>
+
+{% if attempt.assessment.doc_requested %}
+  {% with docs_done=attempt.documents.all %}
+  {% if docs_done %}
+  <!-- Docs already submitted -->
+  <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:2px solid #10b981;border-radius:var(--radius-xl);padding:24px;margin-bottom:24px;text-align:center;">
+    <div style="font-size:1.8rem;margin-bottom:8px;">&#10003;</div>
+    <div style="font-size:.95rem;font-weight:800;color:#065f46;margin-bottom:6px;">Documents Submitted</div>
+    <div style="font-size:.82rem;color:#047857;margin-bottom:16px;line-height:1.5;">
+      You have already submitted your verification documents. The recruiter will review them.
+    </div>
+    <a href="{% url 'assessments:docs_complete' attempt.pk %}"
+       class="btn btn-primary" style="background:#059669;padding:10px 24px;font-size:.9rem;">
+      &#128194; View Submitted Documents
+    </a>
+  </div>
+  {% else %}
+  <!-- Docs requested, not yet submitted -->
+  <div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:2px solid #f59e0b;border-radius:var(--radius-xl);padding:24px;margin-bottom:24px;text-align:center;">
+    <div style="font-size:1.8rem;margin-bottom:8px;">&#128203;</div>
+    <div style="font-size:.95rem;font-weight:800;color:#92400e;margin-bottom:6px;">Action Required: Submit Your Documents</div>
+    <div style="font-size:.82rem;color:#b45309;margin-bottom:16px;line-height:1.5;">
+      The recruiter has reviewed your assessment and is requesting document verification.
+      Please upload your <strong>Work Experience</strong>, <strong>Certificates</strong>,
+      and <strong>Criminal Record Check</strong>.
+    </div>
+    <a href="{% url 'assessments:submit_docs' attempt.pk 'experience' %}"
+       class="btn btn-primary" style="background:#d97706;padding:10px 24px;font-size:.9rem;">
+      &#128194; Upload Documents Now
+    </a>
+  </div>
+  {% endif %}
+  {% endwith %}
+{% endif %}
+
+<div style="text-align:center;">
+  <a href="{% url 'applications:my_applications' %}" class="btn btn-primary" style="background:#E84530;padding:10px 28px;">
+    &#8592; Back to My Applications
+  </a>
+</div>
+
+</div>
+{% endblock %}

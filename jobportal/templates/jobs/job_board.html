@@ -1,207 +1,605 @@
 {% extends 'accounts/base.html' %}
-{% block title %}Job Board — TalentBridge{% endblock %}
+{% block title %}Jobs — Hireiz{% endblock %}
 
 {% block extra_css %}
-.board-layout { max-width: 1100px; margin: 0 auto; padding: 28px 24px 60px; }
+/* ── Page wrapper ── */
+.board-wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
 
-/* Search hero */
-.search-hero {
-  background: linear-gradient(135deg, var(--navy) 0%, #1e3a5f 100%);
-  border-radius: var(--radius-xl); padding: 36px 40px; margin-bottom: 28px;
-  position: relative; overflow: hidden;
+/* ── Hero ── */
+.board-hero {
+  margin-bottom: 40px;
 }
-.search-hero::before {
-  content:''; position:absolute; top:-60px; right:-40px;
-  width:240px; height:240px;
-  background:radial-gradient(circle,rgba(79,70,229,.25) 0%,transparent 70%);
+.board-hero-eyebrow {
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 10px;
 }
-.search-hero h1 { color:#fff; font-size:1.6rem; font-weight:800; margin-bottom:6px; }
-.search-hero p  { color:rgba(255,255,255,.65); font-size:.95rem; margin-bottom:22px; }
-.search-row { display:flex; gap:10px; }
-.search-input {
-  flex:1; padding:11px 16px; border-radius:10px; border:none; font-size:.95rem;
-  font-family:var(--font); outline:none; background:#fff; color:var(--gray-800);
+.board-hero h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--gray-900);
+  letter-spacing: -.03em;
+  line-height: 1.2;
+  margin-bottom: 6px;
 }
-.search-input::placeholder { color:var(--gray-400); }
-.search-btn {
-  padding:11px 24px; background:var(--indigo); color:#fff; border:none;
-  border-radius:10px; font-size:.9rem; font-weight:700; cursor:pointer;
-  font-family:var(--font); transition:background .2s;
+.board-hero h1 span { color: var(--blue); }
+.board-hero-sub {
+  font-size: .95rem;
+  color: var(--gray-400);
+  margin-bottom: 28px;
 }
-.search-btn:hover { background:#4338ca; }
 
-/* Filters */
-.filters-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px; align-items:center; }
-.filter-pill {
-  padding:6px 14px; border-radius:999px; font-size:.8rem; font-weight:600;
-  border:1.5px solid var(--gray-200); color:var(--gray-600); background:var(--white);
-  text-decoration:none; transition:all .15s; cursor:pointer;
+/* ── Search bar (2-field: keyword + location) ── */
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: var(--white);
+  border: 1.5px solid var(--gray-200);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: border-color .2s, box-shadow .2s;
 }
-.filter-pill:hover { border-color:var(--blue); color:var(--blue); text-decoration:none; }
-.filter-pill.active { background:var(--blue); border-color:var(--blue); color:#fff; }
-.filter-label { font-size:.78rem; font-weight:700; color:var(--gray-400); text-transform:uppercase; letter-spacing:.06em; }
+.search-bar:focus-within {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(232,69,48,.08), var(--shadow);
+}
+.search-field {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 18px;
+  min-width: 0;
+}
+.search-field svg { flex-shrink: 0; color: var(--gray-400); }
+.search-field input {
+  flex: 1;
+  padding: 14px 0;
+  border: none;
+  outline: none;
+  font-size: .93rem;
+  font-family: var(--font);
+  color: var(--gray-800);
+  background: transparent;
+  min-width: 0;
+}
+.search-field input::placeholder { color: var(--gray-400); }
+.search-divider {
+  width: 1px; height: 32px;
+  background: var(--gray-200);
+  flex-shrink: 0;
+}
+.search-bar button {
+  margin: 6px;
+  padding: 10px 26px;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: .875rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: background .2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: flex; align-items: center; gap: 6px;
+}
+.search-bar button:hover { background: var(--blue-dark); }
 
-/* Job cards */
-.jobs-grid { display:flex; flex-direction:column; gap:14px; }
+/* ── Location quick chips ── */
+.location-quick {
+  display: flex; align-items: center; gap: 6px;
+  flex-wrap: wrap; margin-top: 12px;
+}
+.loc-q-label { font-size: .76rem; font-weight: 700; color: var(--gray-400); margin-right: 2px; }
+.loc-chip {
+  padding: 3px 11px; border-radius: 999px;
+  border: 1.5px solid var(--gray-200);
+  color: var(--gray-600); background: var(--white);
+  text-decoration: none; font-weight: 600; font-size: .76rem;
+  transition: all .15s;
+}
+.loc-chip:hover { border-color: var(--blue); color: var(--blue); text-decoration: none; }
+.loc-chip.active { background: var(--blue-pale); border-color: var(--blue); color: var(--blue-dark); }
+
+/* ── Toolbar (count + filters) ── */
+.board-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.result-count {
+  font-size: .85rem;
+  color: var(--gray-500);
+}
+.result-count strong { color: var(--gray-800); }
+
+/* ── Filter tabs ── */
+.filter-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.filter-tab {
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: .8rem;
+  font-weight: 600;
+  border: 1.5px solid var(--gray-200);
+  color: var(--gray-600);
+  background: var(--white);
+  text-decoration: none;
+  transition: all .15s;
+  cursor: pointer;
+}
+.filter-tab:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+  text-decoration: none;
+}
+.filter-tab.active {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+
+/* ── Divider ── */
+.board-divider {
+  height: 1px;
+  background: var(--gray-200);
+  margin-bottom: 24px;
+}
+
+/* ── Job list ── */
+.job-list { display: flex; flex-direction: column; gap: 1px; }
+
+/* ── Job card ── */
 .job-card {
-  background:var(--white); border:1.5px solid var(--gray-200); border-radius:var(--radius-lg);
-  padding:20px 22px; display:flex; gap:16px; align-items:flex-start;
-  transition:border-color .2s, box-shadow .2s; text-decoration:none; color:inherit;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 22px;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 14px;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow .18s, border-color .18s, transform .18s;
+  margin-bottom: 10px;
 }
-.job-card:hover { border-color:var(--blue); box-shadow:var(--shadow-md); text-decoration:none; }
-.company-logo {
-  width:52px; height:52px; border-radius:12px; flex-shrink:0;
-  border:1.5px solid var(--gray-200); overflow:hidden;
-  display:flex; align-items:center; justify-content:center;
-  background:var(--gray-50); font-size:1.4rem;
+.job-card:hover {
+  box-shadow: 0 8px 24px -6px rgba(0,0,0,.10);
+  border-color: var(--gray-300);
+  transform: translateY(-1px);
+  text-decoration: none;
+  color: inherit;
 }
-.company-logo img { width:100%; height:100%; object-fit:cover; }
-.job-title { font-size:1rem; font-weight:700; color:var(--gray-900); margin-bottom:3px; }
-.job-company { font-size:.85rem; color:var(--blue); font-weight:600; }
-.job-meta { font-size:.78rem; color:var(--gray-400); margin-top:5px; display:flex; flex-wrap:wrap; gap:10px; }
+
+/* Company logo */
+.jc-logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  border: 1px solid var(--gray-200);
+  background: var(--gray-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.jc-logo img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Main info */
+.jc-body { flex: 1; min-width: 0; }
+.jc-title {
+  font-size: .975rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.jc-company {
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--blue);
+  margin-bottom: 6px;
+}
+.jc-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: .775rem;
+  color: var(--gray-400);
+}
+.jc-meta span { display: flex; align-items: center; gap: 4px; }
+
+/* Right side */
+.jc-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.jc-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: flex-end;
+}
 .badge {
-  display:inline-flex; align-items:center; gap:4px;
-  padding:3px 10px; border-radius:999px; font-size:.75rem; font-weight:700;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 700;
 }
-.badge-type     { background:var(--blue-pale);    color:var(--blue-dark); }
-.badge-remote   { background:var(--green-pale);   color:var(--green-dark); }
-.badge-salary   { background:var(--orange-pale);  color:#92400e; }
-.badge-exp      { background:var(--indigo-pale);  color:var(--indigo); }
-.skills-row { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
+.badge-type   { background: var(--blue-pale);   color: var(--blue-dark); }
+.badge-remote { background: var(--green-pale);  color: #065f46; }
+.badge-salary { background: var(--orange-pale); color: #92400e; }
+.badge-exp    { background: var(--gray-100);    color: var(--gray-700); }
+
+/* Skills */
+.jc-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 7px;
+}
 .skill-tag {
-  padding:2px 9px; border-radius:999px; font-size:.72rem; font-weight:600;
-  background:var(--gray-100); color:var(--gray-600);
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: .7rem;
+  font-weight: 600;
+  background: var(--gray-100);
+  color: var(--gray-600);
 }
-.no-jobs { text-align:center; padding:64px 24px; }
-.no-jobs-icon  { font-size:3rem; margin-bottom:12px; }
-.no-jobs-title { font-size:1.1rem; font-weight:700; color:var(--gray-700); margin-bottom:6px; }
-.no-jobs-desc  { font-size:.875rem; color:var(--gray-400); }
-.result-count  { font-size:.875rem; color:var(--gray-500); margin-bottom:14px; }
+
+/* Save button */
+.save-btn {
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1.5px solid var(--gray-200);
+  background: var(--white);
+  color: var(--gray-400);
+  cursor: pointer;
+  font-size: .85rem;
+  font-family: var(--font);
+  transition: all .15s;
+  line-height: 1;
+}
+.save-btn.saved {
+  border-color: #f59e0b;
+  background: #fffbeb;
+  color: #d97706;
+}
+.save-btn:hover { border-color: var(--gray-400); }
+.save-btn.saved:hover { border-color: #d97706; }
+
+/* ── Empty state ── */
+.empty-state {
+  text-align: center;
+  padding: 80px 24px;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 16px;
+}
+.empty-icon { font-size: 2.5rem; margin-bottom: 14px; }
+.empty-title { font-size: 1.05rem; font-weight: 700; color: var(--gray-800); margin-bottom: 6px; }
+.empty-desc  { font-size: .875rem; color: var(--gray-400); margin-bottom: 20px; }
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+  .search-bar { flex-wrap: wrap; border-radius: 14px; }
+  .search-field:first-child { flex: 1 1 100%; border-bottom: 1px solid var(--gray-200); }
+  .search-divider { display: none; }
+  .search-field:nth-child(3) { flex: 1 1 auto; }
+  .search-bar button { margin: 6px; }
+}
+@media (max-width: 640px) {
+  .board-hero h1 { font-size: 1.6rem; }
+  .jc-right { display: none; }
+  .board-toolbar { flex-direction: column; align-items: flex-start; }
+  .location-quick { display: none; }
+}
 {% endblock %}
 
 {% block content %}
-<div class="board-layout">
+<div class="board-wrap">
 
-  <!-- SEARCH HERO -->
-  <div class="search-hero">
-    <h1>&#128269; Find Your Next Job</h1>
-    <p>Browse {{ total }} open position{{ total|pluralize }} from top companies</p>
+  <!-- HERO -->
+  <div class="board-hero">
+    <div class="board-hero-eyebrow">Hireiz Job Board</div>
+    <h1>Find work you'll <span>love</span></h1>
+    <p class="board-hero-sub">{{ total }} open position{{ total|pluralize }} from top companies</p>
+
     <form method="get" action="{% url 'jobs:board' %}">
-      <div class="search-row">
-        <input class="search-input" type="text" name="q" value="{{ q }}"
-               placeholder="Search by title, company, or skill…" />
-        {% if filter_type %}<input type="hidden" name="type" value="{{ filter_type }}">{% endif %}
-        {% if filter_location %}<input type="hidden" name="location" value="{{ filter_location }}">{% endif %}
-        {% if filter_exp %}<input type="hidden" name="exp" value="{{ filter_exp }}">{% endif %}
-        <button type="submit" class="search-btn">&#128269; Search</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- FILTER BAR -->
-  <div class="filters-bar">
-    <span class="filter-label">Type:</span>
-    <a href="{% url 'jobs:board' %}{% if q %}?q={{ q }}{% endif %}"
-       class="filter-pill {% if not filter_type %}active{% endif %}">All</a>
-    {% for val, label in job_type_choices %}
-    <a href="{% url 'jobs:board' %}?type={{ val }}{% if q %}&q={{ q }}{% endif %}"
-       class="filter-pill {% if filter_type == val %}active{% endif %}">{{ label }}</a>
-    {% endfor %}
-  </div>
-
-  <!-- RESULT COUNT -->
-  {% if q or filter_type %}
-  <p class="result-count">
-    Showing <strong>{{ jobs|length }}</strong> result{{ jobs|length|pluralize }}
-    {% if q %} for "<strong>{{ q }}</strong>"{% endif %}
-    {% if filter_type %} · {{ filter_type|title }}{% endif %}
-  </p>
-  {% endif %}
-
-  <!-- JOB CARDS -->
-  {% if jobs %}
-  <div class="jobs-grid">
-    {% for job in jobs %}
-    <a class="job-card" href="{% url 'jobs:detail' job.pk %}">
-      <!-- Company logo -->
-      <div class="company-logo">
-        {% if job.recruiter.logo %}
-          <img src="{{ job.recruiter.logo.url }}" alt="{{ job.recruiter.company_name }}" />
-        {% else %}
-          &#127970;
-        {% endif %}
+      {% if filter_type %}<input type="hidden" name="type" value="{{ filter_type }}">{% endif %}
+      <div class="search-bar">
+        <!-- Keyword field -->
+        <div class="search-field">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" name="q" value="{{ q }}"
+                 placeholder="Job title, skill, or company…" autocomplete="off">
+        </div>
+        <!-- Divider -->
+        <div class="search-divider"></div>
+        <!-- Location field -->
+        <div class="search-field">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <input type="text" name="location" list="loc-options"
+                 value="{{ filter_location }}"
+                 placeholder="{% if user_location and not filter_location %}{{ user_location }}{% else %}City, state, or country…{% endif %}"
+                 autocomplete="off">
+        </div>
+        <!-- Submit -->
+        <button type="submit">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Search
+        </button>
       </div>
 
-      <!-- Info -->
-      <div style="flex:1;min-width:0;">
-        <div class="job-title">{{ job.title }}</div>
-        <a href="{% url 'recruiter:public_profile' job.recruiter.pk %}" class="job-company" style="color:inherit;text-decoration:none;">{{ job.recruiter.company_name }}</a>
-        <div class="job-meta">
-          {% if job.location %}<span>&#128205; {{ job.location }}</span>{% endif %}
-          <span>&#128197; {{ job.days_since_posted }}</span>
-          {% if job.deadline %}<span>&#9203; Deadline: {{ job.deadline|date:"M d, Y" }}</span>{% endif %}
-        </div>
+      <!-- ── Location datalist (nationality-aware) ── -->
+      {% if nationality_code == 'india' %}
+      <datalist id="loc-options">
+        <option value="Remote">
+        <!-- Indian Metros -->
+        <option value="Mumbai"><option value="Delhi"><option value="Bangalore"><option value="Hyderabad"><option value="Chennai"><option value="Kolkata"><option value="Pune"><option value="Ahmedabad"><option value="Jaipur"><option value="Lucknow"><option value="Surat"><option value="Noida"><option value="Gurgaon"><option value="Chandigarh"><option value="Indore"><option value="Bhopal"><option value="Nagpur"><option value="Kochi"><option value="Coimbatore"><option value="Visakhapatnam"><option value="Patna"><option value="Vadodara"><option value="Nashik"><option value="Agra"><option value="Varanasi"><option value="Meerut"><option value="Faridabad"><option value="Ghaziabad"><option value="Ranchi"><option value="Amritsar"><option value="Ludhiana"><option value="Jalandhar"><option value="Jabalpur"><option value="Gwalior"><option value="Jodhpur"><option value="Madurai"><option value="Raipur"><option value="Kota"><option value="Guwahati"><option value="Bhubaneswar"><option value="Mysuru"><option value="Mangaluru"><option value="Hubli-Dharwad"><option value="Thiruvananthapuram"><option value="Kozhikode"><option value="Thrissur"><option value="Kollam"><option value="Erode"><option value="Salem"><option value="Tirunelveli"><option value="Tiruchirappalli"><option value="Dehradun"><option value="Haridwar"><option value="Jammu"><option value="Srinagar"><option value="Udaipur"><option value="Ajmer"><option value="Bikaner"><option value="Alwar"><option value="Siliguri"><option value="Asansol"><option value="Howrah"><option value="Jamshedpur"><option value="Dhanbad"><option value="Prayagraj"><option value="Kanpur"><option value="Bareilly"><option value="Aligarh"><option value="Moradabad"><option value="Saharanpur"><option value="Gorakhpur"><option value="Gurugram"><option value="Panipat"><option value="Hisar"><option value="Rohtak"><option value="Shimla"><option value="Patiala"><option value="Ujjain"><option value="Bilaspur"><option value="Bhilai"><option value="Korba"><option value="Rajkot"><option value="Bhavnagar"><option value="Jamnagar"><option value="Junagadh"><option value="Gandhinagar"><option value="Warangal"><option value="Karimnagar"><option value="Nizamabad"><option value="Khammam"><option value="Kurnool"><option value="Guntur"><option value="Nellore"><option value="Tirupati"><option value="Kakinada"><option value="Cuttack"><option value="Rourkela"><option value="Berhampur"><option value="Imphal"><option value="Shillong"><option value="Aizawl"><option value="Kohima"><option value="Agartala"><option value="Gangtok"><option value="Itanagar"><option value="Dibrugarh"><option value="Silchar"><option value="Jorhat"><option value="Puducherry">
+        <!-- Indian States & UTs -->
+        <option value="Andhra Pradesh"><option value="Arunachal Pradesh"><option value="Assam"><option value="Bihar"><option value="Chhattisgarh"><option value="Goa"><option value="Gujarat"><option value="Haryana"><option value="Himachal Pradesh"><option value="Jharkhand"><option value="Karnataka"><option value="Kerala"><option value="Madhya Pradesh"><option value="Maharashtra"><option value="Manipur"><option value="Meghalaya"><option value="Mizoram"><option value="Nagaland"><option value="Odisha"><option value="Punjab"><option value="Rajasthan"><option value="Sikkim"><option value="Tamil Nadu"><option value="Telangana"><option value="Tripura"><option value="Uttar Pradesh"><option value="Uttarakhand"><option value="West Bengal"><option value="Delhi"><option value="Jammu & Kashmir"><option value="Ladakh"><option value="Puducherry"><option value="Chandigarh"><option value="Andaman and Nicobar Islands"><option value="Lakshadweep"><option value="Dadra and Nagar Haveli">
+        <!-- Kerala Districts -->
+        <option value="Thiruvananthapuram"><option value="Kollam"><option value="Pathanamthitta"><option value="Alappuzha"><option value="Kottayam"><option value="Idukki"><option value="Ernakulam"><option value="Thrissur"><option value="Palakkad"><option value="Malappuram"><option value="Kozhikode"><option value="Wayanad"><option value="Kannur"><option value="Kasaragod">
+        <!-- Tamil Nadu Districts -->
+        <option value="Chennai"><option value="Coimbatore"><option value="Madurai"><option value="Tiruchirappalli"><option value="Salem"><option value="Tirunelveli"><option value="Vellore"><option value="Erode"><option value="Dindigul"><option value="Thanjavur"><option value="Tiruvannamalai"><option value="Ranipet"><option value="Krishnagiri"><option value="Namakkal"><option value="Cuddalore"><option value="Villupuram"><option value="Kancheepuram"><option value="Chengalpattu"><option value="Nagapattinam"><option value="Tiruppur"><option value="Theni"><option value="Kanyakumari"><option value="Sivaganga"><option value="Ramanathapuram"><option value="Ariyalur"><option value="Perambalur"><option value="Karur"><option value="Tiruvarur"><option value="Kallakurichi"><option value="Tenkasi"><option value="Pudukkottai"><option value="Virudhunagar"><option value="Thoothukudi"><option value="Nilgiris"><option value="Dharmapuri"><option value="Tirupattur"><option value="Mayiladuthurai">
+        <!-- Karnataka Districts -->
+        <option value="Bengaluru Urban"><option value="Bengaluru Rural"><option value="Mysuru"><option value="Dakshina Kannada"><option value="Udupi"><option value="Belagavi"><option value="Dharwad"><option value="Shivamogga"><option value="Uttara Kannada"><option value="Hassan"><option value="Kodagu"><option value="Chikkamagaluru"><option value="Tumkuru"><option value="Mandya"><option value="Kolar"><option value="Chikkaballapur"><option value="Ramanagara"><option value="Haveri"><option value="Gadag"><option value="Bagalkot"><option value="Vijayapura"><option value="Raichur"><option value="Koppal"><option value="Ballari"><option value="Davanagere"><option value="Chitradurga"><option value="Bidar"><option value="Kalaburagi"><option value="Yadgir">
+        <!-- Maharashtra Districts -->
+        <option value="Mumbai City"><option value="Mumbai Suburban"><option value="Thane"><option value="Palghar"><option value="Raigad"><option value="Ratnagiri"><option value="Sindhudurg"><option value="Pune"><option value="Satara"><option value="Sangli"><option value="Solapur"><option value="Kolhapur"><option value="Nashik"><option value="Dhule"><option value="Nandurbar"><option value="Jalgaon"><option value="Ahmednagar"><option value="Aurangabad"><option value="Jalna"><option value="Beed"><option value="Osmanabad"><option value="Latur"><option value="Nanded"><option value="Hingoli"><option value="Parbhani"><option value="Buldhana"><option value="Akola"><option value="Washim"><option value="Amravati"><option value="Yavatmal"><option value="Wardha"><option value="Nagpur"><option value="Bhandara"><option value="Gondia"><option value="Chandrapur"><option value="Gadchiroli">
+        <!-- Gujarat Districts -->
+        <option value="Ahmedabad"><option value="Surat"><option value="Vadodara"><option value="Rajkot"><option value="Gandhinagar"><option value="Bhavnagar"><option value="Jamnagar"><option value="Junagadh"><option value="Anand"><option value="Mehsana"><option value="Patan"><option value="Banaskantha"><option value="Sabarkantha"><option value="Arvalli"><option value="Mahisagar"><option value="Kheda"><option value="Panchmahal"><option value="Chhota Udaipur"><option value="Dahod"><option value="Narmada"><option value="Bharuch"><option value="Tapi"><option value="Valsad"><option value="Navsari"><option value="Dang"><option value="Amreli"><option value="Gir Somnath"><option value="Morbi"><option value="Devbhoomi Dwarka"><option value="Porbandar"><option value="Surendranagar"><option value="Botad">
+        <!-- Rajasthan Districts -->
+        <option value="Jaipur"><option value="Jodhpur"><option value="Udaipur"><option value="Bikaner"><option value="Kota"><option value="Ajmer"><option value="Alwar"><option value="Bharatpur"><option value="Bhilwara"><option value="Sikar"><option value="Pali"><option value="Tonk"><option value="Nagaur"><option value="Barmer"><option value="Sirohi"><option value="Jalor"><option value="Jaisalmer"><option value="Churu"><option value="Jhunjhunu"><option value="Hanumangarh"><option value="Ganganagar"><option value="Pratapgarh"><option value="Baran"><option value="Jhalawar"><option value="Bundi"><option value="Karauli"><option value="Dholpur"><option value="Dausa"><option value="Sawai Madhopur"><option value="Rajsamand"><option value="Dungarpur"><option value="Banswara"><option value="Chittorgarh">
+        <!-- Andhra Pradesh Districts -->
+        <option value="Visakhapatnam"><option value="Srikakulam"><option value="Vizianagaram"><option value="East Godavari"><option value="West Godavari"><option value="Krishna"><option value="Guntur"><option value="Bapatla"><option value="Palnadu"><option value="Nandyal"><option value="Kurnool"><option value="Anantapur"><option value="Sri Sathya Sai"><option value="YSR Kadapa"><option value="Chittoor"><option value="Tirupati"><option value="Nellore"><option value="Prakasam"><option value="Alluri Sitarama Raju"><option value="Anakapalli"><option value="Konaseema">
+        <!-- Telangana Districts -->
+        <option value="Hyderabad"><option value="Rangareddy"><option value="Medchal-Malkajgiri"><option value="Sangareddy"><option value="Medak"><option value="Nizamabad"><option value="Karimnagar"><option value="Warangal"><option value="Hanumakonda"><option value="Jangaon"><option value="Khammam"><option value="Bhadradri Kothagudem"><option value="Nalgonda"><option value="Suryapet"><option value="Yadadri Bhuvanagiri"><option value="Mahabubabad"><option value="Jayashankar Bhupalpally"><option value="Mulugu"><option value="Peddapalli"><option value="Mancherial"><option value="Rajanna Sircilla"><option value="Jagitial"><option value="Nirmal"><option value="Adilabad"><option value="Nagarkurnool"><option value="Wanaparthy"><option value="Gadwal"><option value="Narayanpet"><option value="Vikarabad"><option value="Siddipet"><option value="Kamareddy">
+        <!-- Madhya Pradesh Districts -->
+        <option value="Bhopal"><option value="Indore"><option value="Jabalpur"><option value="Gwalior"><option value="Ujjain"><option value="Rewa"><option value="Satna"><option value="Sagar"><option value="Katni"><option value="Chhindwara"><option value="Khandwa"><option value="Ratlam"><option value="Morena"><option value="Bhind"><option value="Guna"><option value="Shivpuri"><option value="Vidisha"><option value="Mandsaur"><option value="Neemuch"><option value="Damoh"><option value="Panna"><option value="Chhatarpur"><option value="Tikamgarh"><option value="Sehore"><option value="Raisen"><option value="Narmadapuram"><option value="Harda"><option value="Betul"><option value="Balaghat"><option value="Seoni"><option value="Mandla"><option value="Dindori"><option value="Sidhi"><option value="Singrauli"><option value="Anuppur"><option value="Shahdol"><option value="Umaria"><option value="Alirajpur"><option value="Barwani"><option value="Burhanpur"><option value="Dhar"><option value="Jhabua"><option value="Khargone"><option value="Dewas"><option value="Shajapur">
+        <!-- Uttar Pradesh Districts -->
+        <option value="Lucknow"><option value="Kanpur Nagar"><option value="Agra"><option value="Varanasi"><option value="Prayagraj"><option value="Meerut"><option value="Ghaziabad"><option value="Gautam Buddha Nagar"><option value="Bareilly"><option value="Moradabad"><option value="Aligarh"><option value="Gorakhpur"><option value="Saharanpur"><option value="Mathura"><option value="Firozabad"><option value="Jhansi"><option value="Muzaffarnagar"><option value="Bulandshahr"><option value="Shahjahanpur"><option value="Rampur"><option value="Bijnor"><option value="Badaun"><option value="Etawah"><option value="Mainpuri"><option value="Hardoi"><option value="Farrukhabad"><option value="Fatehpur"><option value="Rae Bareli"><option value="Sultanpur"><option value="Bahraich"><option value="Gonda"><option value="Deoria"><option value="Kushinagar"><option value="Maharajganj"><option value="Siddharthnagar"><option value="Basti"><option value="Ambedkar Nagar"><option value="Ballia"><option value="Azamgarh"><option value="Mau"><option value="Jaunpur"><option value="Chandauli"><option value="Mirzapur"><option value="Sonbhadra"><option value="Hamirpur"><option value="Banda"><option value="Chitrakoot"><option value="Etah"><option value="Kasganj"><option value="Hathras"><option value="Pratapgarh"><option value="Unnao"><option value="Lakhimpur Kheri"><option value="Ayodhya"><option value="Sitapur"><option value="Hapur"><option value="Sambhal"><option value="Amroha"><option value="Shravasti"><option value="Balrampur">
+        <!-- Bihar Districts -->
+        <option value="Patna"><option value="Gaya"><option value="Bhagalpur"><option value="Muzaffarpur"><option value="Darbhanga"><option value="Purnia"><option value="Katihar"><option value="Kishanganj"><option value="Araria"><option value="Sitamarhi"><option value="Madhubani"><option value="Supaul"><option value="Saharsa"><option value="Madhepura"><option value="Bhojpur"><option value="Buxar"><option value="Rohtas"><option value="Kaimur"><option value="Aurangabad"><option value="Nawada"><option value="Jehanabad"><option value="Arwal"><option value="Nalanda"><option value="Sheikhpura"><option value="Lakhisarai"><option value="Jamui"><option value="Munger"><option value="Begusarai"><option value="Khagaria"><option value="Samastipur"><option value="Vaishali"><option value="Saran"><option value="Siwan"><option value="Gopalganj"><option value="East Champaran"><option value="West Champaran">
+        <!-- West Bengal Districts -->
+        <option value="Kolkata"><option value="Howrah"><option value="North 24 Parganas"><option value="South 24 Parganas"><option value="Nadia"><option value="Murshidabad"><option value="Birbhum"><option value="Bankura"><option value="Purulia"><option value="Hooghly"><option value="Purba Bardhaman"><option value="Paschim Bardhaman"><option value="Jalpaiguri"><option value="Darjeeling"><option value="Malda"><option value="Uttar Dinajpur"><option value="Dakshin Dinajpur"><option value="Cooch Behar"><option value="Alipurduar"><option value="Jhargram"><option value="Paschim Medinipur"><option value="Purba Medinipur"><option value="Kalimpong">
+        <!-- Punjab Districts -->
+        <option value="Amritsar"><option value="Ludhiana"><option value="Jalandhar"><option value="Patiala"><option value="Mohali"><option value="Bathinda"><option value="Firozpur"><option value="Fazilka"><option value="Muktsar"><option value="Moga"><option value="Gurdaspur"><option value="Pathankot"><option value="Hoshiarpur"><option value="Nawanshahr"><option value="Rupnagar"><option value="Fatehgarh Sahib"><option value="Sangrur"><option value="Barnala"><option value="Mansa"><option value="Kapurthala"><option value="Tarn Taran">
+        <!-- Haryana Districts -->
+        <option value="Gurugram"><option value="Faridabad"><option value="Rohtak"><option value="Sonipat"><option value="Panipat"><option value="Karnal"><option value="Ambala"><option value="Yamunanagar"><option value="Hisar"><option value="Sirsa"><option value="Bhiwani"><option value="Jhajjar"><option value="Rewari"><option value="Mahendragarh"><option value="Nuh"><option value="Palwal"><option value="Kurukshetra"><option value="Kaithal"><option value="Jind"><option value="Fatehabad"><option value="Charkhi Dadri">
+        <!-- Himachal Pradesh Districts -->
+        <option value="Shimla"><option value="Mandi"><option value="Kangra"><option value="Kullu"><option value="Hamirpur"><option value="Una"><option value="Solan"><option value="Sirmour"><option value="Chamba"><option value="Bilaspur"><option value="Kinnaur"><option value="Lahul and Spiti">
+        <!-- Uttarakhand Districts -->
+        <option value="Dehradun"><option value="Haridwar"><option value="Udham Singh Nagar"><option value="Nainital"><option value="Pauri Garhwal"><option value="Tehri Garhwal"><option value="Chamoli"><option value="Uttarkashi"><option value="Rudraprayag"><option value="Pithoragarh"><option value="Bageshwar"><option value="Almora"><option value="Champawat">
+        <!-- Jharkhand Districts -->
+        <option value="Ranchi"><option value="East Singhbhum"><option value="Dhanbad"><option value="Bokaro"><option value="Hazaribagh"><option value="Giridih"><option value="Deoghar"><option value="Dumka"><option value="Godda"><option value="Pakur"><option value="Sahebganj"><option value="Jamtara"><option value="Ramgarh"><option value="Lohardaga"><option value="Gumla"><option value="Simdega"><option value="Latehar"><option value="Khunti"><option value="West Singhbhum"><option value="Saraikela Kharsawan"><option value="Chatra"><option value="Koderma"><option value="Palamu"><option value="Garhwa">
+        <!-- Odisha Districts -->
+        <option value="Khordha"><option value="Cuttack"><option value="Sundargarh"><option value="Ganjam"><option value="Sambalpur"><option value="Balasore"><option value="Mayurbhanj"><option value="Puri"><option value="Bhadrak"><option value="Jajpur"><option value="Kendrapara"><option value="Jagatsinghpur"><option value="Bargarh"><option value="Bolangir"><option value="Nabarangapur"><option value="Koraput"><option value="Rayagada"><option value="Kandhamal"><option value="Nayagarh"><option value="Dhenkanal"><option value="Keonjhar"><option value="Angul"><option value="Jharsuguda"><option value="Kalahandi"><option value="Nuapada"><option value="Subarnapur"><option value="Boudh"><option value="Gajapati"><option value="Malkangiri">
+        <!-- Assam Districts -->
+        <option value="Kamrup Metropolitan"><option value="Kamrup"><option value="Dibrugarh"><option value="Cachar"><option value="Jorhat"><option value="Nagaon"><option value="Tinsukia"><option value="Lakhimpur"><option value="Bongaigaon"><option value="Dhubri"><option value="Karimganj"><option value="Hailakandi"><option value="Kokrajhar"><option value="Barpeta"><option value="Nalbari"><option value="Darrang"><option value="Morigaon"><option value="Golaghat"><option value="Sivasagar"><option value="Charaideo"><option value="Majuli"><option value="Goalpara"><option value="Udalguri"><option value="Karbi Anglong"><option value="Dima Hasao"><option value="Hojai"><option value="Biswanath">
+        <!-- Chhattisgarh Districts -->
+        <option value="Raipur"><option value="Durg"><option value="Bilaspur"><option value="Korba"><option value="Raigarh"><option value="Rajnandgaon"><option value="Kabirdham"><option value="Mahasamund"><option value="Dhamtari"><option value="Gariaband"><option value="Baloda Bazar"><option value="Balod"><option value="Bemetara"><option value="Mungeli"><option value="Janjgir-Champa"><option value="Surajpur"><option value="Jagdalpur"><option value="Kondagaon"><option value="Narayanpur"><option value="Bijapur"><option value="Sukma"><option value="Dantewada">
+        <!-- Goa -->
+        <option value="North Goa"><option value="South Goa">
+        <!-- Northeast States -->
+        <option value="East Khasi Hills"><option value="West Khasi Hills"><option value="East Garo Hills"><option value="West Garo Hills"><option value="Ri Bhoi"><option value="East Jaintia Hills">
+        <option value="Kohima"><option value="Dimapur"><option value="Mokokchung"><option value="Tuensang"><option value="Mon"><option value="Wokha"><option value="Zunheboto"><option value="Phek">
+        <option value="Imphal East"><option value="Imphal West"><option value="Bishnupur"><option value="Thoubal"><option value="Churachandpur"><option value="Senapati"><option value="Ukhrul"><option value="Chandel"><option value="Tamenglong">
+        <option value="West Tripura"><option value="East Tripura"><option value="North Tripura"><option value="South Tripura"><option value="Sipahijala"><option value="Gomati"><option value="Khowai"><option value="Dhalai">
+        <option value="Aizawl"><option value="Lunglei"><option value="Champhai"><option value="Mamit"><option value="Kolasib"><option value="Serchhip"><option value="Lawngtlai">
+        <option value="East Sikkim"><option value="West Sikkim"><option value="North Sikkim"><option value="South Sikkim">
+        <option value="Papum Pare"><option value="East Kameng"><option value="West Kameng"><option value="Tawang"><option value="East Siang"><option value="West Siang"><option value="Upper Siang"><option value="Lower Siang"><option value="Lohit"><option value="Changlang"><option value="Tirap"><option value="Namsai">
+        <!-- J&K Districts -->
+        <option value="Srinagar"><option value="Jammu"><option value="Anantnag"><option value="Baramulla"><option value="Budgam"><option value="Kupwara"><option value="Pulwama"><option value="Shopian"><option value="Kulgam"><option value="Ganderbal"><option value="Bandipore"><option value="Kathua"><option value="Udhampur"><option value="Rajouri"><option value="Poonch"><option value="Doda"><option value="Ramban"><option value="Kishtwar"><option value="Reasi"><option value="Samba">
+        <!-- Ladakh Districts -->
+        <option value="Leh"><option value="Kargil">
+      </datalist>
 
-        <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">
-          <span class="badge badge-type">{{ job.get_job_type_display }}</span>
-          {% if job.is_remote %}<span class="badge badge-remote">&#127760; Remote</span>{% endif %}
-          {% if job.experience_level != 'any' %}
-          <span class="badge badge-exp">{{ job.get_experience_level_display }}</span>
-          {% endif %}
-          {% with sal=job.get_salary_display %}
-          {% if sal and sal != 'Confidential' %}
-          <span class="badge badge-salary">&#128181; {{ sal }}</span>
-          {% endif %}{% endwith %}
-        </div>
+      {% elif nationality_code == 'canada' %}
+      <datalist id="loc-options">
+        <option value="Remote">
+        <option value="Canada">
+        <!-- Canadian Provinces & Territories -->
+        <option value="Ontario"><option value="Quebec"><option value="British Columbia"><option value="Alberta"><option value="Manitoba"><option value="Saskatchewan"><option value="Nova Scotia"><option value="New Brunswick"><option value="Newfoundland and Labrador"><option value="Prince Edward Island"><option value="Yukon"><option value="Northwest Territories"><option value="Nunavut">
+        <!-- Ontario Cities -->
+        <option value="Toronto"><option value="Ottawa"><option value="Mississauga"><option value="Brampton"><option value="Hamilton"><option value="London"><option value="Markham"><option value="Vaughan"><option value="Kitchener"><option value="Windsor"><option value="Richmond Hill"><option value="Oakville"><option value="Burlington"><option value="Sudbury"><option value="Oshawa"><option value="Barrie"><option value="Waterloo"><option value="Guelph"><option value="Thunder Bay"><option value="Sault Ste. Marie"><option value="Cambridge"><option value="Kingston"><option value="Peterborough">
+        <!-- Quebec Cities -->
+        <option value="Montreal"><option value="Quebec City"><option value="Laval"><option value="Gatineau"><option value="Longueuil"><option value="Sherbrooke"><option value="Saguenay"><option value="Levis"><option value="Trois-Rivieres"><option value="Terrebonne">
+        <!-- British Columbia Cities -->
+        <option value="Vancouver"><option value="Surrey"><option value="Burnaby"><option value="Richmond"><option value="Kelowna"><option value="Abbotsford"><option value="Victoria"><option value="Coquitlam"><option value="Langley"><option value="Delta"><option value="North Vancouver"><option value="Kamloops"><option value="Prince George"><option value="Nanaimo">
+        <!-- Alberta Cities -->
+        <option value="Calgary"><option value="Edmonton"><option value="Red Deer"><option value="Lethbridge"><option value="St. Albert"><option value="Medicine Hat"><option value="Grande Prairie"><option value="Airdrie"><option value="Spruce Grove"><option value="Fort McMurray">
+        <!-- Other Province Cities -->
+        <option value="Winnipeg"><option value="Brandon"><option value="Saskatoon"><option value="Regina"><option value="Halifax"><option value="Dartmouth"><option value="Moncton"><option value="Fredericton"><option value="Saint John"><option value="St. John's"><option value="Charlottetown">
+      </datalist>
 
-        {% if job.required_skills %}
-        <div class="skills-row">
-          {% for skill in job.get_skills_list|slice:":6" %}
-          <span class="skill-tag">{{ skill }}</span>
-          {% endfor %}
-          {% if job.get_skills_list|length > 6 %}
-          <span class="skill-tag">+{{ job.get_skills_list|length|add:"-6" }} more</span>
-          {% endif %}
-        </div>
-        {% endif %}
-      </div>
-
-      <!-- Right arrow / save button -->
-      {% if request.user.is_authenticated and request.user.is_job_seeker_user %}
-        {# Bookmark shown as separate form wrapping only the icon, outside the card anchor #}
-        <div style="color:var(--gray-300);font-size:1.1rem;align-self:center;flex-shrink:0;">&#8594;</div>
       {% else %}
-        <div style="color:var(--gray-300);font-size:1.1rem;align-self:center;flex-shrink:0;">&#8594;</div>
+      <datalist id="loc-options">
+        <option value="Remote">
+        <!-- Popular Global Cities -->
+        <option value="New York, USA"><option value="San Francisco, USA"><option value="Los Angeles, USA"><option value="Chicago, USA"><option value="Seattle, USA"><option value="Austin, USA"><option value="Boston, USA"><option value="Houston, USA"><option value="Dallas, USA"><option value="Atlanta, USA">
+        <option value="London, UK"><option value="Manchester, UK"><option value="Birmingham, UK"><option value="Edinburgh, UK">
+        <option value="Toronto, Canada"><option value="Vancouver, Canada"><option value="Montreal, Canada"><option value="Calgary, Canada"><option value="Ottawa, Canada">
+        <option value="Sydney, Australia"><option value="Melbourne, Australia"><option value="Brisbane, Australia"><option value="Perth, Australia">
+        <option value="Auckland, New Zealand">
+        <option value="Dubai, UAE"><option value="Abu Dhabi, UAE"><option value="Sharjah, UAE">
+        <option value="Riyadh, Saudi Arabia"><option value="Jeddah, Saudi Arabia">
+        <option value="Berlin, Germany"><option value="Munich, Germany"><option value="Frankfurt, Germany"><option value="Hamburg, Germany">
+        <option value="Amsterdam, Netherlands"><option value="Dublin, Ireland"><option value="Paris, France">
+        <option value="Singapore"><option value="Kuala Lumpur, Malaysia"><option value="Tokyo, Japan"><option value="Seoul, South Korea">
+        <option value="Cape Town, South Africa"><option value="Johannesburg, South Africa">
+        <option value="Mumbai, India"><option value="Delhi, India"><option value="Bangalore, India"><option value="Hyderabad, India"><option value="Chennai, India">
+        <!-- Countries -->
+        <option value="United States"><option value="United Kingdom"><option value="Canada"><option value="Australia"><option value="New Zealand"><option value="India"><option value="UAE"><option value="Saudi Arabia"><option value="Singapore"><option value="Germany"><option value="France"><option value="Netherlands"><option value="Ireland"><option value="Japan"><option value="South Korea"><option value="Malaysia"><option value="Philippines"><option value="Bangladesh"><option value="Pakistan"><option value="Sri Lanka"><option value="Nepal"><option value="South Africa"><option value="Nigeria"><option value="Kenya"><option value="Sweden"><option value="Norway"><option value="Denmark"><option value="Switzerland"><option value="Austria"><option value="Belgium"><option value="Spain"><option value="Italy"><option value="Portugal"><option value="Poland"><option value="Czech Republic"><option value="Hungary"><option value="Romania"><option value="Israel"><option value="Turkey"><option value="Qatar"><option value="Bahrain"><option value="Kuwait"><option value="Oman"><option value="Jordan"><option value="Egypt"><option value="Morocco">
+      </datalist>
       {% endif %}
-    </a>
-    {% if request.user.is_authenticated and request.user.is_job_seeker_user %}
-    <form method="post" action="{% url 'jobs:save' job.pk %}"
-          style="position:relative;margin-top:-44px;margin-bottom:6px;text-align:right;padding-right:12px;z-index:2;">
-      {% csrf_token %}
-      <input type="hidden" name="next" value="{{ request.path }}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}">
-      <button type="submit"
-              title="{% if job.pk in saved_ids %}Remove from saved{% else %}Save job{% endif %}"
-              style="padding:6px 10px;border-radius:8px;border:1.5px solid {% if job.pk in saved_ids %}#f59e0b{% else %}var(--gray-200){% endif %};
-                     background:{% if job.pk in saved_ids %}#fffbeb{% else %}var(--white){% endif %};
-                     color:{% if job.pk in saved_ids %}#d97706{% else %}var(--gray-400){% endif %};
-                     cursor:pointer;font-size:.875rem;font-family:var(--font);">
-        {% if job.pk in saved_ids %}&#11088;{% else %}&#9734;{% endif %}
-      </button>
     </form>
-    {% endif %}
+
+    <!-- ── Location quick chips ── -->
+    <div class="location-quick">
+      <span class="loc-q-label">Popular:</span>
+      {% for loc in popular_locations %}
+      <a href="{% url 'jobs:board' %}?location={{ loc }}{% if q %}&q={{ q }}{% endif %}{% if filter_type %}&type={{ filter_type }}{% endif %}"
+         class="loc-chip {% if filter_location == loc %}active{% endif %}">{{ loc }}</a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="board-toolbar">
+    <p class="result-count">
+      {% if q or filter_type or filter_location %}
+        <strong>{{ jobs|length }}</strong> result{{ jobs|length|pluralize }}
+        {% if q %} for "<strong>{{ q }}</strong>"{% endif %}
+        {% if filter_type %}&nbsp;&middot;&nbsp;{{ filter_type|title }}{% endif %}
+        {% if filter_location %}
+          &nbsp;&middot;&nbsp;
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;color:var(--blue)"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <strong>{{ filter_location }}</strong>
+        {% endif %}
+        &nbsp;&nbsp;<a href="{% url 'jobs:board' %}" style="font-size:.8rem;color:var(--gray-400);">Clear all</a>
+      {% else %}
+        Showing <strong>{{ jobs|length }}</strong> of {{ total }} job{{ total|pluralize }}
+      {% endif %}
+    </p>
+
+    <div class="filter-tabs">
+      <a href="{% url 'jobs:board' %}?{% if q %}q={{ q }}&{% endif %}{% if filter_location %}location={{ filter_location }}{% endif %}"
+         class="filter-tab {% if not filter_type %}active{% endif %}">All</a>
+      {% for val, label in job_type_choices %}
+      <a href="{% url 'jobs:board' %}?type={{ val }}{% if q %}&q={{ q }}{% endif %}{% if filter_location %}&location={{ filter_location }}{% endif %}"
+         class="filter-tab {% if filter_type == val %}active{% endif %}">{{ label }}</a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="board-divider"></div>
+
+  <!-- JOB LIST -->
+  {% if jobs %}
+  <div class="job-list">
+    {% for job in jobs %}
+    <div style="position:relative;">
+
+      <a class="job-card" href="{% url 'jobs:detail' job.pk %}">
+
+        <!-- Logo -->
+        <div class="jc-logo">
+          {% if job.recruiter.logo %}
+            <img src="{{ job.recruiter.logo.url }}" alt="{{ job.recruiter.company_name }}">
+          {% else %}
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+          {% endif %}
+        </div>
+
+        <!-- Body -->
+        <div class="jc-body">
+          <div class="jc-title">{{ job.title }}</div>
+          <div class="jc-company">{{ job.recruiter.company_name }}</div>
+          <div class="jc-meta">
+            {% if job.location %}
+            <span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              {{ job.location }}
+            </span>
+            {% endif %}
+            <span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              {{ job.days_since_posted }}
+            </span>
+            {% if job.deadline %}
+            <span>Deadline: {{ job.deadline|date:"M d, Y" }}</span>
+            {% endif %}
+          </div>
+
+          {% if job.required_skills %}
+          <div class="jc-skills">
+            {% for skill in job.get_skills_list|slice:":5" %}
+            <span class="skill-tag">{{ skill }}</span>
+            {% endfor %}
+            {% if job.get_skills_list|length > 5 %}
+            <span class="skill-tag">+{{ job.get_skills_list|length|add:"-5" }}</span>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Right: badges -->
+        <div class="jc-right">
+          <div class="jc-badges">
+            <span class="badge badge-type">{{ job.get_job_type_display }}</span>
+            {% if job.is_remote %}<span class="badge badge-remote">Remote</span>{% endif %}
+            {% if job.experience_level != 'any' %}
+            <span class="badge badge-exp">{{ job.get_experience_level_display }}</span>
+            {% endif %}
+            {% with sal=job.get_salary_display %}
+            {% if sal and sal != 'Confidential' %}
+            <span class="badge badge-salary">{{ sal }}</span>
+            {% endif %}{% endwith %}
+          </div>
+
+          <!-- Arrow -->
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+
+      </a>
+
+      <!-- Save button (outside the anchor) -->
+      {% if request.user.is_authenticated and request.user.is_job_seeker_user %}
+      <form method="post" action="{% url 'jobs:save' job.pk %}"
+            style="position:absolute;top:14px;right:14px;z-index:2;">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.path }}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}">
+        <button type="submit"
+                class="save-btn {% if job.pk in saved_ids %}saved{% endif %}"
+                title="{% if job.pk in saved_ids %}Remove from saved{% else %}Save job{% endif %}">
+          {% if job.pk in saved_ids %}★{% else %}☆{% endif %}
+        </button>
+      </form>
+      {% endif %}
+
+    </div>
     {% endfor %}
   </div>
 
   {% else %}
-  <div class="no-jobs">
-    <div class="no-jobs-icon">&#128269;</div>
-    <div class="no-jobs-title">No jobs found</div>
-    <div class="no-jobs-desc">
-      {% if q or filter_type %}Try adjusting your search or clearing filters.
-      {% else %}No active jobs right now. Check back soon!{% endif %}
+  <div class="empty-state">
+    <div class="empty-icon">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+    <div class="empty-title">No jobs found</div>
+    <div class="empty-desc">
+      {% if q or filter_type %}Try a different search term or remove the active filter.
+      {% else %}No active positions right now — check back soon.{% endif %}
     </div>
     {% if q or filter_type %}
-    <a href="{% url 'jobs:board' %}" style="margin-top:16px;display:inline-block;" class="btn btn-primary btn-sm">Clear Filters</a>
+    <a href="{% url 'jobs:board' %}" class="btn btn-primary btn-sm">Clear filters</a>
     {% endif %}
   </div>
   {% endif %}

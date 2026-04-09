@@ -1,0 +1,271 @@
+{% extends 'jobseeker/base_profile.html' %}
+{% block title %}Assessment — {{ assessment.title }}{% endblock %}
+{% block nav_resume %}active{% endblock %}
+
+{% block extra_css %}
+/* Sticky timer bar at top */
+#timer-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+  background: #9a3420; color: #fff;
+  display: flex; align-items: center; justify-content: center; gap: 24px;
+  padding: 10px 20px; font-family: var(--font);
+  box-shadow: 0 2px 12px rgba(76,29,149,.35);
+}
+#timer-box {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,.15); border-radius: 10px; padding: 6px 16px;
+}
+#timer-countdown {
+  font-size: 1.6rem; font-weight: 900; letter-spacing: .05em;
+  font-variant-numeric: tabular-nums; color: #fff;
+  min-width: 80px; text-align: center;
+}
+#timer-label {
+  font-size: .72rem; font-weight: 700; color: rgba(255,255,255,.6);
+  text-transform: uppercase; letter-spacing: .1em;
+}
+#timer-bar.warning-state { background: #991b1b; }
+#timer-bar.warning-state #timer-box { background: rgba(255,255,255,.2); }
+#timer-elapsed-box {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.1); border-radius: 10px; padding: 6px 14px;
+}
+#elapsed-time {
+  font-size: 1rem; font-weight: 800; color: rgba(255,255,255,.85);
+  font-variant-numeric: tabular-nums;
+}
+.timer-progress-bar {
+  height: 3px; background: rgba(255,255,255,.2);
+  position: absolute; bottom: 0; left: 0; right: 0;
+}
+.timer-progress-fill {
+  height: 3px; background: #F07060; transition: width 1s linear;
+}
+
+/* Push content down so sticky bar doesn't overlap */
+.timer-spacer { height: 56px; }
+
+.assess-header {
+  background: linear-gradient(135deg, #9a3420 0%, #C73A26 50%, #E84530 100%);
+  border-radius: var(--radius-xl); padding: 22px 26px; margin-bottom: 20px;
+}
+.q-card {
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 14px;
+  transition: border-color .2s;
+}
+.q-card:focus-within { border-color: #E84530; }
+.q-num-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 50%; background: #E84530;
+  color: #fff; font-size: .78rem; font-weight: 800; flex-shrink: 0;
+}
+.q-text {
+  font-size: .92rem; font-weight: 700; color: var(--gray-900);
+  margin: 10px 0 14px 0; line-height: 1.5;
+}
+.opt-label {
+  display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px;
+  border: 1.5px solid var(--gray-200); border-radius: 10px; cursor: pointer;
+  margin-bottom: 8px; transition: all .15s; font-size: .875rem; color: var(--gray-700);
+}
+.opt-label:hover { border-color: #E84530; background: #FFF0EE; }
+.opt-label input[type="radio"] { display: none; }
+.opt-label:has(input[type="radio"]:checked) {
+  border-color: #E84530; background: #FFF0EE; color: #E84530; font-weight: 700;
+}
+.opt-letter {
+  width: 22px; height: 22px; border-radius: 6px; background: var(--gray-100);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: .72rem; font-weight: 800; color: var(--gray-600); flex-shrink: 0;
+}
+.opt-label:has(input[type="radio"]:checked) .opt-letter {
+  background: #E84530; color: #fff;
+}
+.sticky-footer {
+  position: sticky; bottom: 0; background: rgba(255,255,255,.97);
+  backdrop-filter: blur(8px); border-top: 1.5px solid var(--gray-200);
+  padding: 12px 0; display: flex; gap: 12px; justify-content: space-between;
+  align-items: center; z-index: 100;
+}
+.progress-pill {
+  padding: 4px 12px; border-radius: 999px; background: #FFF0EE;
+  color: #E84530; font-size: .8rem; font-weight: 700;
+}
+{% endblock %}
+
+{% block main_content %}
+
+<!-- ====== STICKY TIMER BAR ====== -->
+<div id="timer-bar" style="position:relative;">
+  <!-- Left: answered progress -->
+  <div style="display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:700;color:rgba(255,255,255,.7);">
+    &#128221; <span id="barAnswered">0</span>/{{ questions|length }} answered
+  </div>
+
+  <!-- Centre: timer -->
+  <div id="timer-box">
+    <div>
+      <div id="timer-label">
+        {% if assessment.time_limit_mins > 0 %}Time Remaining{% else %}Time Elapsed{% endif %}
+      </div>
+      <div id="timer-countdown">
+        {% if assessment.time_limit_mins > 0 %}{{ assessment.time_limit_mins }}:00{% else %}0:00{% endif %}
+      </div>
+    </div>
+    <div style="font-size:1.6rem;">&#9201;</div>
+  </div>
+
+  <!-- Right: questions count -->
+  <div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.7);">
+    {{ questions|length }} Questions
+    {% if assessment.time_limit_mins > 0 %}
+    &bull; {{ assessment.time_limit_mins }} min limit
+    {% endif %}
+  </div>
+
+  <!-- Progress bar at bottom of bar -->
+  {% if assessment.time_limit_mins > 0 %}
+  <div class="timer-progress-bar">
+    <div class="timer-progress-fill" id="timerProgressFill" style="width:100%;"></div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Spacer so content isn't hidden under sticky bar -->
+<div class="timer-spacer"></div>
+
+<div style="max-width:820px;">
+
+<!-- Assessment header -->
+<div class="assess-header">
+  <h2 style="color:#fff;font-size:1.1rem;font-weight:800;margin-bottom:4px;">&#128221; {{ assessment.title }}</h2>
+  <p style="color:rgba(255,255,255,.65);font-size:.82rem;">
+    {{ assessment.application.job.title }} &bull; {{ assessment.application.job.recruiter.company_name }}
+  </p>
+  {% if assessment.instructions %}
+  <div style="margin-top:10px;background:rgba(255,255,255,.12);border-radius:8px;padding:8px 12px;font-size:.8rem;color:rgba(255,255,255,.85);">
+    {{ assessment.instructions }}
+  </div>
+  {% endif %}
+</div>
+
+<form method="post" id="assessmentForm">
+{% csrf_token %}
+
+{% for question in questions %}
+<div class="q-card" id="qcard{{ question.pk }}">
+  <div style="display:flex;align-items:flex-start;gap:10px;">
+    <div class="q-num-badge">{{ forloop.counter }}</div>
+    <div style="flex:1;">
+      <div class="q-text">{{ question.question_text }}</div>
+      <label class="opt-label">
+        <input type="radio" name="q_{{ question.pk }}" value="a">
+        <span class="opt-letter">A</span>
+        <span>{{ question.option_a }}</span>
+      </label>
+      <label class="opt-label">
+        <input type="radio" name="q_{{ question.pk }}" value="b">
+        <span class="opt-letter">B</span>
+        <span>{{ question.option_b }}</span>
+      </label>
+      <label class="opt-label">
+        <input type="radio" name="q_{{ question.pk }}" value="c">
+        <span class="opt-letter">C</span>
+        <span>{{ question.option_c }}</span>
+      </label>
+      <label class="opt-label">
+        <input type="radio" name="q_{{ question.pk }}" value="d">
+        <span class="opt-letter">D</span>
+        <span>{{ question.option_d }}</span>
+      </label>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+<div class="sticky-footer">
+  <span class="progress-pill">&#128202; <span id="answeredCount">0</span> / {{ questions|length }} answered</span>
+  <button type="submit" class="btn btn-primary" style="background:#E84530;" onclick="return confirmSubmit()">
+    &#128640; Submit Assessment
+  </button>
+</div>
+
+</form>
+</div>
+
+<script>
+(function () {
+  const totalQ  = {{ questions|length }};
+  {% if assessment.time_limit_mins > 0 %}
+  const LIMITED = true;
+  const totalSec = {{ assessment.time_limit_mins }} * 60;
+  {% else %}
+  const LIMITED = false;
+  const totalSec = 0;
+  {% endif %}
+
+  let remaining = totalSec;
+  let elapsed   = 0;
+
+  const countdownEl   = document.getElementById('timer-countdown');
+  const barEl         = document.getElementById('timer-bar');
+  const answeredEl    = document.getElementById('answeredCount');
+  const barAnsweredEl = document.getElementById('barAnswered');
+  const fillEl        = document.getElementById('timerProgressFill');
+
+  function fmt(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
+  function updateAnswered() {
+    const names = new Set();
+    document.querySelectorAll('input[type="radio"]:checked').forEach(r => names.add(r.name));
+    const n = names.size;
+    answeredEl.textContent    = n;
+    barAnsweredEl.textContent = n;
+  }
+
+  document.getElementById('assessmentForm').addEventListener('change', updateAnswered);
+
+  // Timer tick every second
+  const tick = setInterval(() => {
+    elapsed++;
+    if (LIMITED) {
+      remaining = totalSec - elapsed;
+      if (remaining < 0) remaining = 0;
+      countdownEl.textContent = fmt(remaining);
+
+      // Progress bar (shrinks as time runs out)
+      if (fillEl) fillEl.style.width = ((remaining / totalSec) * 100) + '%';
+
+      // Warning at 60 seconds left
+      if (remaining <= 60) barEl.classList.add('warning-state');
+
+      // Auto-submit on timeout
+      if (remaining <= 0) {
+        clearInterval(tick);
+        document.getElementById('assessmentForm').submit();
+      }
+    } else {
+      // Elapsed mode
+      countdownEl.textContent = fmt(elapsed);
+    }
+  }, 1000);
+
+})();
+
+function confirmSubmit() {
+  const names = new Set();
+  document.querySelectorAll('input[type="radio"]:checked').forEach(r => names.add(r.name));
+  const answered = names.size;
+  const total    = {{ questions|length }};
+  if (answered < total) {
+    return confirm(`You have answered ${answered} of ${total} questions.\nUnanswered questions will be marked incorrect.\nSubmit anyway?`);
+  }
+  return true;
+}
+</script>
+{% endblock %}

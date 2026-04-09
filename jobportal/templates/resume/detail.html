@@ -12,7 +12,7 @@
 .detail-hero::before {
   content: ''; position: absolute; top: -60px; right: -40px;
   width: 220px; height: 220px;
-  background: radial-gradient(circle, rgba(79,70,229,0.3) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(232,69,48,0.3) 0%, transparent 70%);
 }
 .hero-left { z-index: 1; }
 .hero-filename { color: var(--white); font-size: 1.25rem; font-weight: 800; margin-bottom: 6px; word-break: break-word; }
@@ -204,7 +204,7 @@
     {% if parsed.education_level %}
     <div style="margin-top:12px;display:flex;align-items:center;gap:8px;">
       <span style="font-size:0.82rem;color:var(--gray-500);">Education level detected:</span>
-      <span style="background:var(--purple-pale);color:#6d28d9;font-size:0.78rem;font-weight:700;padding:3px 10px;border-radius:999px;">&#127979; {{ parsed.get_education_level_display }}</span>
+      <span style="background:var(--purple-pale);color:#C73A26;font-size:0.78rem;font-weight:700;padding:3px 10px;border-radius:999px;">&#127979; {{ parsed.get_education_level_display }}</span>
     </div>
     {% endif %}
   </div>

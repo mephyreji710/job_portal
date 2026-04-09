@@ -1,0 +1,193 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Assign Task — {{ app.applicant.get_full_name|default:app.applicant.email }}{% endblock %}
+
+{% block extra_css %}
+.at-wrap { max-width: 720px; margin: 0 auto; padding: 40px 20px 80px; }
+.at-back { display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600;color:var(--gray-400);text-decoration:none;margin-bottom:22px; }
+.at-back:hover { color:var(--blue);text-decoration:none; }
+
+.at-hero {
+  background: linear-gradient(135deg,#0a1628 0%,#1e2e4a 100%);
+  border-radius: 16px; padding: 28px 28px 24px; margin-bottom: 28px;
+}
+.at-hero-eyebrow { font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#E84530;margin-bottom:6px; }
+.at-hero h2 { font-size:1.4rem;font-weight:800;color:#fff;margin-bottom:4px; }
+.at-hero-sub { font-size:.85rem;color:rgba(255,255,255,.5); }
+
+.at-card { background:var(--white);border:1px solid var(--gray-200);border-radius:16px;padding:28px; }
+.at-card h3 { font-size:.95rem;font-weight:700;color:var(--gray-900);margin-bottom:22px;padding-bottom:12px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;gap:8px; }
+
+.form-group { margin-bottom:20px; }
+.form-label { display:block;font-size:.8rem;font-weight:700;color:var(--gray-700);margin-bottom:6px; }
+.form-label span { color:var(--gray-400);font-weight:400; }
+.form-control {
+  width:100%;padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:9px;
+  font-size:.88rem;font-family:var(--font);color:var(--gray-800);background:var(--white);
+  transition:border-color .15s,box-shadow .15s;
+}
+.form-control:focus { outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(232,69,48,.08); }
+textarea.form-control { resize:vertical; }
+.form-hint { font-size:.73rem;color:var(--gray-400);margin-top:5px; }
+.form-error { font-size:.75rem;color:#dc2626;margin-top:4px; }
+
+/* Attachment type toggle */
+.attach-options { display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px; }
+.attach-opt {
+  display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:9px;
+  border:1.5px solid var(--gray-200);cursor:pointer;font-size:.8rem;font-weight:600;
+  color:var(--gray-600);background:var(--white);transition:all .15s;
+}
+.attach-opt.selected, .attach-opt:hover { border-color:var(--blue);color:var(--blue);background:var(--blue-pale); }
+.attach-opt input[type=radio] { display:none; }
+
+/* Conditional fields */
+.attach-field { display:none;margin-top:8px; }
+.attach-field.show { display:block; }
+
+.form-row { display:grid;grid-template-columns:1fr 1fr;gap:18px; }
+@media (max-width:600px) { .form-row { grid-template-columns:1fr; } }
+
+.btn-assign {
+  display:inline-flex;align-items:center;gap:8px;padding:12px 30px;
+  background:var(--blue);color:#fff;border:none;border-radius:10px;
+  font-size:.92rem;font-weight:700;cursor:pointer;font-family:var(--font);
+  transition:background .15s;
+}
+.btn-assign:hover { background:var(--blue-dark); }
+.btn-cancel {
+  display:inline-flex;align-items:center;gap:6px;padding:12px 22px;
+  background:var(--white);color:var(--gray-600);border:1.5px solid var(--gray-200);
+  border-radius:10px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:var(--font);
+  text-decoration:none;transition:all .15s;
+}
+.btn-cancel:hover { border-color:var(--gray-400);color:var(--gray-800);text-decoration:none; }
+{% endblock %}
+
+{% block content %}
+<div class="at-wrap">
+
+  <a href="{% url 'applications:applicants' app.job.pk %}" class="at-back">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Applicants
+  </a>
+
+  <div class="at-hero">
+    <div class="at-hero-eyebrow">Task Assignment</div>
+    <h2>Assign a Task</h2>
+    <p class="at-hero-sub">
+      To: <strong style="color:rgba(255,255,255,.8);">{{ app.applicant.get_full_name|default:app.applicant.email }}</strong>
+      &nbsp;&middot;&nbsp;
+      For: <strong style="color:rgba(255,255,255,.8);">{{ app.job.title }}</strong>
+    </p>
+  </div>
+
+  <div class="at-card">
+    <h3>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Task Details
+    </h3>
+
+    <form method="post" enctype="multipart/form-data" id="assign-form">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label class="form-label" for="{{ form.title.id_for_label }}">Task Title</label>
+        {{ form.title }}
+        {% if form.title.errors %}<div class="form-error">{{ form.title.errors.0 }}</div>{% endif %}
+        <div class="form-hint">e.g. "Write a 700-word Blog Article", "Design a Landing Page Mockup"</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="{{ form.description.id_for_label }}">Task Description & Requirements</label>
+        {{ form.description }}
+        {% if form.description.errors %}<div class="form-error">{{ form.description.errors.0 }}</div>{% endif %}
+        <div class="form-hint">Be specific about requirements, goals, format, and what you expect as the final deliverable.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Attachment Type <span>(optional — select if you have reference material)</span></label>
+        <div class="attach-options" id="attach-opts">
+          {% for val, label in form.attachment_type.field.choices %}
+          <label class="attach-opt {% if forloop.first %}selected{% endif %}" data-val="{{ val }}">
+            <input type="radio" name="attachment_type" value="{{ val }}" {% if forloop.first %}checked{% endif %}>
+            {% if val == 'none' %}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+            {% elif val == 'file' %}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            {% elif val == 'video' %}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            {% elif val == 'image' %}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            {% elif val == 'link' %}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            {% endif %}
+            {{ label }}
+          </label>
+          {% endfor %}
+        </div>
+
+        <div class="attach-field" id="field-file">
+          <label class="form-label">Upload File</label>
+          {{ form.attachment }}
+          <div class="form-hint">PDF, DOC, DOCX, MP4, JPG, PNG — max 50MB</div>
+        </div>
+        <div class="attach-field" id="field-video">
+          <label class="form-label">Upload Video</label>
+          {{ form.attachment }}
+        </div>
+        <div class="attach-field" id="field-image">
+          <label class="form-label">Upload Image</label>
+          {{ form.attachment }}
+        </div>
+        <div class="attach-field" id="field-link">
+          <label class="form-label">Reference URL</label>
+          {{ form.attachment_url }}
+          <div class="form-hint">Paste a link to a reference article, design brief, or any relevant URL.</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="{{ form.due_date.id_for_label }}">Deadline <span>(optional)</span></label>
+        {{ form.due_date }}
+        <div class="form-hint">Set a due date if you need the task completed by a specific date.</div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button type="submit" class="btn-assign">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Assign Task
+        </button>
+        <a href="{% url 'applications:applicants' app.job.pk %}" class="btn-cancel">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+</div>
+
+<script>
+// Handle attachment type toggle
+const opts = document.querySelectorAll('.attach-opt');
+const fields = { file: 'field-file', video: 'field-file', image: 'field-file', link: 'field-link' };
+
+function showAttachField(val) {
+  document.querySelectorAll('.attach-field').forEach(f => f.classList.remove('show'));
+  if (val && val !== 'none' && fields[val]) {
+    document.getElementById(fields[val]).classList.add('show');
+  }
+}
+
+opts.forEach(opt => {
+  opt.addEventListener('click', function() {
+    opts.forEach(o => o.classList.remove('selected'));
+    this.classList.add('selected');
+    const val = this.dataset.val;
+    this.querySelector('input[type=radio]').checked = true;
+    showAttachField(val);
+  });
+});
+
+// Init on page load
+const checked = document.querySelector('input[name="attachment_type"]:checked');
+if (checked) showAttachField(checked.value);
+</script>
+{% endblock %}

@@ -22,9 +22,9 @@
 .pb-beginner     { background: #e0f2fe; color: #075985; }
 .pb-intermediate { background: var(--indigo-pale); color: var(--indigo); }
 .pb-advanced     { background: var(--green-pale); color: var(--green-dark); }
-.pb-expert       { background: #fdf4ff; color: #7e22ce; }
+.pb-expert       { background: #FFF0EE; color: #7e22ce; }
 .add-skill-card {
-  background: var(--indigo-pale); border: 2px dashed rgba(79,70,229,0.25);
+  background: var(--indigo-pale); border: 2px dashed rgba(232,69,48,0.25);
   border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 4px;
 }
 .add-skill-title { font-size: 0.9rem; font-weight: 700; color: var(--indigo); margin-bottom: 16px; }
@@ -103,7 +103,7 @@
         <div class="skill-bar-outer">
           <div class="skill-bar">
             <div class="skill-bar-fill" style="width:{{ skill.get_pct }}%;
-              background:{% if skill.proficiency == 'beginner' %}#0ea5e9{% elif skill.proficiency == 'intermediate' %}var(--indigo){% elif skill.proficiency == 'advanced' %}var(--green){% else %}#8b5cf6{% endif %};"></div>
+              background:{% if skill.proficiency == 'beginner' %}#0ea5e9{% elif skill.proficiency == 'intermediate' %}var(--indigo){% elif skill.proficiency == 'advanced' %}var(--green){% else %}#F07060{% endif %};"></div>
           </div>
           <div class="skill-bar-label">{{ skill.get_pct }}%</div>
         </div>

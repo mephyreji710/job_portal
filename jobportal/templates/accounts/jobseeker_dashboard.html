@@ -1,164 +1,605 @@
 {% extends 'accounts/base.html' %}
-{% block title %}Job Seeker Dashboard — TalentBridge{% endblock %}
+{% block title %}Dashboard — Hireiz{% endblock %}
 
 {% block extra_css %}
-.main-content { padding: 32px; }
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 28px; }
-.profile-card {
-  background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow);
-  padding: 28px; margin-bottom: 28px;
+/* ── Reset main padding ── */
+.main-content { padding: 0 !important; background: #f4f5f7; min-height: calc(100vh - 64px); }
+
+/* ══════════════════════════════════════════
+   HERO
+══════════════════════════════════════════ */
+.dash-hero {
+  background: linear-gradient(135deg, var(--navy) 0%, #1a2d4a 60%, #0f1f36 100%);
+  padding: 48px 40px 0;
+  position: relative;
+  overflow: hidden;
 }
-.profile-header { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
-.profile-info h3 { font-size: 1.2rem; font-weight: 700; color: var(--gray-900); }
-.profile-info p  { color: var(--gray-500); font-size: 0.875rem; margin-top: 4px; }
-.profile-details { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.detail-item { display: flex; flex-direction: column; gap: 3px; }
-.detail-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gray-400); }
-.detail-value { font-size: 0.9rem; color: var(--gray-700); font-weight: 500; }
-.skills-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-.skill-tag { background: var(--blue-pale); color: var(--blue-dark); font-size: 0.8rem; font-weight: 600; padding: 4px 12px; border-radius: 999px; }
-.feature-card {
-  background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow);
-  padding: 24px; border-top: 3px solid var(--gray-200);
+.dash-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 600px 400px at 90% -20%, rgba(232,69,48,.18) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 300px at -10% 110%, rgba(232,69,48,.10) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* Hero inner */
+.hero-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* Avatar */
+.hero-avatar {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,.15);
+  background: var(--blue);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3);
+}
+.hero-avatar img { width:100%; height:100%; object-fit:cover; }
+
+/* Greeting */
+.hero-greeting { flex: 1; padding-top: 4px; }
+.hero-eyebrow {
+  font-size: .72rem; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: rgba(232,69,48,.9);
+  margin-bottom: 6px;
+}
+.hero-name {
+  font-size: 1.75rem; font-weight: 800;
+  color: #fff; letter-spacing: -.03em; line-height: 1.2;
+  margin-bottom: 4px;
+}
+.hero-sub {
+  font-size: .875rem; color: rgba(255,255,255,.55);
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.hero-sub-dot { width: 3px; height: 3px; border-radius: 50%; background: rgba(255,255,255,.3); }
+
+/* Hero stats strip */
+.hero-stats {
+  display: flex;
+  max-width: 1100px;
+  margin: 32px auto 0;
+  position: relative; z-index: 1;
+  border-top: 1px solid rgba(255,255,255,.07);
+}
+.hero-stat {
+  flex: 1;
+  padding: 20px 24px;
+  text-decoration: none;
+  color: inherit;
+  display: flex; align-items: center; gap: 16px;
+  border-right: 1px solid rgba(255,255,255,.07);
+  transition: background .2s;
+  cursor: pointer;
+}
+.hero-stat:last-child { border-right: none; }
+.hero-stat:hover { background: rgba(255,255,255,.04); text-decoration: none; }
+.hstat-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.hstat-val {
+  font-size: 1.6rem; font-weight: 800; color: #fff; line-height: 1;
+  margin-bottom: 2px;
+}
+.hstat-lbl {
+  font-size: .72rem; font-weight: 600; letter-spacing: .04em;
+  text-transform: uppercase; color: rgba(255,255,255,.45);
+}
+
+/* ══════════════════════════════════════════
+   PAGE BODY
+══════════════════════════════════════════ */
+.dash-body {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 40px 60px;
+}
+
+/* Section title */
+.section-label {
+  font-size: .7rem; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--gray-400);
+  margin-bottom: 14px;
+}
+
+/* ══════════════════════════════════════════
+   QUICK ACTIONS
+══════════════════════════════════════════ */
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 32px;
+}
+.qa-card {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 16px;
+  padding: 22px 20px;
+  text-decoration: none;
+  color: inherit;
   display: flex; flex-direction: column; gap: 12px;
+  transition: box-shadow .2s, transform .2s, border-color .2s;
+  position: relative; overflow: hidden;
 }
-.feature-icon-box { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
-.feature-title { font-size: 1rem; font-weight: 700; color: var(--gray-900); }
-.feature-desc  { font-size: 0.85rem; color: var(--gray-500); line-height: 1.6; }
-.coming-badge { display: inline-block; background: var(--gray-100); color: var(--gray-500); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; }
+.qa-card::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 3px; background: var(--qa-color, var(--blue));
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .25s ease;
+  border-radius: 0 0 16px 16px;
+}
+.qa-card:hover {
+  box-shadow: 0 10px 30px -8px rgba(0,0,0,.12);
+  transform: translateY(-2px);
+  border-color: var(--gray-300);
+  text-decoration: none; color: inherit;
+}
+.qa-card:hover::after { transform: scaleX(1); }
+.qa-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--qa-pale, var(--blue-pale));
+  flex-shrink: 0;
+}
+.qa-title {
+  font-size: .9rem; font-weight: 700; color: var(--gray-900);
+  margin-bottom: 2px;
+}
+.qa-desc { font-size: .775rem; color: var(--gray-500); line-height: 1.5; }
+.qa-arrow {
+  margin-top: auto;
+  font-size: .8rem; font-weight: 700;
+  color: var(--qa-color, var(--blue));
+  display: flex; align-items: center; gap: 4px;
+}
+
+/* ══════════════════════════════════════════
+   MAIN GRID (profile + skills + feature)
+══════════════════════════════════════════ */
+.dash-main-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* ── Profile card ── */
+.profile-card {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.pc-top {
+  background: linear-gradient(135deg, var(--navy) 0%, #1a2d4a 100%);
+  padding: 28px 24px 20px;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  position: relative;
+}
+.pc-avatar {
+  width: 72px; height: 72px; border-radius: 50%;
+  border: 3px solid rgba(255,255,255,.2);
+  background: var(--blue);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; font-weight: 800; color: #fff;
+  overflow: hidden; margin-bottom: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.25);
+}
+.pc-avatar img { width:100%; height:100%; object-fit:cover; }
+.pc-name { font-size: 1rem; font-weight: 800; color: #fff; margin-bottom: 2px; }
+.pc-email { font-size: .78rem; color: rgba(255,255,255,.5); }
+.pc-edit {
+  position: absolute; top: 12px; right: 12px;
+  width: 30px; height: 30px; border-radius: 8px;
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,.7); text-decoration: none;
+  transition: background .2s;
+}
+.pc-edit:hover { background: rgba(255,255,255,.2); color: #fff; text-decoration: none; }
+
+.pc-body { padding: 20px 24px; }
+.pc-row {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+.pc-row:last-child { border-bottom: none; padding-bottom: 0; }
+.pc-row-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--gray-50); border: 1px solid var(--gray-100);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.pc-row-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--gray-400); margin-bottom: 2px; }
+.pc-row-val { font-size: .875rem; font-weight: 600; color: var(--gray-800); }
+
+/* Skills in profile card */
+.pc-skills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.pc-skill {
+  padding: 3px 10px; border-radius: 999px;
+  font-size: .72rem; font-weight: 700;
+  background: var(--blue-pale); color: var(--blue-dark);
+}
+.pc-no-skills {
+  font-size: .8rem; color: var(--gray-400);
+  font-style: italic;
+}
+
+/* ── Right column ── */
+.dash-right { display: flex; flex-direction: column; gap: 20px; }
+
+/* Feature cards grid */
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.feat-card {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 18px;
+  padding: 22px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: box-shadow .2s, transform .2s;
+}
+.feat-card:hover {
+  box-shadow: 0 8px 24px -6px rgba(0,0,0,.10);
+  transform: translateY(-2px);
+}
+.feat-icon {
+  width: 46px; height: 46px; border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+}
+.feat-title { font-size: .95rem; font-weight: 800; color: var(--gray-900); }
+.feat-desc { font-size: .8rem; color: var(--gray-500); line-height: 1.6; flex: 1; }
+.feat-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: .8rem; font-weight: 700;
+  text-decoration: none;
+  padding: 7px 14px; border-radius: 8px;
+  transition: opacity .15s;
+  align-self: flex-start; margin-top: 4px;
+}
+.feat-link:hover { opacity: .85; text-decoration: none; }
+.feat-link-ghost {
+  background: transparent;
+  border: 1.5px solid var(--gray-200);
+  color: var(--gray-600);
+  padding: 6px 13px;
+}
+.feat-links-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .dash-body { padding: 28px 28px 56px; }
+  .quick-grid { grid-template-columns: repeat(2, 1fr); }
+  .dash-main-grid { grid-template-columns: 1fr; }
+  .feature-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 768px) {
+  .dash-hero { padding: 32px 20px 0; }
+  .hero-top { flex-direction: column; align-items: center; text-align: center; }
+  .hero-avatar { width: 72px; height: 72px; font-size: 1.6rem; }
+  .hero-name { font-size: 1.4rem; }
+  .hero-sub { justify-content: center; }
+  .hero-stats { flex-direction: column; }
+  .hero-stat { border-right: none; border-bottom: 1px solid rgba(255,255,255,.07); }
+  .hero-stat:last-child { border-bottom: none; }
+  .dash-body { padding: 20px 16px 48px; }
+  .quick-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .feature-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .quick-grid { grid-template-columns: 1fr; }
+  .hero-stats { display: grid; grid-template-columns: 1fr 1fr; }
+  .hero-stat { border-right: 1px solid rgba(255,255,255,.07); border-bottom: 1px solid rgba(255,255,255,.07); }
+  .hero-stat:nth-child(2n) { border-right: none; }
+}
 {% endblock %}
 
 {% block content %}
-<div class="main-content">
 
-  <!-- PAGE HEADER -->
-  <div class="page-header">
-    <div class="flex items-center gap-4">
-      <div class="avatar" style="width:52px;height:52px;font-size:1.3rem;">
+<!-- ══ HERO ══ -->
+<div class="dash-hero">
+  <div class="hero-top">
+
+    <!-- Avatar -->
+    <div class="hero-avatar">
+      {% if profile and profile.profile_picture %}
+        <img src="{{ profile.profile_picture.url }}" alt="Profile photo">
+      {% else %}
         {{ request.user.first_name|slice:":1"|upper }}{{ request.user.last_name|slice:":1"|upper }}
+      {% endif %}
+    </div>
+
+    <!-- Greeting -->
+    <div class="hero-greeting">
+      <div class="hero-eyebrow">Welcome back</div>
+      <div class="hero-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+      <div class="hero-sub">
+        <span>Job Seeker</span>
+        <span class="hero-sub-dot"></span>
+        <span>{{ request.user.email }}</span>
+        {% if request.user.phone %}
+          <span class="hero-sub-dot"></span>
+          <span>{{ request.user.phone }}</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Edit profile shortcut -->
+    <a href="{% url 'jobseeker:profile' %}" style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:9px 18px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.8);font-size:.82rem;font-weight:700;text-decoration:none;transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.14)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Edit Profile
+    </a>
+  </div>
+
+  <!-- Stats strip -->
+  <div class="hero-stats">
+    <a class="hero-stat" href="{% url 'applications:my_applications' %}">
+      <div class="hstat-icon" style="background:rgba(232,69,48,.15);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E84530" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
       </div>
       <div>
-        <h1>My Dashboard</h1>
-        <p>Welcome back, {{ request.user.get_full_name|default:request.user.username }}! Ready to find your next opportunity?</p>
+        <div class="hstat-val">{{ applied_count }}</div>
+        <div class="hstat-lbl">Applications</div>
       </div>
-    </div>
-  </div>
-
-  <!-- WELCOME CARD -->
-  <div class="welcome-card" style="margin-bottom:28px;">
-    <h2>&#127919; Your Job Search</h2>
-    <p>Complete your profile, upload your resume, and get matched to jobs that fit your skills and experience.</p>
-    <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;">
-      <a href="{% url 'jobs:board' %}" class="btn btn-primary" style="background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.4);color:#fff;">&#128269; Browse Jobs</a>
-      <a href="{% url 'applications:my_applications' %}" class="btn btn-primary" style="background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.4);color:#fff;">&#128640; My Applications</a>
-      <a href="{% url 'jobs:saved' %}" class="btn btn-primary" style="background:rgba(255,255,255,0.18);border-color:rgba(255,255,255,0.35);color:rgba(255,255,255,0.95);">&#11088; Saved Jobs</a>
-      <a href="{% url 'interviews:my_interviews' %}" class="btn btn-primary" style="background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.9);">&#128197; My Interviews</a>
-      <a href="{% url 'feedback:my_ratings' %}" class="btn btn-primary" style="background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.25);color:rgba(255,255,255,0.88);">&#11088; My Ratings</a>
-      <a href="{% url 'screening:my_scores' %}" class="btn btn-primary" style="background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.85);">&#128202; My Scores</a>
-      <a href="{% url 'jobseeker:profile' %}" class="btn btn-primary" style="background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.15);color:rgba(255,255,255,0.8);">&#128100; My Profile</a>
-    </div>
-  </div>
-
-  <!-- STAT CARDS -->
-  <div class="grid-3">
-    <a href="{% url 'applications:my_applications' %}" class="stat-card" style="text-decoration:none;display:block;">
-      <div class="stat-value" style="color:var(--indigo);">{{ applied_count }}</div>
-      <div class="stat-label">Jobs Applied</div>
     </a>
-    <a href="{% url 'interviews:my_interviews' %}" class="stat-card green" style="text-decoration:none;display:block;">
-      <div class="stat-value" style="color:var(--green);">{{ upcoming_interviews }}</div>
-      <div class="stat-label">Interview Invites</div>
+    <a class="hero-stat" href="{% url 'interviews:my_interviews' %}">
+      <div class="hstat-icon" style="background:rgba(16,185,129,.15);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <div>
+        <div class="hstat-val">{{ upcoming_interviews }}</div>
+        <div class="hstat-lbl">Interviews</div>
+      </div>
     </a>
-    <a href="{% url 'jobs:saved' %}" class="stat-card indigo" style="text-decoration:none;display:block;">
-      <div class="stat-value" style="color:#d97706;">{{ saved_count }}</div>
-      <div class="stat-label">Saved Jobs</div>
+    <a class="hero-stat" href="{% url 'jobs:saved' %}">
+      <div class="hstat-icon" style="background:rgba(245,158,11,.15);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </div>
+      <div>
+        <div class="hstat-val">{{ saved_count }}</div>
+        <div class="hstat-lbl">Saved Jobs</div>
+      </div>
+    </a>
+    <a class="hero-stat" href="{% url 'jobs:board' %}">
+      <div class="hstat-icon" style="background:rgba(8,145,178,.15);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+      <div>
+        <div class="hstat-val">&#8594;</div>
+        <div class="hstat-lbl">Browse Jobs</div>
+      </div>
     </a>
   </div>
-
-  <!-- PROFILE CARD -->
-  <div class="profile-card">
-    <div class="profile-header">
-      <div class="avatar" style="width:64px;height:64px;font-size:1.6rem;">
-        {{ request.user.first_name|slice:":1"|upper }}{{ request.user.last_name|slice:":1"|upper }}
-      </div>
-      <div class="profile-info">
-        <h3>{{ request.user.get_full_name|default:request.user.username }}</h3>
-        <p>{{ request.user.email }}</p>
-        {% if request.user.phone %}<p>{{ request.user.phone }}</p>{% endif %}
-      </div>
-    </div>
-
-    {% if profile %}
-    <div class="profile-details">
-      <div class="detail-item">
-        <span class="detail-label">Education</span>
-        <span class="detail-value">{{ profile.education|default:"Not specified" }}</span>
-      </div>
-      <div class="detail-item">
-        <span class="detail-label">Experience</span>
-        <span class="detail-value">
-          {% if profile.experience_years == 1 %}1 year{% else %}{{ profile.experience_years }} years{% endif %}
-        </span>
-      </div>
-    </div>
-
-    {% if skills_list %}
-    <div style="margin-top:16px;">
-      <span class="detail-label">Skills</span>
-      <div class="skills-list">
-        {% for skill in skills_list %}
-          <span class="skill-tag">{{ skill.name }}</span>
-        {% endfor %}
-      </div>
-    </div>
-    {% else %}
-    <div style="margin-top:12px;">
-      <span style="color:var(--gray-400);font-size:0.875rem;">&#128161; Add your skills to improve job match accuracy.</span>
-    </div>
-    {% endif %}
-
-    {% else %}
-    <p style="color:var(--gray-400);font-size:0.875rem;">Profile details not found.</p>
-    {% endif %}
-  </div>
-
-  <!-- FEATURE CARDS -->
-  <div class="grid-2">
-    <div class="feature-card" style="border-top-color:var(--blue);">
-      <div class="feature-icon-box" style="background:var(--blue-pale);">&#128269;</div>
-      <div class="feature-title">Browse Job Listings</div>
-      <p class="feature-desc">Search through hundreds of job openings across industries and locations. Filter by skills, salary, and experience level.</p>
-      <a href="{% url 'jobs:board' %}" class="btn btn-primary btn-sm" style="align-self:flex-start;">Browse Jobs &rarr;</a>
-    </div>
-
-    <div class="feature-card" style="border-top-color:var(--indigo);">
-      <div class="feature-icon-box" style="background:#ede9fe;">&#129302;</div>
-      <div class="feature-title">AI Resume Analysis</div>
-      <p class="feature-desc">Get an AI-powered match score for any job. Open a job listing and click <strong>Check My Match Score</strong> to see your skill fit, experience, and keyword analysis.</p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-self:flex-start;">
-        <a href="{% url 'jobs:board' %}" class="btn btn-primary btn-sm">Find a Job to Analyse &rarr;</a>
-        <a href="{% url 'screening:my_scores' %}" class="btn btn-outline btn-sm">My Scores</a>
-      </div>
-    </div>
-
-    <div class="feature-card" style="border-top-color:var(--green);">
-      <div class="feature-icon-box" style="background:var(--green-pale);">&#128196;</div>
-      <div class="feature-title">Upload Resume</div>
-      <p class="feature-desc">Upload your CV/resume to appear in recruiter searches and get automatically evaluated for matching jobs.</p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-self:flex-start;">
-        <a href="{% url 'resume:upload' %}" class="btn btn-primary btn-sm">Upload Resume &rarr;</a>
-        <a href="{% url 'resume:list' %}" class="btn btn-outline btn-sm">My Resumes</a>
-      </div>
-    </div>
-
-    <div class="feature-card" style="border-top-color:var(--orange);">
-      <div class="feature-icon-box" style="background:var(--orange-pale);">&#128203;</div>
-      <div class="feature-title">Application Tracker</div>
-      <p class="feature-desc">Track all your job applications in one place — from applied to shortlisted to interview and offer.</p>
-      <a href="{% url 'applications:my_applications' %}" class="btn btn-primary btn-sm" style="align-self:flex-start;">View Applications &rarr;</a>
-    </div>
-  </div>
-
 </div>
+
+<!-- ══ BODY ══ -->
+<div class="dash-body">
+
+  <!-- QUICK ACTIONS -->
+  <div class="section-label">Quick Actions</div>
+  <div class="quick-grid">
+
+    <a class="qa-card" href="{% url 'jobs:board' %}" style="--qa-color:#E84530;--qa-pale:#FFF0EE;">
+      <div class="qa-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E84530" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+      <div>
+        <div class="qa-title">Browse Jobs</div>
+        <div class="qa-desc">Explore open positions matching your skills</div>
+      </div>
+      <div class="qa-arrow">View all jobs <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+
+    <a class="qa-card" href="{% url 'applications:my_applications' %}" style="--qa-color:#10b981;--qa-pale:#ecfdf5;">
+      <div class="qa-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+      </div>
+      <div>
+        <div class="qa-title">My Applications</div>
+        <div class="qa-desc">Track the status of your job applications</div>
+      </div>
+      <div class="qa-arrow">Track now <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+
+    <a class="qa-card" href="{% url 'screening:my_scores' %}" style="--qa-color:#10b981;--qa-pale:#ecfdf5;">
+      <div class="qa-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div>
+        <div class="qa-title">AI Resume Match</div>
+        <div class="qa-desc">Get an AI-powered match score on any job listing. See your skill fit, experience alignment, and keyword analysis.</div>
+      </div>
+      <div class="qa-arrow">Find a Job / My Scores <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+
+    <a class="qa-card" href="{% url 'interviews:my_interviews' %}" style="--qa-color:#f59e0b;--qa-pale:#fffbeb;">
+      <div class="qa-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <div>
+        <div class="qa-title">My Interviews</div>
+        <div class="qa-desc">View scheduled and upcoming interviews</div>
+      </div>
+      <div class="qa-arrow">View schedule <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="dash-main-grid">
+
+    <!-- ── Profile card ── -->
+    <div class="profile-card">
+      <div class="pc-top">
+        <a class="pc-edit" href="{% url 'jobseeker:profile' %}" title="Edit profile">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </a>
+        <div class="pc-avatar">
+          {% if profile and profile.profile_picture %}
+            <img src="{{ profile.profile_picture.url }}" alt="Profile photo">
+          {% else %}
+            {{ request.user.first_name|slice:":1"|upper }}{{ request.user.last_name|slice:":1"|upper }}
+          {% endif %}
+        </div>
+        <div class="pc-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+        <div class="pc-email">{{ request.user.email }}</div>
+      </div>
+
+      <div class="pc-body">
+        {% if profile %}
+        <div class="pc-row">
+          <div class="pc-row-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gray-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          </div>
+          <div>
+            <div class="pc-row-label">Education</div>
+            <div class="pc-row-val">{{ profile.education|default:"Not specified" }}</div>
+          </div>
+        </div>
+        <div class="pc-row">
+          <div class="pc-row-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gray-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+          </div>
+          <div>
+            <div class="pc-row-label">Experience</div>
+            <div class="pc-row-val">
+              {% if profile.experience_years == 1 %}1 year
+              {% elif profile.experience_years %}{{ profile.experience_years }} years
+              {% else %}Not specified{% endif %}
+            </div>
+          </div>
+        </div>
+        {% if request.user.phone %}
+        <div class="pc-row">
+          <div class="pc-row-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gray-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.59 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+          <div>
+            <div class="pc-row-label">Phone</div>
+            <div class="pc-row-val">{{ request.user.phone }}</div>
+          </div>
+        </div>
+        {% endif %}
+        <div class="pc-row">
+          <div class="pc-row-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gray-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div>
+            <div class="pc-row-label">Skills</div>
+            {% if skills_list %}
+            <div class="pc-skills" style="margin-top:6px;">
+              {% for skill in skills_list %}
+                <span class="pc-skill">{{ skill.name }}</span>
+              {% endfor %}
+            </div>
+            {% else %}
+            <div class="pc-no-skills">No skills added yet</div>
+            {% endif %}
+          </div>
+        </div>
+        {% else %}
+        <div style="padding:16px 0;text-align:center;color:var(--gray-400);font-size:.875rem;">Profile not set up yet.</div>
+        {% endif %}
+
+        <a href="{% url 'jobseeker:profile' %}" style="display:block;margin-top:16px;text-align:center;padding:10px;border-radius:10px;background:var(--blue-pale);color:var(--blue-dark);font-size:.82rem;font-weight:700;text-decoration:none;transition:background .2s;" onmouseover="this.style.background='#fde0db'" onmouseout="this.style.background='var(--blue-pale)'">
+          Complete Profile &rarr;
+        </a>
+      </div>
+    </div>
+
+    <!-- ── Right column ── -->
+    <div class="dash-right">
+      <div class="section-label">Features</div>
+      <div class="feature-grid">
+
+        <div class="feat-card">
+          <div class="feat-icon" style="background:#FFF0EE;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E84530" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </div>
+          <div class="feat-title">Browse Job Listings</div>
+          <p class="feat-desc">Search hundreds of open positions across industries. Filter by skills, salary, and experience level.</p>
+          <a href="{% url 'jobs:board' %}" class="feat-link" style="background:#E84530;color:#fff;">Browse Jobs</a>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon" style="background:#ecfeff;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <div class="feat-title">My Resumes</div>
+          <p class="feat-desc">Upload and manage your CV and resumes. Appear in recruiter searches and get auto-evaluated for matching jobs.</p>
+          <div class="feat-links-row">
+            <a href="{% url 'resume:upload' %}" class="feat-link" style="background:#0891b2;color:#fff;">Upload CV</a>
+            <a href="{% url 'resume:list' %}" class="feat-link feat-link-ghost">My Resumes</a>
+          </div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon" style="background:#ecfdf5;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="feat-title">AI Resume Match</div>
+          <p class="feat-desc">Get an AI-powered match score on any job listing. See your skill fit, experience alignment, and keyword analysis.</p>
+          <div class="feat-links-row">
+            <a href="{% url 'jobs:board' %}" class="feat-link" style="background:#10b981;color:#fff;">Find a Job</a>
+            <a href="{% url 'screening:my_scores' %}" class="feat-link feat-link-ghost">My Scores</a>
+          </div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon" style="background:#fffbeb;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <div class="feat-title">Application Tracker</div>
+          <p class="feat-desc">Track all your job applications in one place — from applied to shortlisted, interview, and offer.</p>
+          <a href="{% url 'applications:my_applications' %}" class="feat-link" style="background:#f59e0b;color:#fff;">View Applications</a>
+        </div>
+
+      </div>
+
+      <!-- Extra links row -->
+      <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        <a href="{% url 'jobs:saved' %}" style="display:flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;background:var(--white);border:1px solid var(--gray-200);color:var(--gray-700);font-size:.82rem;font-weight:700;text-decoration:none;transition:box-shadow .2s,border-color .2s;" onmouseover="this.style.borderColor='var(--gray-400)'" onmouseout="this.style.borderColor='var(--gray-200)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Saved Jobs
+        </a>
+        <a href="{% url 'feedback:my_ratings' %}" style="display:flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;background:var(--white);border:1px solid var(--gray-200);color:var(--gray-700);font-size:.82rem;font-weight:700;text-decoration:none;transition:box-shadow .2s,border-color .2s;" onmouseover="this.style.borderColor='var(--gray-400)'" onmouseout="this.style.borderColor='var(--gray-200)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          My Ratings
+        </a>
+        <a href="{% url 'screening:my_scores' %}" style="display:flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;background:var(--white);border:1px solid var(--gray-200);color:var(--gray-700);font-size:.82rem;font-weight:700;text-decoration:none;transition:box-shadow .2s,border-color .2s;" onmouseover="this.style.borderColor='var(--gray-400)'" onmouseout="this.style.borderColor='var(--gray-200)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          My Scores
+        </a>
+        <a href="{% url 'resume:builder_list' %}" style="display:flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;background:var(--white);border:1px solid var(--gray-200);color:var(--gray-700);font-size:.82rem;font-weight:700;text-decoration:none;transition:box-shadow .2s,border-color .2s;" onmouseover="this.style.borderColor='var(--gray-400)'" onmouseout="this.style.borderColor='var(--gray-200)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Resume Builder
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 {% endblock %}

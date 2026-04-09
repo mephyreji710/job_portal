@@ -1,0 +1,175 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Review Task — {{ task.title }}{% endblock %}
+
+{% block extra_css %}
+.rv-wrap { max-width: 760px; margin: 0 auto; padding: 40px 20px 80px; }
+.rv-back { display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600;color:var(--gray-400);text-decoration:none;margin-bottom:22px; }
+.rv-back:hover { color:var(--blue);text-decoration:none; }
+
+.rv-card { background:var(--white);border:1px solid var(--gray-200);border-radius:16px;overflow:hidden;margin-bottom:18px; }
+.rv-card-header { padding:24px 26px;border-bottom:1px solid var(--gray-100); }
+.rv-title { font-size:1.15rem;font-weight:800;color:var(--gray-900);margin-bottom:6px; }
+.rv-meta { display:flex;gap:12px;flex-wrap:wrap;font-size:.78rem;color:var(--gray-400); }
+.rv-meta span { display:flex;align-items:center;gap:4px; }
+.status-badge { display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:999px;font-size:.74rem;font-weight:700; }
+.rv-body { padding:24px 26px; }
+.rv-label { font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-400);margin-bottom:8px; }
+.rv-text { font-size:.88rem;color:var(--gray-700);line-height:1.75;white-space:pre-wrap; }
+
+/* Submission card */
+.rv-submission { background:var(--white);border:1px solid var(--gray-200);border-radius:16px;padding:24px 26px;margin-bottom:18px; }
+.rv-submission h3 { font-size:.95rem;font-weight:700;color:var(--gray-900);margin-bottom:16px;display:flex;align-items:center;gap:8px; }
+.rv-sub-text { background:var(--gray-50);border:1px solid var(--gray-200);border-radius:10px;padding:14px;font-size:.875rem;color:var(--gray-700);line-height:1.7;white-space:pre-wrap; }
+.rv-sub-file { margin-top:10px;display:flex;align-items:center;gap:8px;font-size:.82rem; }
+.rv-sub-file a { color:var(--blue);font-weight:600;text-decoration:none; }
+.rv-sub-file a:hover { text-decoration:underline; }
+
+/* Review form */
+.rv-review-card { background:var(--white);border:1px solid var(--gray-200);border-radius:16px;padding:24px 26px; }
+.rv-review-card h3 { font-size:.95rem;font-weight:700;color:var(--gray-900);margin-bottom:18px;display:flex;align-items:center;gap:8px; }
+.action-btns { display:flex;gap:10px;margin-bottom:16px; }
+.action-btn {
+  flex:1;padding:12px;border-radius:10px;border:2px solid var(--gray-200);
+  background:var(--white);font-size:.9rem;font-weight:700;cursor:pointer;
+  font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all .15s;
+}
+.action-btn.approve { color:#059669;border-color:#6ee7b7; }
+.action-btn.approve:hover,.action-btn.approve.selected { background:#ecfdf5;border-color:#059669; }
+.action-btn.reject { color:#dc2626;border-color:#fca5a5; }
+.action-btn.reject:hover,.action-btn.reject.selected { background:#fef2f2;border-color:#dc2626; }
+.form-group { margin-bottom:16px; }
+.form-label { display:block;font-size:.8rem;font-weight:600;color:var(--gray-700);margin-bottom:6px; }
+.form-control { width:100%;padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:9px;font-size:.88rem;font-family:var(--font);color:var(--gray-800);background:var(--white);transition:border-color .15s;resize:vertical; }
+.form-control:focus { outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(232,69,48,.08); }
+.btn-confirm { display:inline-flex;align-items:center;gap:8px;padding:11px 28px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer;font-family:var(--font);transition:background .15s; }
+.btn-confirm:hover { background:var(--blue-dark); }
+
+/* Already reviewed */
+.rv-done-panel { padding:20px;border-radius:12px;display:flex;align-items:center;gap:12px;font-size:.88rem;font-weight:600; }
+.rv-done-approved { background:#ecfdf5;border:1px solid #6ee7b7;color:#059669; }
+.rv-done-rejected { background:#fef2f2;border:1px solid #fca5a5;color:#dc2626; }
+{% endblock %}
+
+{% block content %}
+<div class="rv-wrap">
+
+  <a href="{% url 'tasks:recruiter_tasks' %}" class="rv-back">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Tasks
+  </a>
+
+  <!-- Task Details -->
+  <div class="rv-card">
+    <div class="rv-card-header">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+        <div>
+          <div class="rv-title">{{ task.title }}</div>
+          <div class="rv-meta">
+            <span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              {{ task.application.applicant.get_full_name|default:task.application.applicant.email }}
+            </span>
+            <span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              {{ task.application.job.title }}
+            </span>
+            <span>Assigned {{ task.created_at|date:"M d, Y" }}</span>
+          </div>
+        </div>
+        <span class="status-badge" style="background:{{ task.status_bg }};color:{{ task.status_color }};">
+          <svg width="7" height="7" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="{{ task.status_color }}"/></svg>
+          {{ task.status_label }}
+        </span>
+      </div>
+    </div>
+    <div class="rv-body">
+      <div class="rv-label">Task Description</div>
+      <div class="rv-text">{{ task.description }}</div>
+    </div>
+  </div>
+
+  <!-- Submission -->
+  {% if task.submission %}
+  <div class="rv-submission">
+    <h3>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Candidate's Submission
+      <span style="font-size:.73rem;font-weight:500;color:var(--gray-400);margin-left:6px;">{{ task.submission.submitted_at|date:"M d, Y g:i A" }}</span>
+    </h3>
+    {% if task.submission.submission_text %}
+    <div class="rv-sub-text">{{ task.submission.submission_text }}</div>
+    {% endif %}
+    {% if task.submission.submission_file %}
+    <div class="rv-sub-file">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+      <a href="{{ task.submission.submission_file.url }}" target="_blank">Download submitted file</a>
+    </div>
+    {% endif %}
+    {% if not task.submission.submission_text and not task.submission.submission_file %}
+    <p style="font-size:.85rem;color:var(--gray-400);">No text or file submitted.</p>
+    {% endif %}
+  </div>
+  {% else %}
+  <div style="padding:18px 20px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:12px;margin-bottom:18px;font-size:.85rem;color:var(--gray-500);text-align:center;">
+    No submission yet — candidate hasn't submitted work.
+  </div>
+  {% endif %}
+
+  <!-- Review Form or Result -->
+  {% if task.status == 'approved' %}
+  <div class="rv-done-panel rv-done-approved">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    You approved this task submission.
+    {% if task.submission.recruiter_feedback %}&nbsp; Feedback sent: "{{ task.submission.recruiter_feedback }}"{% endif %}
+  </div>
+
+  {% elif task.status == 'rejected' %}
+  <div class="rv-done-panel rv-done-rejected">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+    You rejected this submission.
+    {% if task.submission.recruiter_feedback %}&nbsp; Feedback: "{{ task.submission.recruiter_feedback }}"{% endif %}
+  </div>
+
+  {% elif task.submission %}
+  <div class="rv-review-card">
+    <h3>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Review Submission
+    </h3>
+    <form method="post" id="review-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" id="action-input" value="">
+      <div class="action-btns">
+        <button type="button" class="action-btn approve" id="btn-approve" onclick="setAction('approved')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Approve
+        </button>
+        <button type="button" class="action-btn reject" id="btn-reject" onclick="setAction('rejected')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Request Revision
+        </button>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="id_feedback">Feedback for Candidate <span style="color:var(--gray-400);font-weight:400;">(optional)</span></label>
+        <textarea name="feedback" id="id_feedback" rows="3" class="form-control" placeholder="Provide helpful feedback to guide the candidate…"></textarea>
+      </div>
+      <button type="submit" class="btn-confirm" id="confirm-btn" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Confirm Decision
+      </button>
+    </form>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+function setAction(val) {
+  document.getElementById('action-input').value = val;
+  document.getElementById('btn-approve').classList.toggle('selected', val === 'approved');
+  document.getElementById('btn-reject').classList.toggle('selected', val === 'rejected');
+  document.getElementById('confirm-btn').disabled = false;
+}
+</script>
+{% endblock %}

@@ -63,7 +63,7 @@
       <button type="submit" class="btn btn-gray btn-sm" style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.8);">&#9646;&#9646; Pause</button>
     </form>
     {% endif %}
-    <a href="{% url 'applications:applicants' job.pk %}" class="btn btn-primary btn-sm" style="background:#8b5cf6;">&#128640; Applicants ({{ job.applications.count }})</a>
+    <a href="{% url 'applications:applicants' job.pk %}" class="btn btn-primary btn-sm" style="background:#F07060;">&#128640; Applicants ({{ job.applications.count }})</a>
     <a href="{% url 'screening:candidates' job.pk %}" class="btn btn-primary btn-sm">&#127942; AI Rank ({{ job.match_scores.count }})</a>
     <a href="{% url 'jobs:manage' %}" class="btn btn-gray btn-sm" style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.8);">&#8592; All Jobs</a>
   </div>

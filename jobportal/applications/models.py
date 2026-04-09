@@ -64,6 +64,14 @@ class Application(models.Model):
             return []
         return [s.strip() for s in self.skills_summary.split(',') if s.strip()]
 
+    @property
+    def assessment_obj(self):
+        """Return the linked Assessment if one exists, otherwise None."""
+        try:
+            return self.assessment
+        except Exception:
+            return None
+
     def status_bg(self):
         return {
             'pending':     'var(--gray-100)',

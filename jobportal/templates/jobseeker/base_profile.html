@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}My Profile{% endblock %} — TalentBridge</title>
+  <title>{% block title %}My Profile{% endblock %} — Hireiz</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --navy: #0f1724; --navy-light: #1a2638;
-      --blue: #2563eb; --blue-dark: #1d4ed8; --blue-light: #60a5fa; --blue-pale: #eff6ff;
-      --indigo: #4f46e5; --indigo-pale: #eef2ff;
+      --blue: #E84530; --blue-dark: #C73A26; --blue-light: #F07060; --blue-pale: #FFF0EE;
+      --indigo: #E84530; --indigo-pale: #FFF0EE;
       --green: #10b981; --green-dark: #059669; --green-pale: #ecfdf5;
       --red: #ef4444; --red-pale: #fef2f2;
       --orange: #f59e0b; --orange-pale: #fffbeb;
-      --purple: #8b5cf6; --purple-pale: #f5f3ff;
+      --purple: #E84530; --purple-pale: #FFF0EE;
       --teal: #0891b2; --teal-pale: #ecfeff;
       --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
       --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280;
@@ -41,8 +41,7 @@
       color: var(--white); font-size: 1.25rem; font-weight: 800;
       text-decoration: none; letter-spacing: -0.3px;
     }
-    .brand-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--blue), var(--indigo)); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
-    .topnav-brand .accent { color: var(--blue-light); }
+    .brand-logo { height: 40px; width: auto; object-fit: contain; display: block; }
     .topnav-right { display: flex; align-items: center; gap: 6px; }
     .topnav-right a, .topnav-right button {
       color: var(--gray-300); font-size: 0.875rem; font-weight: 500;
@@ -64,7 +63,7 @@
     .alert-success { background: var(--green-pale);  border-color: var(--green);  color: #065f46; }
     .alert-error   { background: var(--red-pale);    border-color: var(--red);    color: #991b1b; }
     .alert-warning { background: var(--orange-pale); border-color: var(--orange); color: #92400e; }
-    .alert-info    { background: var(--blue-pale);   border-color: var(--blue);   color: #1e40af; }
+    .alert-info    { background: var(--blue-pale);   border-color: var(--blue);   color: #9a3420; }
 
     /* ===== MAIN LAYOUT ===== */
     .profile-layout {
@@ -147,7 +146,7 @@
     .nav-item.active { background: var(--indigo-pale); color: var(--indigo); border-left-color: var(--indigo); font-weight: 600; }
     .nav-icon { font-size: 1rem; width: 22px; text-align: center; }
     .nav-count { margin-left: auto; background: var(--gray-100); color: var(--gray-500); font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
-    .nav-item.active .nav-count { background: rgba(79,70,229,0.12); color: var(--indigo); }
+    .nav-item.active .nav-count { background: rgba(232,69,48,0.12); color: var(--indigo); }
 
     /* ===== MAIN CONTENT ===== */
     .profile-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
@@ -179,7 +178,7 @@
     }
     .btn:hover { text-decoration: none; }
     .btn-primary { background: var(--indigo); color: var(--white); border-color: var(--indigo); }
-    .btn-primary:hover { background: #4338ca; border-color: #4338ca; }
+    .btn-primary:hover { background: var(--blue-dark); border-color: var(--blue-dark); }
     .btn-outline { background: transparent; color: var(--indigo); border-color: var(--indigo); }
     .btn-outline:hover { background: var(--indigo-pale); }
     .btn-gray    { background: var(--gray-100); color: var(--gray-700); border-color: var(--gray-200); }
@@ -200,7 +199,7 @@
       border-radius: 8px; color: var(--gray-800); outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .form-control:focus { border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+    .form-control:focus { border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(232,69,48,0.1); }
     .form-control.error { border-color: var(--red); }
     textarea.form-control { resize: vertical; min-height: 90px; }
     .field-error { color: var(--red); font-size: 0.78rem; margin-top: 4px; display: block; }
@@ -237,12 +236,13 @@
       background: rgba(0,0,0,.5); z-index: 150;
     }
     .sidebar-overlay.open { display: block; }
+
     @media (max-width: 900px) {
       .topnav { padding: 0 16px; }
       .topnav-brand { font-size: 1.05rem; }
       .topnav-right a:not(.cta):not([title]), .topnav-right button { display: none; }
       .mob-hamburger { display: flex; align-items: center; order: -1; }
-      .profile-layout { padding: 16px 16px 40px; flex-direction: column; gap: 0; }
+      .profile-layout { padding: 16px 14px 40px; flex-direction: column; gap: 0; }
       .profile-sidebar {
         position: fixed; top: 0; left: -300px; width: 290px; height: 100vh;
         overflow-y: auto; z-index: 200; background: #f0f4f8;
@@ -253,16 +253,38 @@
       .profile-sidebar.open { left: 0; }
       .profile-main { width: 100%; }
       .form-grid-2 { grid-template-columns: 1fr !important; }
-      .section-header { flex-wrap: wrap; gap: 10px; }
+      .section-header { flex-wrap: wrap; gap: 10px; padding: 16px; }
       .section-body { padding: 16px; }
-      .section-header { padding: 16px; }
     }
+
+    @media (max-width: 600px) {
+      .topnav { padding: 0 12px; }
+      .topnav-brand { font-size: .95rem; gap: 7px; }
+      .brand-logo { height: 32px; }
+      .topnav-right .cta { padding: 5px 10px; font-size: .78rem; }
+      .profile-layout { padding: 12px 10px 32px; }
+      .section-header { padding: 14px; gap: 8px; }
+      .section-body { padding: 14px; }
+      .section-title { font-size: .92rem; }
+      .section-icon { width: 32px; height: 32px; font-size: 1rem; }
+      .btn-sm { padding: 5px 10px; font-size: .76rem; }
+    }
+
     @media (max-width: 480px) {
-      .profile-layout { padding: 12px 12px 32px; }
-      .topnav { height: 54px; }
+      .topnav { height: 52px; padding: 0 10px; }
+      .brand-logo { height: 28px; }
+      .profile-layout { padding: 10px 8px 28px; }
       .section-body { padding: 12px; }
-      .btn { padding: 8px 14px; font-size: 0.82rem; }
-      .topnav-right .cta { padding: 5px 10px; font-size: 0.8rem; }
+      .section-header { padding: 12px; }
+      .btn { padding: 7px 12px; font-size: .8rem; }
+      .btn-sm { padding: 4px 9px; font-size: .74rem; }
+      .empty-state { padding: 28px 16px; }
+      .empty-icon { font-size: 2.2rem; }
+    }
+
+    @media (max-width: 360px) {
+      .topnav-right .cta { padding: 4px 8px; font-size: .74rem; }
+      .section-body { padding: 10px; }
     }
 
     {% block extra_css %}{% endblock %}
@@ -277,8 +299,7 @@
 <nav class="topnav">
   <button class="mob-hamburger" onclick="openSidebar()" aria-label="Menu">&#9776;</button>
   <a class="topnav-brand" href="/accounts/dashboard/">
-    <div class="brand-icon">&#128188;</div>
-    Talent<span class="accent">Bridge</span>
+    <img src="/static/images/logo.png" alt="Hireiz" class="brand-logo">
   </a>
   <div class="topnav-right">
     <a href="/accounts/dashboard/job-seeker/">Dashboard</a>

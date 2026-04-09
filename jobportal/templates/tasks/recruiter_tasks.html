@@ -1,0 +1,164 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Assigned Tasks — Hireiz{% endblock %}
+
+{% block extra_css %}
+.rt-wrap { max-width: 960px; margin: 0 auto; padding: 40px 20px 80px; }
+.rt-hero {
+  background: linear-gradient(135deg,#0a1628 0%,#1e2e4a 100%);
+  border-radius: 18px; padding: 32px 32px 28px; margin-bottom: 28px; position:relative;overflow:hidden;
+}
+.rt-hero::before { content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;background:radial-gradient(circle,rgba(232,69,48,.15) 0%,transparent 70%);border-radius:50%; }
+.rt-hero-eyebrow { font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#E84530;margin-bottom:7px; }
+.rt-hero h1 { font-size:1.7rem;font-weight:800;color:#fff;margin-bottom:5px; }
+.rt-hero-sub { font-size:.88rem;color:rgba(255,255,255,.5); }
+
+.rt-stats { display:flex;gap:12px;flex-wrap:wrap;margin-bottom:26px; }
+.rt-stat { flex:1;min-width:100px;background:var(--white);border:1px solid var(--gray-200);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:10px; }
+.rt-stat-icon { width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.rt-stat-val { font-size:1.35rem;font-weight:800;color:var(--gray-900);line-height:1; }
+.rt-stat-lbl { font-size:.7rem;font-weight:600;color:var(--gray-400);margin-top:2px; }
+
+.rt-tabs { display:flex;gap:6px;flex-wrap:wrap;margin-bottom:22px; }
+.rt-tab { padding:6px 16px;border-radius:999px;font-size:.8rem;font-weight:600;border:1.5px solid var(--gray-200);color:var(--gray-600);background:var(--white);text-decoration:none;transition:all .15s; }
+.rt-tab:hover { border-color:var(--blue);color:var(--blue);text-decoration:none; }
+.rt-tab.active { background:var(--blue);border-color:var(--blue);color:#fff; }
+.rt-tab .cnt { display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:999px;font-size:.68rem;font-weight:700;padding:0 4px;background:rgba(255,255,255,.22);margin-left:4px; }
+.rt-tab:not(.active) .cnt { background:var(--gray-100);color:var(--gray-500); }
+
+/* Task row */
+.rt-row {
+  background:var(--white);border:1px solid var(--gray-200);border-radius:13px;
+  padding:18px 20px;margin-bottom:10px;display:flex;align-items:center;gap:16px;
+  transition:box-shadow .15s,border-color .15s;
+}
+.rt-row:hover { box-shadow:0 4px 14px -4px rgba(0,0,0,.08);border-color:var(--gray-300); }
+.rt-row-icon { width:42px;height:42px;border-radius:10px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.rt-row-body { flex:1;min-width:0; }
+.rt-row-title { font-size:.93rem;font-weight:700;color:var(--gray-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.rt-row-meta { display:flex;gap:10px;flex-wrap:wrap;font-size:.75rem;color:var(--gray-400);margin-top:3px; }
+.rt-row-meta span { display:flex;align-items:center;gap:4px; }
+.rt-row-right { display:flex;align-items:center;gap:10px;flex-shrink:0; }
+.status-badge { display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:999px;font-size:.74rem;font-weight:700;white-space:nowrap; }
+.btn-review {
+  display:inline-flex;align-items:center;gap:5px;padding:7px 16px;border-radius:8px;
+  background:var(--blue);color:#fff;font-size:.78rem;font-weight:700;text-decoration:none;
+  border:none;cursor:pointer;transition:background .15s;
+}
+.btn-review:hover { background:var(--blue-dark);color:#fff;text-decoration:none; }
+.btn-view {
+  display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;
+  background:var(--white);color:var(--gray-600);font-size:.78rem;font-weight:600;text-decoration:none;
+  border:1.5px solid var(--gray-200);transition:all .15s;
+}
+.btn-view:hover { border-color:var(--blue);color:var(--blue);text-decoration:none; }
+
+.empty-rt { text-align:center;padding:60px 24px;background:var(--white);border:1px dashed var(--gray-200);border-radius:16px; }
+.empty-rt-title { font-size:1rem;font-weight:700;color:var(--gray-800);margin-bottom:6px;margin-top:14px; }
+.empty-rt-desc { font-size:.875rem;color:var(--gray-400); }
+
+@media (max-width:600px) {
+  .rt-row { flex-wrap:wrap; }
+  .rt-row-right { width:100%;justify-content:space-between; }
+}
+{% endblock %}
+
+{% block content %}
+<div class="rt-wrap">
+
+  <div class="rt-hero">
+    <div class="rt-hero-eyebrow">Task Management</div>
+    <h1>Assigned Tasks</h1>
+    <p class="rt-hero-sub">{{ counts.total }} task{{ counts.total|pluralize }} assigned · {{ counts.submitted }} awaiting review</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="rt-stats">
+    <div class="rt-stat">
+      <div class="rt-stat-icon" style="background:#eff6ff;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+      <div><div class="rt-stat-val">{{ counts.total }}</div><div class="rt-stat-lbl">Total</div></div>
+    </div>
+    <div class="rt-stat">
+      <div class="rt-stat-icon" style="background:#fffbeb;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <div><div class="rt-stat-val">{{ counts.pending }}</div><div class="rt-stat-lbl">Pending</div></div>
+    </div>
+    <div class="rt-stat">
+      <div class="rt-stat-icon" style="background:#f5f3ff;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+      <div><div class="rt-stat-val">{{ counts.submitted }}</div><div class="rt-stat-lbl">Submitted</div></div>
+    </div>
+    <div class="rt-stat">
+      <div class="rt-stat-icon" style="background:#ecfdf5;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div><div class="rt-stat-val">{{ counts.approved }}</div><div class="rt-stat-lbl">Approved</div></div>
+    </div>
+    <div class="rt-stat">
+      <div class="rt-stat-icon" style="background:#fef2f2;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+      <div><div class="rt-stat-val">{{ counts.rejected }}</div><div class="rt-stat-lbl">Rejected</div></div>
+    </div>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="rt-tabs">
+    <a href="{% url 'tasks:recruiter_tasks' %}" class="rt-tab {% if not status_filter %}active{% endif %}">All <span class="cnt">{{ counts.total }}</span></a>
+    <a href="?status=pending" class="rt-tab {% if status_filter == 'pending' %}active{% endif %}">Pending <span class="cnt">{{ counts.pending }}</span></a>
+    <a href="?status=in_progress" class="rt-tab {% if status_filter == 'in_progress' %}active{% endif %}">In Progress <span class="cnt">{{ counts.in_progress }}</span></a>
+    <a href="?status=submitted" class="rt-tab {% if status_filter == 'submitted' %}active{% endif %}">Submitted <span class="cnt">{{ counts.submitted }}</span></a>
+    <a href="?status=approved" class="rt-tab {% if status_filter == 'approved' %}active{% endif %}">Approved <span class="cnt">{{ counts.approved }}</span></a>
+    <a href="?status=rejected" class="rt-tab {% if status_filter == 'rejected' %}active{% endif %}">Rejected <span class="cnt">{{ counts.rejected }}</span></a>
+  </div>
+
+  <!-- Task rows -->
+  {% if tasks %}
+    {% for task in tasks %}
+    <div class="rt-row">
+      <div class="rt-row-icon">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </div>
+      <div class="rt-row-body">
+        <div class="rt-row-title">{{ task.title }}</div>
+        <div class="rt-row-meta">
+          <span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            {{ task.application.applicant.get_full_name|default:task.application.applicant.email }}
+          </span>
+          <span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {{ task.application.job.title }}
+          </span>
+          <span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Assigned {{ task.created_at|date:"M d" }}
+          </span>
+          {% if task.due_date %}
+          <span style="color:#dc2626;">Due {{ task.due_date|date:"M d, Y" }}</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="rt-row-right">
+        <span class="status-badge" style="background:{{ task.status_bg }};color:{{ task.status_color }};">
+          <svg width="7" height="7" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="{{ task.status_color }}"/></svg>
+          {{ task.status_label }}
+        </span>
+        {% if task.status == 'submitted' %}
+        <a href="{% url 'tasks:review_task' task.pk %}" class="btn-review">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Review
+        </a>
+        {% else %}
+        <a href="{% url 'tasks:review_task' task.pk %}" class="btn-view">View</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+
+  {% else %}
+  <div class="empty-rt">
+    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    <div class="empty-rt-title">No tasks assigned yet</div>
+    <div class="empty-rt-desc">
+      {% if status_filter %}No {{ status_filter|title }} tasks. <a href="{% url 'tasks:recruiter_tasks' %}">View all</a>
+      {% else %}Go to an applicant's profile and click "Assign Task" to get started.{% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -24,7 +24,8 @@ class PersonalDetailsForm(forms.ModelForm):
         model = JobSeekerProfile
         fields = [
             'profile_picture', 'headline', 'bio',
-            'date_of_birth', 'gender', 'location', 'nationality',
+            'date_of_birth', 'gender', 'location', 'address', 'nationality',
+            'languages',
             'website', 'linkedin_url', 'github_url',
             'is_available', 'preferred_job_type', 'expected_salary',
         ]
@@ -33,7 +34,14 @@ class PersonalDetailsForm(forms.ModelForm):
             'bio':          forms.Textarea(attrs={'rows': 4, 'placeholder': 'Tell employers about yourself…'}),
             'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
             'location':     forms.TextInput(attrs={'placeholder': 'City, Country'}),
-            'nationality':  forms.TextInput(attrs={'placeholder': 'e.g. American'}),
+            'address':      forms.Textarea(attrs={
+                'rows': 3,
+                'placeholder': 'e.g. 12 Main Street, Koramangala, Bangalore 560034, Karnataka, India',
+            }),
+            'nationality':  forms.TextInput(attrs={'placeholder': 'e.g. Indian'}),
+            'languages':    forms.TextInput(attrs={
+                'placeholder': 'e.g. English, Hindi, Tamil, French',
+            }),
             'website':      forms.URLInput(attrs={'placeholder': 'https://yourwebsite.com'}),
             'linkedin_url': forms.URLInput(attrs={'placeholder': 'https://linkedin.com/in/yourname'}),
             'github_url':   forms.URLInput(attrs={'placeholder': 'https://github.com/yourname'}),

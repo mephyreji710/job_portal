@@ -1,5 +1,5 @@
 {% extends 'accounts/base.html' %}
-{% block title %}Admin Dashboard — TalentBridge{% endblock %}
+{% block title %}Admin Dashboard — Hireiz{% endblock %}
 
 {% block extra_css %}
 .main-content { padding: 32px; }
@@ -112,7 +112,7 @@
   <!-- WELCOME BANNER -->
   <div class="welcome-card" style="margin-bottom:28px;">
     <h2>&#128736; Platform Overview</h2>
-    <p>Real-time snapshot of TalentBridge activity.</p>
+    <p>Real-time snapshot of Hireiz activity.</p>
     <div class="ov-bar">
       <div class="ov-item">
         <div class="ov-val">{{ stats.total_users }}</div>
@@ -135,7 +135,7 @@
       </div>
       <div class="ov-div"></div>
       <div class="ov-item">
-        <div class="ov-val" style="color:#a78bfa;">{{ stats.hired }}</div>
+        <div class="ov-val" style="color:#F07060;">{{ stats.hired }}</div>
         <div class="ov-lbl">Hired</div>
       </div>
       <div class="ov-div"></div>
@@ -189,8 +189,8 @@
       <div class="adm-stat-label">Interviews Scheduled</div>
       <div class="adm-stat-sub">{{ stats.upcoming_interviews }} upcoming</div>
     </div>
-    <div class="adm-stat" style="border-top-color:#8b5cf6;">
-      <div class="adm-stat-val" style="color:#8b5cf6;">{{ stats.confirmed_interviews }}</div>
+    <div class="adm-stat" style="border-top-color:#F07060;">
+      <div class="adm-stat-val" style="color:#F07060;">{{ stats.confirmed_interviews }}</div>
       <div class="adm-stat-label">Confirmed Interviews</div>
       <div class="adm-stat-sub">Candidate confirmed</div>
     </div>
@@ -229,7 +229,7 @@
         </div>
         <div class="pipe-row">
           <div class="pipe-label">&#127881; Hired</div>
-          <div class="pipe-track"><div class="pipe-fill" style="width:{% widthratio stats.hired total 100 %}%;background:#8b5cf6;"></div></div>
+          <div class="pipe-track"><div class="pipe-fill" style="width:{% widthratio stats.hired total 100 %}%;background:#F07060;"></div></div>
           <div class="pipe-count">{{ stats.hired }}</div>
         </div>
         {% endwith %}
@@ -247,7 +247,7 @@
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem;">
               <span style="color:var(--gray-600);">Hire rate</span>
-              <span style="font-weight:800;color:#8b5cf6;">{% widthratio stats.hired stats.total_apps 100 %}%</span>
+              <span style="font-weight:800;color:#F07060;">{% widthratio stats.hired stats.total_apps 100 %}%</span>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem;">
               <span style="color:var(--gray-600);">Interview rate</span>
@@ -260,7 +260,7 @@
         </div>
         <div style="background:var(--gray-50);border-radius:var(--radius);padding:14px 16px;">
           <div style="font-size:.72rem;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">&#127942; Total Hired</div>
-          <div style="font-size:2.4rem;font-weight:900;color:#8b5cf6;line-height:1;">{{ stats.hired }}</div>
+          <div style="font-size:2.4rem;font-weight:900;color:#F07060;line-height:1;">{{ stats.hired }}</div>
           <div style="font-size:.75rem;color:var(--gray-400);margin-top:2px;">successful placements</div>
         </div>
       </div>
@@ -369,7 +369,7 @@
           <a href="/admin/recruiter/recruiterprofile/" class="qa-btn">
             <span class="qa-icon">&#127970;</span><span>Recruiters</span>
           </a>
-          <a href="{% url 'analytics:dashboard' %}" class="qa-btn" style="border-color:var(--indigo);background:#eef2ff;color:var(--indigo);">
+          <a href="{% url 'analytics:dashboard' %}" class="qa-btn" style="border-color:var(--indigo);background:#FFF0EE;color:var(--indigo);">
             <span class="qa-icon">&#128200;</span><span>Analytics</span>
           </a>
           <a href="/admin/" class="qa-btn">

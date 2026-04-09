@@ -1,223 +1,715 @@
 {% extends 'jobseeker/base_profile.html' %}
-{% block title %}My Applications{% endblock %}
+{% block title %}My Applications — Hireiz{% endblock %}
 {% block nav_resume %}active{% endblock %}
 
 {% block extra_css %}
-.apps-wrap { max-width: 860px; }
+/* ══ Reset main padding ══ */
+.main-content { background: #f4f5f7; }
 
-.page-header {
-  background: linear-gradient(135deg, var(--indigo) 0%, #4338ca 100%);
-  border-radius: var(--radius-xl); padding: 24px 28px; margin-bottom: 20px;
+/* ══════════════════════════════
+   HERO
+══════════════════════════════ */
+.ma-hero {
+  background: linear-gradient(135deg, var(--navy) 0%, #1a2d4a 60%, #0f1f36 100%);
+  border-radius: 20px;
+  padding: 32px 36px 0;
+  margin-bottom: 24px;
+  position: relative; overflow: hidden;
 }
+.ma-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 500px 300px at 95% -20%, rgba(232,69,48,.2) 0%, transparent 70%),
+    radial-gradient(ellipse 300px 250px at -5% 110%, rgba(232,69,48,.10) 0%, transparent 60%);
+  pointer-events: none;
+}
+.ma-hero-inner {
+  position: relative; z-index: 1;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding-bottom: 28px;
+}
+.ma-hero-text {}
+.ma-eyebrow {
+  font-size: .68rem; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: rgba(232,69,48,.85); margin-bottom: 7px;
+}
+.ma-hero-title {
+  font-size: 1.55rem; font-weight: 800; color: #fff;
+  letter-spacing: -.03em; margin-bottom: 4px;
+}
+.ma-hero-sub { font-size: .85rem; color: rgba(255,255,255,.5); }
+.ma-hero-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 20px; border-radius: 11px;
+  background: var(--blue); color: #fff;
+  font-size: .82rem; font-weight: 700;
+  text-decoration: none; border: none; cursor: pointer;
+  font-family: var(--font); transition: background .2s; flex-shrink: 0;
+}
+.ma-hero-btn:hover { background: var(--blue-dark); color: #fff; text-decoration: none; }
+
+/* Stats strip inside hero */
+.ma-stats {
+  position: relative; z-index: 1;
+  display: flex;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.ma-stat {
+  flex: 1; padding: 18px 20px;
+  display: flex; align-items: center; gap: 14px;
+  border-right: 1px solid rgba(255,255,255,.07);
+  text-decoration: none; color: inherit;
+  transition: background .2s; cursor: default;
+}
+.ma-stat:last-child { border-right: none; }
+.ma-stat-icon {
+  width: 36px; height: 36px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.ma-stat-val { font-size: 1.5rem; font-weight: 800; color: #fff; line-height: 1; margin-bottom: 2px; }
+.ma-stat-lbl { font-size: .68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: rgba(255,255,255,.4); }
+
+/* ══════════════════════════════
+   FILTER TABS
+══════════════════════════════ */
+.ma-filters {
+  display: flex; gap: 5px; flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.ma-ftab {
+  padding: 6px 16px; border-radius: 999px;
+  font-size: .8rem; font-weight: 700;
+  border: 1.5px solid var(--gray-200);
+  color: var(--gray-600); background: #fff;
+  text-decoration: none; transition: all .15s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.ma-ftab:hover { border-color: var(--blue); color: var(--blue); text-decoration: none; }
+.ma-ftab.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.ma-ftab-count {
+  font-size: .7rem; font-weight: 800;
+  background: rgba(0,0,0,.12); color: inherit;
+  padding: 1px 6px; border-radius: 999px; line-height: 1.4;
+}
+.ma-ftab.active .ma-ftab-count { background: rgba(255,255,255,.2); }
+
+/* ══════════════════════════════
+   APPLICATION CARDS
+══════════════════════════════ */
+.app-list { display: flex; flex-direction: column; gap: 14px; }
 
 .app-card {
-  background: var(--white); border: 1.5px solid var(--gray-200);
-  border-radius: var(--radius-lg); padding: 18px 20px;
-  display: flex; align-items: flex-start; gap: 16px;
-  transition: border-color .2s; margin-bottom: 10px;
+  background: #fff;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 18px;
+  overflow: hidden;
+  transition: box-shadow .2s, border-color .2s, transform .2s;
 }
-.app-card:hover { border-color: var(--indigo); }
+.app-card:hover {
+  box-shadow: 0 10px 32px -8px rgba(0,0,0,.12);
+  border-color: var(--gray-300);
+  transform: translateY(-1px);
+}
 
-.co-logo { width: 46px; height: 46px; border-radius: 10px; border: 1.5px solid var(--gray-200);
-           overflow: hidden; display: flex; align-items: center; justify-content: center;
-           background: var(--gray-50); font-size: 1.2rem; flex-shrink: 0; }
-.co-logo img { width: 100%; height: 100%; object-fit: cover; }
+/* Card header */
+.app-card-head {
+  display: flex; align-items: flex-start; gap: 16px;
+  padding: 20px 22px 16px;
+}
+.ac-logo {
+  width: 50px; height: 50px; border-radius: 12px;
+  border: 1.5px solid var(--gray-200);
+  background: var(--gray-50);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; flex-shrink: 0; overflow: hidden;
+}
+.ac-logo img { width: 100%; height: 100%; object-fit: cover; }
 
-.app-info { flex: 1; min-width: 0; }
-.app-job  { font-size: .95rem; font-weight: 700; color: var(--gray-900); margin-bottom: 2px; }
-.app-co   { font-size: .82rem; color: var(--blue); font-weight: 600; }
-.app-meta { font-size: .75rem; color: var(--gray-400); margin-top: 5px; display: flex; flex-wrap: wrap; gap: 10px; }
+.ac-info { flex: 1; min-width: 0; }
+.ac-title {
+  font-size: .975rem; font-weight: 800; color: var(--gray-900);
+  margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ac-company {
+  font-size: .82rem; font-weight: 700; color: var(--blue); margin-bottom: 7px;
+}
+.ac-meta {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  font-size: .75rem; color: var(--gray-400);
+}
+.ac-meta-item { display: flex; align-items: center; gap: 4px; }
 
-.st-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: .75rem; font-weight: 700; }
+.ac-right {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex-shrink: 0;
+}
 
-.cover-preview { margin-top: 8px; font-size: .8rem; color: var(--gray-600); font-style: italic;
-                  background: var(--gray-50); padding: 8px 12px; border-radius: 8px;
-                  border-left: 3px solid var(--gray-200); white-space: pre-line; }
+/* Status pill */
+.ac-status {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 12px; border-radius: 999px;
+  font-size: .75rem; font-weight: 800;
+}
+.ac-status-dot { width: 6px; height: 6px; border-radius: 50%; }
 
-/* Stat strip */
-.stat-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-.ss-card { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: var(--radius-lg);
-           padding: 12px 16px; text-align: center; }
-.ss-num   { font-size: 1.4rem; font-weight: 800; }
-.ss-label { font-size: .72rem; color: var(--gray-400); font-weight: 600; margin-top: 2px; }
+/* Action buttons row */
+.ac-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.ac-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 13px; border-radius: 8px;
+  font-size: .75rem; font-weight: 700;
+  text-decoration: none; border: 1.5px solid var(--gray-200);
+  color: var(--gray-600); background: #fff;
+  cursor: pointer; font-family: var(--font);
+  transition: all .15s; white-space: nowrap;
+}
+.ac-btn:hover { border-color: var(--gray-400); color: var(--gray-800); text-decoration: none; }
+.ac-btn-primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+.ac-btn-primary:hover { background: var(--blue-dark); border-color: var(--blue-dark); color: #fff; }
+.ac-btn-danger { background: #fff; border-color: #fca5a5; color: #dc2626; }
+.ac-btn-danger:hover { background: #fef2f2; border-color: #f87171; color: #dc2626; }
+.ac-btn-gold { border-color: #fbbf24; color: #d97706; background: #fffbeb; }
+.ac-btn-gold:hover { background: #fef3c7; }
+.ac-btn-green { background: #10b981; border-color: #10b981; color: #fff; }
+.ac-btn-green:hover { background: #059669; border-color: #059669; color: #fff; }
+
+/* Card body (collapsible info blocks) */
+.app-card-body { padding: 0 22px 20px; display: flex; flex-direction: column; gap: 10px; }
+
+/* Resume row */
+.ac-resume-row {
+  display: flex; align-items: center; gap: 8px;
+  font-size: .78rem; color: var(--gray-500);
+  padding: 8px 12px; border-radius: 9px;
+  background: var(--gray-50); border: 1px solid var(--gray-100);
+}
+.ac-resume-name {
+  font-weight: 700; color: var(--blue); text-decoration: none;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px;
+}
+.ac-resume-name:hover { text-decoration: underline; }
+
+/* Cover letter */
+.ac-cover {
+  font-size: .8rem; color: var(--gray-600); font-style: italic;
+  background: var(--gray-50); padding: 10px 14px; border-radius: 9px;
+  border-left: 3px solid var(--gray-200); line-height: 1.6;
+  white-space: pre-line;
+}
+
+/* Interview block */
+.iv-block {
+  border-radius: 10px; overflow: hidden;
+  border: 1px solid rgba(232,69,48,.2);
+}
+.iv-block-head {
+  background: linear-gradient(135deg, var(--navy) 0%, #1a2d4a 100%);
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.iv-block-label {
+  font-size: .68rem; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; color: rgba(255,255,255,.9);
+}
+.iv-block-body { padding: 12px 14px; background: #fff8f7; }
+.iv-detail {
+  font-size: .82rem; font-weight: 700; color: var(--gray-800); margin-bottom: 6px;
+}
+.iv-badges { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px; }
+.iv-badge {
+  font-size: .7rem; font-weight: 700; padding: 2px 9px; border-radius: 999px;
+}
+.iv-actions { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 6px; }
+.iv-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 11px; border-radius: 7px; font-size: .72rem; font-weight: 700;
+  border: none; cursor: pointer; font-family: var(--font);
+  text-decoration: none; transition: opacity .15s;
+}
+.iv-btn:hover { opacity: .85; text-decoration: none; }
+.iv-btn-confirm { background: #10b981; color: #fff; }
+.iv-btn-decline { background: #fee2e2; color: #dc2626; }
+.iv-btn-view { background: var(--blue-pale); color: var(--blue-dark); }
+
+/* Assessment block */
+.asmt-block {
+  border-radius: 10px; overflow: hidden;
+}
+.asmt-pending {
+  background: #fffbeb; border: 1px solid #fde68a;
+  padding: 12px 14px;
+}
+.asmt-completed {
+  background: #f0fdf4; border: 1px solid #86efac;
+  padding: 12px 14px;
+}
+.asmt-label {
+  font-size: .68rem; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; margin-bottom: 5px;
+}
+.asmt-detail { font-size: .82rem; font-weight: 700; color: var(--gray-800); }
+
+/* Docs block */
+.docs-block {
+  border-radius: 10px; padding: 10px 14px;
+  font-size: .8rem; font-weight: 600;
+}
+.docs-needed { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+.docs-done   { background: #f0fdf4; border: 1px solid #86efac; color: #065f46; }
+
+/* Task block */
+.task-block { border-radius: 10px; overflow: hidden; border: 1px solid #c4b5fd; }
+.task-block-head {
+  background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%);
+  padding: 9px 14px; display: flex; align-items: center; gap: 8px;
+}
+.task-block-label { font-size: .68rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.9); }
+.task-item {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 10px 14px; background: #faf5ff;
+  border-top: 1px solid #ede9fe;
+}
+.task-item:first-of-type { border-top: none; }
+.task-item-title { flex: 1; min-width: 0; font-size: .82rem; font-weight: 700; color: var(--gray-800); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.task-status { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 999px; font-size: .7rem; font-weight: 700; white-space: nowrap; }
+.task-link { display: inline-flex; align-items: center; gap: 4px; font-size: .74rem; font-weight: 700; color: #7c3aed; text-decoration: none; padding: 4px 10px; border-radius: 7px; background: #ede9fe; transition: background .15s; white-space: nowrap; }
+.task-link:hover { background: #ddd6fe; color: #5b21b6; text-decoration: none; }
+
+/* ══════════════════════════════
+   EMPTY STATE
+══════════════════════════════ */
+.ma-empty {
+  text-align: center; padding: 80px 24px;
+  background: #fff; border: 1.5px solid var(--gray-200);
+  border-radius: 20px;
+}
+.ma-empty-icon { margin-bottom: 16px; color: var(--gray-300); }
+.ma-empty-title { font-size: 1.05rem; font-weight: 800; color: var(--gray-800); margin-bottom: 6px; }
+.ma-empty-sub   { font-size: .875rem; color: var(--gray-400); margin-bottom: 22px; }
+
+/* ══════════════════════════════
+   RESPONSIVE
+══════════════════════════════ */
+@media (max-width: 768px) {
+  .ma-hero { padding: 24px 20px 0; border-radius: 16px; }
+  .ma-hero-title { font-size: 1.3rem; }
+  .ma-stats { flex-wrap: wrap; }
+  .ma-stat { flex: 0 0 50%; border-bottom: 1px solid rgba(255,255,255,.07); }
+  .ma-stat:nth-child(2n) { border-right: none; }
+  .ma-stat:last-child { border-bottom: none; }
+  .ma-stat:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+}
+@media (max-width: 600px) {
+  .app-card-head { flex-wrap: wrap; gap: 12px; }
+  .ac-right { flex-direction: row; align-items: center; flex-wrap: wrap; width: 100%; justify-content: flex-start; }
+  .ac-actions { flex-direction: row; flex-wrap: wrap; }
+  .ac-btn { font-size: .72rem; padding: 5px 10px; }
+  .app-card-body { padding: 0 14px 14px; }
+  .ac-logo { width: 42px; height: 42px; border-radius: 10px; }
+  .ac-title { font-size: .9rem; }
+  .ma-filters { gap: 4px; }
+  .ma-ftab { padding: 5px 12px; font-size: .76rem; }
+}
+@media (max-width: 420px) {
+  .ma-stat { flex: 0 0 100%; border-right: none; }
+  .ma-hero-inner { flex-direction: column; align-items: flex-start; }
+  .ma-hero-btn { align-self: stretch; justify-content: center; }
+}
 {% endblock %}
 
 {% block main_content %}
-<div class="apps-wrap">
 
-  <div class="page-header">
-    <h2 style="color:#fff;font-size:1.2rem;font-weight:800;margin-bottom:4px;">&#128640; My Applications</h2>
-    <p style="color:rgba(255,255,255,.65);font-size:.875rem;">
-      {{ counts.total }} application{{ counts.total|pluralize }} submitted
-    </p>
+<!-- ══ HERO ══ -->
+<div class="ma-hero">
+  <div class="ma-hero-inner">
+    <div class="ma-hero-text">
+      <div class="ma-eyebrow">Job Seeker</div>
+      <div class="ma-hero-title">My Applications</div>
+      <div class="ma-hero-sub">
+        {% if counts.total == 0 %}No applications yet — browse and apply below
+        {% elif counts.total == 1 %}1 application submitted
+        {% else %}{{ counts.total }} applications submitted{% endif %}
+      </div>
+    </div>
+    <a href="{% url 'jobs:board' %}" class="ma-hero-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Browse Jobs
+    </a>
   </div>
 
-  <!-- STATS -->
-  <div class="stat-strip">
-    <div class="ss-card">
-      <div class="ss-num" style="color:var(--gray-600);">{{ counts.total }}</div>
-      <div class="ss-label">Total</div>
+  <!-- Stats strip -->
+  <div class="ma-stats">
+    <div class="ma-stat">
+      <div class="ma-stat-icon" style="background:rgba(255,255,255,.1);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <div>
+        <div class="ma-stat-val">{{ counts.total }}</div>
+        <div class="ma-stat-lbl">Total</div>
+      </div>
     </div>
-    <div class="ss-card">
-      <div class="ss-num" style="color:var(--gray-500);">{{ counts.pending }}</div>
-      <div class="ss-label">Pending</div>
+    <div class="ma-stat">
+      <div class="ma-stat-icon" style="background:rgba(245,158,11,.2);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div>
+        <div class="ma-stat-val">{{ counts.pending }}</div>
+        <div class="ma-stat-lbl">Pending</div>
+      </div>
     </div>
-    <div class="ss-card">
-      <div class="ss-num" style="color:var(--green);">{{ counts.shortlisted }}</div>
-      <div class="ss-label">Shortlisted</div>
+    <div class="ma-stat">
+      <div class="ma-stat-icon" style="background:rgba(16,185,129,.2);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div>
+        <div class="ma-stat-val">{{ counts.shortlisted }}</div>
+        <div class="ma-stat-lbl">Shortlisted</div>
+      </div>
     </div>
-    <div class="ss-card">
-      <div class="ss-num" style="color:#8b5cf6;">{{ counts.hired }}</div>
-      <div class="ss-label">Hired</div>
+    <div class="ma-stat">
+      <div class="ma-stat-icon" style="background:rgba(239,68,68,.2);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
+      <div>
+        <div class="ma-stat-val">{{ counts.rejected }}</div>
+        <div class="ma-stat-lbl">Rejected</div>
+      </div>
+    </div>
+    <div class="ma-stat">
+      <div class="ma-stat-icon" style="background:rgba(232,69,48,.2);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E84530" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <div>
+        <div class="ma-stat-val">{{ counts.hired }}</div>
+        <div class="ma-stat-lbl">Hired</div>
+      </div>
     </div>
   </div>
+</div>
 
-  {% if applications %}
-  <div>
-    {% for app in applications %}
-    <div class="app-card">
-      <div class="co-logo">
-        {% if app.job.recruiter.logo %}<img src="{{ app.job.recruiter.logo.url }}" alt="">{% else %}&#127970;{% endif %}
+<!-- ══ FILTER TABS ══ -->
+<div class="ma-filters">
+  <a href="{% url 'applications:my_applications' %}"
+     class="ma-ftab {% if not status_filter %}active{% endif %}">
+    All
+    <span class="ma-ftab-count">{{ counts.total }}</span>
+  </a>
+  <a href="{% url 'applications:my_applications' %}?status=pending"
+     class="ma-ftab {% if status_filter == 'pending' %}active{% endif %}">
+    Pending
+    <span class="ma-ftab-count">{{ counts.pending }}</span>
+  </a>
+  <a href="{% url 'applications:my_applications' %}?status=shortlisted"
+     class="ma-ftab {% if status_filter == 'shortlisted' %}active{% endif %}">
+    Shortlisted
+    <span class="ma-ftab-count">{{ counts.shortlisted }}</span>
+  </a>
+  <a href="{% url 'applications:my_applications' %}?status=rejected"
+     class="ma-ftab {% if status_filter == 'rejected' %}active{% endif %}">
+    Rejected
+    <span class="ma-ftab-count">{{ counts.rejected }}</span>
+  </a>
+  <a href="{% url 'applications:my_applications' %}?status=hired"
+     class="ma-ftab {% if status_filter == 'hired' %}active{% endif %}"
+     style="{% if not status_filter == 'hired' %}border-color:#fca5a5;color:#e84530;{% endif %}">
+    Hired
+    <span class="ma-ftab-count">{{ counts.hired }}</span>
+  </a>
+</div>
+
+<!-- ══ APPLICATION LIST ══ -->
+{% if applications %}
+<div class="app-list">
+  {% for app in applications %}
+  <div class="app-card">
+
+    <!-- Card Head -->
+    <div class="app-card-head">
+
+      <!-- Company Logo -->
+      <div class="ac-logo">
+        {% if app.job.recruiter.logo %}
+          <img src="{{ app.job.recruiter.logo.url }}" alt="{{ app.job.recruiter.company_name }}">
+        {% else %}
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+        {% endif %}
       </div>
 
-      <div class="app-info">
-        <div class="app-job">{{ app.job.title }}</div>
-        <div class="app-co">{{ app.job.recruiter.company_name }}</div>
-        <div class="app-meta">
-          <span>&#128197; Applied {{ app.applied_at|date:"M d, Y" }}</span>
-          <span>&#128188; {{ app.job.get_job_type_display }}</span>
-          {% if app.job.location %}<span>&#128205; {{ app.job.location }}</span>{% endif %}
-          {% if app.job.is_remote %}<span>&#127760; Remote</span>{% endif %}
+      <!-- Main Info -->
+      <div class="ac-info">
+        <div class="ac-title">{{ app.job.title }}</div>
+        <div class="ac-company">{{ app.job.recruiter.company_name }}</div>
+        <div class="ac-meta">
+          <span class="ac-meta-item">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Applied {{ app.applied_at|date:"M d, Y" }}
+          </span>
+          <span class="ac-meta-item">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+            {{ app.job.get_job_type_display }}
+          </span>
+          {% if app.job.location %}
+          <span class="ac-meta-item">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {{ app.job.location }}
+          </span>
+          {% endif %}
+          {% if app.job.is_remote %}
+          <span class="ac-meta-item" style="color:#10b981;font-weight:700;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="2 12 12 12 17 7"/></svg>
+            Remote
+          </span>
+          {% endif %}
         </div>
-        {% if app.resume %}
-        <div style="margin-top:6px;display:flex;align-items:center;gap:8px;font-size:.78rem;">
-          <span style="color:var(--gray-500);">&#128196; Resume:</span>
-          <a href="{{ app.resume.file.url }}" target="_blank"
-             style="color:var(--blue);font-weight:700;text-decoration:none;">
-            {{ app.resume.original_filename }}
-          </a>
-        </div>
-        {% endif %}
-        {% if app.cover_letter %}
-        <div class="cover-preview">&#128196; {{ app.cover_letter|truncatechars:140 }}</div>
-        {% endif %}
+      </div>
 
-        {# Interview info block #}
-        {% with iv=app.interview %}
-        {% if iv and iv.status != 'cancelled' %}
-        <div style="margin-top:10px;background:#eef2ff;border-left:3px solid var(--indigo);border-radius:0 8px 8px 0;padding:10px 14px;font-size:.82rem;">
-          <div style="font-size:.7rem;font-weight:800;color:var(--indigo);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">
-            &#128197; Interview Scheduled
+      <!-- Right: Status + Actions -->
+      <div class="ac-right">
+        <!-- Status badge -->
+        <span class="ac-status" style="background:{{ app.status_bg }};color:{{ app.status_color }};">
+          <span class="ac-status-dot" style="background:{{ app.status_color }};"></span>
+          {{ app.get_status_display }}
+        </span>
+
+        <!-- Action buttons -->
+        <div class="ac-actions">
+          <a href="{% url 'jobs:detail' app.job.pk %}" class="ac-btn">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            View Job
+          </a>
+          <a href="{% url 'interviews:my_interviews' %}" class="ac-btn">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Interviews
+          </a>
+
+          {% if app.status != 'pending' %}
+            {% if app.pk in rated_company_ids %}
+            <span class="ac-btn" style="cursor:default;color:#10b981;border-color:#a7f3d0;background:#f0fdf4;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              Rated
+            </span>
+            {% else %}
+            <a href="{% url 'feedback:give' app.pk %}" class="ac-btn ac-btn-gold">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              Rate Company
+            </a>
+            {% endif %}
+          {% endif %}
+
+          {% if app.status == 'shortlisted' %}
+            {% with asmt=app.assessment_obj %}
+            {% if asmt %}
+              {% if asmt.attempt_obj and asmt.attempt_obj.is_completed %}
+              <a href="{% url 'assessments:result' asmt.attempt_obj.pk %}" class="ac-btn ac-btn-primary">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                Assessment Score
+              </a>
+              {% if asmt.doc_requested and not asmt.attempt_obj.documents.all %}
+              <a href="{% url 'assessments:submit_docs' asmt.attempt_obj.pk 'experience' %}" class="ac-btn ac-btn-gold" style="animation:pulse 2s infinite;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload Docs
+              </a>
+              {% endif %}
+              {% else %}
+              <a href="{% url 'assessments:take' asmt.pk %}" class="ac-btn ac-btn-primary" style="animation:pulse 2s infinite;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                Take Assessment
+              </a>
+              {% endif %}
+            {% endif %}
+            {% endwith %}
+          {% endif %}
+
+          {% if app.status == 'pending' %}
+          <form method="post" action="{% url 'applications:withdraw' app.pk %}"
+                onsubmit="return confirm('Withdraw your application for {{ app.job.title|escapejs }}?')">
+            {% csrf_token %}
+            <button type="submit" class="ac-btn ac-btn-danger">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Withdraw
+            </button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+    </div><!-- /app-card-head -->
+
+    <!-- Card Body (resume + cover letter + interview + assessment) -->
+    <div class="app-card-body">
+
+      <!-- Resume -->
+      {% if app.resume %}
+      <div class="ac-resume-row">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span style="color:var(--gray-400);font-weight:600;white-space:nowrap;">Resume attached:</span>
+        <a href="{{ app.resume.file.url }}" target="_blank" class="ac-resume-name">
+          {{ app.resume.original_filename }}
+        </a>
+      </div>
+      {% endif %}
+
+      <!-- Cover Letter -->
+      {% if app.cover_letter %}
+      <div class="ac-cover">{{ app.cover_letter|truncatechars:180 }}</div>
+      {% endif %}
+
+      <!-- Interview block -->
+      {% with iv=app.interview %}
+      {% if iv and iv.status != 'cancelled' %}
+      <div class="iv-block">
+        <div class="iv-block-head">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span class="iv-block-label">Interview Scheduled</span>
+        </div>
+        <div class="iv-block-body">
+          <div class="iv-detail">
+            {{ iv.get_interview_type_display }}
+            &nbsp;&bull;&nbsp; {{ iv.scheduled_at|date:"M d, Y" }} at {{ iv.scheduled_at|date:"H:i" }}
+            &nbsp;&bull;&nbsp; {{ iv.duration_mins }} min
           </div>
-          <div style="color:var(--gray-700);font-weight:600;">
-            {{ iv.get_interview_type_display }} &bull; {{ iv.scheduled_at|date:"l, F d Y" }} at {{ iv.scheduled_at|date:"H:i" }} &bull; {{ iv.duration_mins }} min
-          </div>
-          <div style="margin-top:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <span style="background:{{ iv.status_bg }};color:{{ iv.status_color }};padding:2px 8px;border-radius:999px;font-size:.7rem;font-weight:700;">
-              &#9679; {{ iv.get_status_display }}
+          <div class="iv-badges">
+            <span class="iv-badge" style="background:{{ iv.status_bg }};color:{{ iv.status_color }};">
+              {{ iv.get_status_display }}
             </span>
             {% if iv.meeting_link %}
-            <a href="{{ iv.meeting_link }}" target="_blank" style="color:var(--blue);font-size:.75rem;font-weight:600;">&#128279; Join Call</a>
+            <a href="{{ iv.meeting_link }}" target="_blank" class="iv-badge" style="background:var(--blue-pale);color:var(--blue-dark);">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              Join Call
+            </a>
             {% endif %}
             {% if iv.location %}
-            <span style="color:var(--gray-500);">&#128205; {{ iv.location }}</span>
+            <span class="iv-badge" style="background:var(--gray-100);color:var(--gray-600);">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              {{ iv.location }}
+            </span>
             {% endif %}
           </div>
           {% if iv.status == 'scheduled' %}
-          <div style="margin-top:8px;display:flex;gap:8px;">
-            <form method="post" action="{% url 'interviews:confirm' iv.pk %}" style="margin:0;">
+          <div class="iv-actions">
+            <form method="post" action="{% url 'interviews:confirm' iv.pk %}">
               {% csrf_token %}
-              <button type="submit" class="btn btn-primary btn-sm" style="font-size:.72rem;background:var(--green);">&#10003; Confirm</button>
+              <button type="submit" class="iv-btn iv-btn-confirm">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Confirm
+              </button>
             </form>
-            <form method="post" action="{% url 'interviews:decline' iv.pk %}"
-                  onsubmit="return confirm('Decline this interview?');" style="margin:0;">
+            <form method="post" action="{% url 'interviews:decline' iv.pk %}" onsubmit="return confirm('Decline this interview?');">
               {% csrf_token %}
-              <button type="submit" class="btn btn-danger btn-sm" style="font-size:.72rem;">&#10005; Decline</button>
+              <button type="submit" class="iv-btn iv-btn-decline">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Decline
+              </button>
             </form>
           </div>
           {% elif iv.status == 'confirmed' %}
-          <div style="margin-top:6px;">
-            <a href="{% url 'interviews:my_interviews' %}" style="font-size:.72rem;color:var(--indigo);font-weight:600;">&#128279; View in My Interviews</a>
+          <div class="iv-actions">
+            <a href="{% url 'interviews:my_interviews' %}" class="iv-btn iv-btn-view">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              View in My Interviews
+            </a>
           </div>
           {% endif %}
         </div>
-        {% endif %}
-        {% endwith %}
-
-        {# Assessment block #}
-        {% with attempt=app._attempt %}
-        {% if attempt %}
-        <div style="margin-top:10px;border-radius:0 10px 10px 0;padding:12px 16px;font-size:.82rem;
-          {% if attempt.status == 'passed' %}background:#f0fdf4;border-left:3px solid #10b981;
-          {% elif attempt.status == 'failed' %}background:#fef2f2;border-left:3px solid #ef4444;
-          {% else %}background:#f5f3ff;border-left:3px solid #7c3aed;{% endif %}">
-          <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;
-            {% if attempt.status == 'passed' %}color:#059669;
-            {% elif attempt.status == 'failed' %}color:#dc2626;
-            {% else %}color:#7c3aed;{% endif %}">
-            &#128221; Assessment
-          </div>
-          {% if attempt.status == 'pending' or attempt.status == 'in_progress' %}
-          <div style="color:var(--gray-700);font-weight:600;margin-bottom:6px;">
-            {{ attempt.assessment.title }} &bull; {{ attempt.assessment.time_limit_minutes }} min &bull; 25 questions
-          </div>
-          <a href="{% url 'assessment:take' attempt.pk %}"
-             style="display:inline-flex;align-items:center;gap:6px;padding:7px 18px;
-                    background:#7c3aed;color:#fff;border-radius:8px;font-size:.82rem;
-                    font-weight:700;text-decoration:none;">
-            &#9654; Take Assessment Now
-          </a>
-          {% elif attempt.status == 'passed' %}
-          <div style="color:#065f46;font-weight:700;">
-            &#9989; Passed — {{ attempt.score }}/{{ attempt.total_questions }} &nbsp;
-            <a href="{% url 'assessment:my_result' attempt.pk %}" style="color:#059669;font-size:.78rem;">View details</a>
-          </div>
-          {% elif attempt.status == 'failed' %}
-          <div style="color:#991b1b;font-weight:700;">
-            &#10060; Did not pass — {{ attempt.score }}/{{ attempt.total_questions }} &nbsp;
-            <a href="{% url 'assessment:my_result' attempt.pk %}" style="color:#dc2626;font-size:.78rem;">View details</a>
-          </div>
-          {% endif %}
-        </div>
-        {% endif %}
-        {% endwith %}
-
       </div>
+      {% endif %}
+      {% endwith %}
 
-      <!-- Status + actions -->
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
-        <span class="st-pill" style="background:{{ app.status_bg }};color:{{ app.status_color }};">
-          &#9679; {{ app.get_status_display }}
-        </span>
-        <a href="{% url 'jobs:detail' app.job.pk %}" class="btn btn-outline btn-sm">&#128269; View Job</a>
-        <a href="{% url 'interviews:my_interviews' %}" class="btn btn-outline btn-sm" style="border-color:var(--indigo);color:var(--indigo);">&#128197; Interviews</a>
-        {% if app.status != 'pending' %}
-          {% if app.pk in rated_company_ids %}
-          <span style="font-size:.72rem;color:var(--green);font-weight:700;">&#9733; Company Rated</span>
+      <!-- Assessment block -->
+      {% if app.status == 'shortlisted' %}
+      {% with asmt=app.assessment_obj %}
+      {% if asmt %}
+        {% with att=asmt.attempt_obj %}
+        {% if att and att.is_completed %}
+        <div class="asmt-block asmt-completed">
+          <div class="asmt-label" style="color:#065f46;">
+            <svg width="12" height="12" style="vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Assessment Completed
+          </div>
+          <div class="asmt-detail">
+            Score: <span style="color:{{ att.score_color }};font-weight:800;">{{ att.score|floatformat:0 }}% — {{ att.score_label }}</span>
+            &bull; {{ att.correct_count }}/{{ att.total_count }} correct
+          </div>
+        </div>
+        {% if asmt.doc_requested %}
+          {% if att.documents.all %}
+          <div class="docs-block docs-done">
+            <svg width="13" height="13" style="vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Documents submitted — the recruiter is reviewing your documents.
+          </div>
           {% else %}
-          <a href="{% url 'feedback:give' app.pk %}" class="btn btn-outline btn-sm" style="border-color:#f59e0b;color:#d97706;font-size:.72rem;">&#11088; Rate Company</a>
+          <div class="docs-block docs-needed">
+            <svg width="13" height="13" style="vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Document Verification Required — please upload your Work Experience, Certificates &amp; Criminal Record Check.
+          </div>
           {% endif %}
         {% endif %}
-        {% if app.status == 'pending' %}
-        <form method="post" action="{% url 'applications:withdraw' app.pk %}"
-              onsubmit="return confirm('Withdraw your application for {{ app.job.title|escapejs }}?')">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-danger btn-sm">&#10005; Withdraw</button>
-        </form>
+        {% else %}
+        <div class="asmt-block asmt-pending">
+          <div class="asmt-label" style="color:#92400e;">
+            <svg width="12" height="12" style="vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Assessment Pending
+          </div>
+          <div class="asmt-detail">
+            {{ asmt.title }} &bull; {{ asmt.question_count }} questions
+            {% if asmt.time_limit_mins > 0 %}
+            &bull; <span style="color:var(--gray-500);">{{ asmt.time_limit_mins }} min time limit</span>
+            {% endif %}
+          </div>
+        </div>
         {% endif %}
+        {% endwith %}
+      {% endif %}
+      {% endwith %}
+      {% endif %}
+
+      <!-- Tasks block -->
+      {% with app_tasks=app.tasks.all %}
+      {% if app_tasks %}
+      <div class="task-block">
+        <div class="task-block-head">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span class="task-block-label">Assigned Task{{ app_tasks|length|pluralize }}</span>
+          <span style="margin-left:auto;font-size:.68rem;font-weight:700;color:rgba(255,255,255,.5);">{{ app_tasks|length }}</span>
+        </div>
+        {% for task in app_tasks %}
+        <div class="task-item">
+          <span class="task-item-title">{{ task.title }}</span>
+          <span class="task-status" style="background:{{ task.status_bg }};color:{{ task.status_color }};">
+            <svg width="6" height="6" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="{{ task.status_color }}"/></svg>
+            {{ task.status_label }}
+          </span>
+          <a href="{% url 'tasks:task_detail' task.pk %}" class="task-link">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            Open Task
+          </a>
+        </div>
+        {% endfor %}
       </div>
-    </div>
-    {% endfor %}
-  </div>
+      {% endif %}
+      {% endwith %}
 
-  {% else %}
-  <div style="text-align:center;padding:64px 24px;background:var(--white);border-radius:var(--radius-xl);box-shadow:var(--shadow);">
-    <div style="font-size:3rem;margin-bottom:12px;">&#128640;</div>
-    <div style="font-size:1.1rem;font-weight:700;color:var(--gray-700);margin-bottom:6px;">No applications yet</div>
-    <div style="font-size:.875rem;color:var(--gray-400);margin-bottom:20px;">Browse jobs and click "Apply Now" to start applying.</div>
-    <a href="{% url 'jobs:board' %}" class="btn btn-primary">&#128269; Browse Jobs</a>
-  </div>
-  {% endif %}
+    </div><!-- /app-card-body -->
 
+  </div>
+  {% endfor %}
 </div>
+
+{% else %}
+<!-- Empty state -->
+<div class="ma-empty">
+  <div class="ma-empty-icon">
+    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+  </div>
+  {% if status_filter %}
+  <div class="ma-empty-title">No {{ status_filter }} applications</div>
+  <div class="ma-empty-sub">You don't have any applications with this status yet.</div>
+  <a href="{% url 'applications:my_applications' %}" class="ma-hero-btn" style="display:inline-flex;">View All Applications</a>
+  {% else %}
+  <div class="ma-empty-title">No applications yet</div>
+  <div class="ma-empty-sub">Browse open positions and click "Apply Now" to get started.</div>
+  <a href="{% url 'jobs:board' %}" class="ma-hero-btn" style="display:inline-flex;">Browse Jobs</a>
+  {% endif %}
+</div>
+{% endif %}
+
 {% endblock %}

@@ -3,35 +3,73 @@
 {% block nav_panel %}active{% endblock %}
 
 {% block extra_css %}
+/* ── Banner ──────────────────────────────────────────────── */
 .overview-banner {
   background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #0891b2 100%);
   border-radius: var(--radius-xl); padding: 28px 32px;
   display: flex; justify-content: space-between; align-items: center;
-  position: relative; overflow: hidden;
+  position: relative; overflow: hidden; gap: 16px;
 }
 .overview-banner::before {
   content: ''; position: absolute; top: -50px; right: -40px;
   width: 200px; height: 200px;
   background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+  pointer-events: none;
 }
-.banner-text h2 { color: var(--white); font-size: 1.4rem; font-weight: 800; }
-.banner-text p  { color: rgba(255,255,255,0.7); margin-top: 6px; font-size: 0.9rem; }
-.banner-actions { display: flex; gap: 10px; flex-wrap: wrap; z-index: 1; }
+.banner-text { flex: 1; min-width: 0; }
+.banner-text h2 { color: #fff; font-size: 1.4rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.banner-text p  { color: rgba(255,255,255,0.7); margin-top: 6px; font-size: 0.875rem; }
+.banner-actions { display: flex; gap: 8px; flex-wrap: wrap; z-index: 1; flex-shrink: 0; }
+.banner-actions .btn { white-space: nowrap; }
 
-.stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+/* ── Stat cards ──────────────────────────────────────────── */
+.stat-row   { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.stat-row-2 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 12px; }
+.assess-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+
 .stat-card {
   background: var(--white); border: 1.5px solid var(--gray-200);
-  border-radius: var(--radius-lg); padding: 18px 20px; text-align: center;
+  border-radius: var(--radius-lg); padding: 18px 16px; text-align: center;
+  text-decoration: none; display: block;
+  transition: border-color .15s, box-shadow .15s, transform .12s;
 }
-.stat-num   { font-size: 2rem; font-weight: 800; }
-.stat-label { font-size: 0.75rem; color: var(--gray-400); font-weight: 600; margin-top: 4px; }
+.stat-card:hover { border-color: #E84530; box-shadow: 0 4px 16px rgba(124,58,237,.12); transform: translateY(-1px); }
+.stat-num   { font-size: 2rem; font-weight: 800; line-height: 1.1; }
+.stat-label { font-size: 0.73rem; color: var(--gray-400); font-weight: 600; margin-top: 5px; }
 
+.stat-mini {
+  background: var(--white); border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius); padding: 12px 10px; text-align: center;
+  text-decoration: none; display: block; transition: border-color .15s;
+}
+.stat-mini:hover { border-color: #E84530; }
+.stat-mini-num   { font-size: 1.4rem; font-weight: 800; line-height: 1; }
+.stat-mini-label { font-size: 0.7rem; color: var(--gray-400); font-weight: 600; margin-top: 3px; }
+
+/* ── Recent apps ─────────────────────────────────────────── */
+.app-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 0; border-bottom: 1px solid var(--gray-100);
+}
+.app-row:last-child { border-bottom: none; }
+.app-avatar {
+  width: 36px; height: 36px; border-radius: 50%; background: #ede9fe;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .85rem; font-weight: 800; color: #E84530; flex-shrink: 0;
+}
+.app-name  { font-size: .875rem; font-weight: 700; color: var(--gray-800); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.app-job   { font-size: .75rem; color: var(--gray-400); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.app-right { text-align: right; flex-shrink: 0; }
+.status-pill { font-size: .68rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; display: inline-block; }
+.app-date  { font-size: .68rem; color: var(--gray-300); margin-top: 3px; }
+
+/* ── Company details ─────────────────────────────────────── */
 .info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .info-item {
   display: flex; align-items: flex-start; gap: 10px;
   padding: 12px 14px; background: var(--gray-50); border-radius: var(--radius);
 }
-.info-item-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.info-item-icon  { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
 .info-item-label { font-size: 0.72rem; color: var(--gray-400); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
 .info-item-val   { font-size: 0.875rem; color: var(--gray-800); font-weight: 600; margin-top: 2px; }
 
@@ -41,16 +79,52 @@
   border: 1px solid #fde68a; font-size: 0.75rem; font-weight: 600;
   padding: 4px 12px; border-radius: 8px;
 }
+
+/* ── Quick links ─────────────────────────────────────────── */
+.quick-links-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.ql-card {
+  border: 1.5px solid var(--gray-200); border-radius: var(--radius); padding: 16px;
+  display: flex; flex-direction: column;
+}
+.ql-icon  { font-size: 1.5rem; margin-bottom: 8px; }
+.ql-title { font-weight: 700; color: var(--gray-800); margin-bottom: 4px; font-size: .9rem; }
+.ql-desc  { font-size: 0.8rem; color: var(--gray-500); margin-bottom: 12px; flex: 1; }
+.ql-btn   { display: inline-block; font-size: 0.75rem; font-weight: 700; padding: 5px 14px;
+            border-radius: 999px; text-decoration: none; align-self: flex-start; }
+
+/* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .overview-banner { flex-wrap: wrap; gap: 14px; padding: 20px; }
-  .banner-actions { width: 100%; }
-  .stat-row { grid-template-columns: 1fr 1fr; }
-  .info-row { grid-template-columns: 1fr; }
-  .quick-links-grid { grid-template-columns: 1fr !important; }
+  .overview-banner  { flex-direction: column; align-items: flex-start; padding: 20px; }
+  .banner-actions   { width: 100%; justify-content: flex-start; }
+  .banner-text h2   { font-size: 1.2rem; white-space: normal; }
+  .stat-row         { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-row-2       { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .assess-row       { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .info-row         { grid-template-columns: 1fr; }
+  .quick-links-grid { grid-template-columns: 1fr; }
+  .app-right        { display: none; }   /* hide date/status on small tablet to save space */
 }
 @media (max-width: 480px) {
-  .stat-row { grid-template-columns: 1fr; }
-  .banner-text h2 { font-size: 1.1rem; }
+  .overview-banner  { padding: 16px; border-radius: var(--radius-lg); }
+  .banner-text h2   { font-size: 1.05rem; }
+  .banner-text p    { font-size: .8rem; }
+  .banner-actions   { flex-direction: column; }
+  .banner-actions .btn { width: 100%; text-align: center; }
+  .stat-row         { grid-template-columns: 1fr; gap: 8px; }
+  .stat-num         { font-size: 1.7rem; }
+  .stat-row-2       { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .assess-row       { grid-template-columns: 1fr; gap: 8px; }
+  .stat-card        { padding: 14px 12px; }
+  .app-avatar       { width: 32px; height: 32px; font-size: .75rem; }
+  .app-name         { font-size: .8rem; }
+  .app-job          { font-size: .7rem; }
+  .app-right        { display: block; }
+  .status-pill      { font-size: .62rem; padding: 2px 8px; }
+  .app-date         { display: none; }
+}
+@media (max-width: 360px) {
+  .stat-row-2       { grid-template-columns: 1fr 1fr; }
+  .banner-text h2   { font-size: .95rem; }
 }
 {% endblock %}
 
@@ -60,34 +134,100 @@
 <div class="overview-banner">
   <div class="banner-text">
     <h2>&#127970; {{ profile.company_name }}</h2>
-    <p>
-      {% if profile.tagline %}{{ profile.tagline }}{% else %}Add a tagline to attract candidates.{% endif %}
-    </p>
+    <p>{% if profile.tagline %}{{ profile.tagline }}{% else %}Add a tagline to attract candidates.{% endif %}</p>
   </div>
   <div class="banner-actions">
     <a href="{% url 'feedback:company_reviews' profile.pk %}" class="btn btn-outline" style="border-color:rgba(255,255,255,0.4);color:#fff;">
       &#11088;{% if stats.avg_rating %} {{ stats.avg_rating }}★{% else %} Reviews{% endif %}
     </a>
     <a href="{% url 'recruiter:edit' %}" class="btn btn-outline" style="border-color:rgba(255,255,255,0.4);color:#fff;">&#9998; Edit Profile</a>
-    <a href="{% url 'recruiter:jobs' %}"  class="btn btn-primary">Post a Job</a>
+    <a href="{% url 'recruiter:jobs' %}" class="btn btn-primary">&#43; Post a Job</a>
   </div>
 </div>
 
-<!-- STATS -->
+<!-- STATS ROW 1 -->
 <div class="stat-row">
-  <div class="stat-card">
-    <div class="stat-num" style="color:var(--green);">{{ stats.active_jobs }}</div>
-    <div class="stat-label">Active Job Posts</div>
+  <a href="{% url 'jobs:manage' %}" class="stat-card">
+    <div class="stat-num" style="color:#10b981;">{{ stats.active_jobs }}</div>
+    <div class="stat-label">&#128196; Active Job Posts</div>
+  </a>
+  <a href="{% url 'applications:all_applications' %}" class="stat-card">
+    <div class="stat-num" style="color:#3b82f6;">{{ stats.total_applied }}</div>
+    <div class="stat-label">&#128101; Total Applications</div>
+  </a>
+  <a href="{% url 'applications:all_applications' %}" class="stat-card">
+    <div class="stat-num" style="color:#E84530;">{{ stats.shortlisted }}</div>
+    <div class="stat-label">&#11088; Shortlisted</div>
+  </a>
+</div>
+
+<!-- STATS ROW 2 -->
+<div class="stat-row-2">
+  <a href="{% url 'applications:all_applications' %}" class="stat-mini">
+    <div class="stat-mini-num" style="color:#f59e0b;">{{ stats.pending }}</div>
+    <div class="stat-mini-label">&#9203; Pending</div>
+  </a>
+  <a href="{% url 'applications:all_applications' %}" class="stat-mini">
+    <div class="stat-mini-num" style="color:#3b82f6;">{{ stats.reviewed }}</div>
+    <div class="stat-mini-label">&#128065; Reviewed</div>
+  </a>
+  <a href="{% url 'applications:all_applications' %}" class="stat-mini">
+    <div class="stat-mini-num" style="color:#ef4444;">{{ stats.rejected }}</div>
+    <div class="stat-mini-label">&#10060; Rejected</div>
+  </a>
+  <a href="{% url 'applications:all_applications' %}" class="stat-mini">
+    <div class="stat-mini-num" style="color:#10b981;">{{ stats.hired }}</div>
+    <div class="stat-mini-label">&#127881; Hired</div>
+  </a>
+</div>
+
+<!-- ASSESSMENT STATS -->
+{% if stats.assessments_sent %}
+<div class="assess-row">
+  <div class="stat-mini" style="pointer-events:none;">
+    <div class="stat-mini-num" style="color:#E84530;">{{ stats.assessments_sent }}</div>
+    <div class="stat-mini-label">&#128203; Assessments Sent</div>
   </div>
-  <div class="stat-card">
-    <div class="stat-num" style="color:var(--blue);">{{ stats.total_applied }}</div>
-    <div class="stat-label">Total Applications</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-num" style="color:var(--indigo);">{{ stats.shortlisted }}</div>
-    <div class="stat-label">Shortlisted</div>
+  <div class="stat-mini" style="pointer-events:none;">
+    <div class="stat-mini-num" style="color:#10b981;">{{ stats.assessments_completed }}</div>
+    <div class="stat-mini-label">&#10003; Assessments Done</div>
   </div>
 </div>
+{% endif %}
+
+<!-- RECENT APPLICATIONS -->
+{% if recent_apps %}
+<div class="section-card" style="margin-top:16px;">
+  <div class="section-header">
+    <div class="section-title-wrap">
+      <div class="section-icon" style="background:#ede9fe;">&#128203;</div>
+      <div>
+        <div class="section-title">Recent Applications</div>
+        <div class="section-sub">Latest candidate activity</div>
+      </div>
+    </div>
+    <a href="{% url 'applications:all_applications' %}" class="btn btn-gray btn-sm">View All</a>
+  </div>
+  <div class="section-body" style="padding:0 20px 12px;">
+    {% for app in recent_apps %}
+    <div class="app-row">
+      <div class="app-avatar">{{ app.applicant.email|slice:":1"|upper }}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="app-name">{% if app.full_name %}{{ app.full_name }}{% else %}{{ app.applicant.email }}{% endif %}</div>
+        <div class="app-job">{{ app.job.title }}</div>
+      </div>
+      <div class="app-right">
+        <span class="status-pill"
+          style="background:{% if app.status == 'shortlisted' %}#ede9fe;color:#C73A26{% elif app.status == 'hired' %}#d1fae5;color:#065f46{% elif app.status == 'rejected' %}#fee2e2;color:#991b1b{% elif app.status == 'reviewed' %}#FEE0DA;color:#9a3420{% else %}#fef3c7;color:#92400e{% endif %};">
+          {{ app.get_status_display }}
+        </span>
+        <div class="app-date">{{ app.applied_at|date:"M d" }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
 
 <!-- ABOUT -->
 <div class="section-card">
@@ -128,50 +268,35 @@
         <span class="info-item-icon">&#127970;</span>
         <div>
           <div class="info-item-label">Company Type</div>
-          <div class="info-item-val">
-            {% if profile.company_type %}{{ profile.get_company_type_display }}
-            {% else %}<span class="missing-badge">Not set</span>{% endif %}
-          </div>
+          <div class="info-item-val">{% if profile.company_type %}{{ profile.get_company_type_display }}{% else %}<span class="missing-badge">Not set</span>{% endif %}</div>
         </div>
       </div>
       <div class="info-item">
         <span class="info-item-icon">&#127981;</span>
         <div>
           <div class="info-item-label">Industry</div>
-          <div class="info-item-val">
-            {% if profile.industry %}{{ profile.get_industry_display }}
-            {% else %}<span class="missing-badge">Not set</span>{% endif %}
-          </div>
+          <div class="info-item-val">{% if profile.industry %}{{ profile.get_industry_display }}{% else %}<span class="missing-badge">Not set</span>{% endif %}</div>
         </div>
       </div>
       <div class="info-item">
         <span class="info-item-icon">&#128101;</span>
         <div>
           <div class="info-item-label">Company Size</div>
-          <div class="info-item-val">
-            {% if profile.company_size %}{{ profile.get_company_size_display }}
-            {% else %}<span class="missing-badge">Not set</span>{% endif %}
-          </div>
+          <div class="info-item-val">{% if profile.company_size %}{{ profile.get_company_size_display }}{% else %}<span class="missing-badge">Not set</span>{% endif %}</div>
         </div>
       </div>
       <div class="info-item">
         <span class="info-item-icon">&#128205;</span>
         <div>
           <div class="info-item-label">Location</div>
-          <div class="info-item-val">
-            {% if profile.location %}{{ profile.location }}
-            {% else %}<span class="missing-badge">Not set</span>{% endif %}
-          </div>
+          <div class="info-item-val">{% if profile.location %}{{ profile.location }}{% else %}<span class="missing-badge">Not set</span>{% endif %}</div>
         </div>
       </div>
       <div class="info-item">
         <span class="info-item-icon">&#128197;</span>
         <div>
           <div class="info-item-label">Founded</div>
-          <div class="info-item-val">
-            {% if profile.founded_year %}{{ profile.founded_year }}
-            {% else %}<span class="missing-badge">Not set</span>{% endif %}
-          </div>
+          <div class="info-item-val">{% if profile.founded_year %}{{ profile.founded_year }}{% else %}<span class="missing-badge">Not set</span>{% endif %}</div>
         </div>
       </div>
       <div class="info-item">
@@ -179,8 +304,7 @@
         <div>
           <div class="info-item-label">Website</div>
           <div class="info-item-val">
-            {% if profile.company_website %}
-              <a href="{{ profile.company_website }}" target="_blank">{{ profile.company_website|truncatechars:30 }}</a>
+            {% if profile.company_website %}<a href="{{ profile.company_website }}" target="_blank">{{ profile.company_website|truncatechars:28 }}</a>
             {% else %}<span class="missing-badge">Not set</span>{% endif %}
           </div>
         </div>
@@ -214,35 +338,35 @@
       <div class="section-icon" style="background:var(--indigo-pale);">&#128640;</div>
       <div>
         <div class="section-title">What's Next?</div>
-        <div class="section-sub">Upcoming features &amp; actions</div>
+        <div class="section-sub">Quick actions</div>
       </div>
     </div>
   </div>
   <div class="section-body">
-    <div class="quick-links-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-      <div style="border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:16px;">
-        <div style="font-size:1.5rem;margin-bottom:8px;">&#128196;</div>
-        <div style="font-weight:700;color:var(--gray-800);margin-bottom:4px;">Post Job Listings</div>
-        <div style="font-size:0.8rem;color:var(--gray-500);margin-bottom:12px;">Create job postings to attract qualified candidates.</div>
-        <a href="{% url 'jobs:new' %}" style="display:inline-block;background:var(--green);color:#fff;font-size:0.75rem;font-weight:700;padding:5px 14px;border-radius:999px;text-decoration:none;">Post a Job &rarr;</a>
+    <div class="quick-links-grid">
+      <div class="ql-card">
+        <div class="ql-icon">&#128196;</div>
+        <div class="ql-title">Post Job Listings</div>
+        <div class="ql-desc">Create job postings to attract qualified candidates.</div>
+        <a href="{% url 'jobs:new' %}" class="ql-btn" style="background:var(--green);color:#fff;">Post a Job &rarr;</a>
       </div>
-      <div style="border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:16px;">
-        <div style="font-size:1.5rem;margin-bottom:8px;">&#129302;</div>
-        <div style="font-weight:700;color:var(--gray-800);margin-bottom:4px;">AI Resume Screening</div>
-        <div style="font-size:0.8rem;color:var(--gray-500);margin-bottom:12px;">Auto-rank candidates by resume match score.</div>
-        <a href="{% url 'screening:recruiter_overview' %}" style="display:inline-block;background:var(--indigo);color:#fff;font-size:0.75rem;font-weight:700;padding:5px 14px;border-radius:999px;text-decoration:none;">Open AI Screening &rarr;</a>
+      <div class="ql-card">
+        <div class="ql-icon">&#129302;</div>
+        <div class="ql-title">AI Resume Screening</div>
+        <div class="ql-desc">Auto-rank candidates by resume match score.</div>
+        <a href="{% url 'screening:recruiter_overview' %}" class="ql-btn" style="background:var(--indigo);color:#fff;">Open AI Screening &rarr;</a>
       </div>
-      <div style="border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:16px;">
-        <div style="font-size:1.5rem;margin-bottom:8px;">&#128197;</div>
-        <div style="font-weight:700;color:var(--gray-800);margin-bottom:4px;">Schedule Interviews</div>
-        <div style="font-size:0.8rem;color:var(--gray-500);margin-bottom:12px;">Invite shortlisted candidates to interviews.</div>
-        <a href="{% url 'jobs:manage' %}" style="display:inline-block;background:var(--blue);color:#fff;font-size:0.75rem;font-weight:700;padding:5px 14px;border-radius:999px;text-decoration:none;">Manage Applicants &rarr;</a>
+      <div class="ql-card">
+        <div class="ql-icon">&#128197;</div>
+        <div class="ql-title">Schedule Interviews</div>
+        <div class="ql-desc">Invite shortlisted candidates to interviews.</div>
+        <a href="{% url 'jobs:manage' %}" class="ql-btn" style="background:var(--blue);color:#fff;">Manage Applicants &rarr;</a>
       </div>
-      <div style="border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:16px;">
-        <div style="font-size:1.5rem;margin-bottom:8px;">&#128202;</div>
-        <div style="font-weight:700;color:var(--gray-800);margin-bottom:4px;">Analytics Dashboard</div>
-        <div style="font-size:0.8rem;color:var(--gray-500);margin-bottom:12px;">Track hiring funnel &amp; performance metrics.</div>
-        <a href="{% url 'analytics:dashboard' %}" style="display:inline-block;background:var(--orange);color:#fff;font-size:0.75rem;font-weight:700;padding:5px 14px;border-radius:999px;text-decoration:none;">View Analytics &rarr;</a>
+      <div class="ql-card">
+        <div class="ql-icon">&#128202;</div>
+        <div class="ql-title">Analytics Dashboard</div>
+        <div class="ql-desc">Track hiring funnel &amp; performance metrics.</div>
+        <a href="{% url 'analytics:dashboard' %}" class="ql-btn" style="background:var(--orange);color:#fff;">View Analytics &rarr;</a>
       </div>
     </div>
   </div>

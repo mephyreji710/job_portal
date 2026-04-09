@@ -12,7 +12,7 @@
 .overview-banner::before {
   content: ''; position: absolute; top: -50px; right: -40px;
   width: 200px; height: 200px;
-  background: radial-gradient(circle, rgba(79,70,229,0.3) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(232,69,48,0.3) 0%, transparent 70%);
 }
 .banner-text h2 { color: var(--white); font-size: 1.4rem; font-weight: 800; }
 .banner-text p  { color: rgba(255,255,255,0.65); margin-top: 6px; font-size: 0.9rem; }
@@ -27,7 +27,7 @@
 .skill-beginner     { background: #e0f2fe; color: #075985; }
 .skill-intermediate { background: var(--indigo-pale); color: var(--indigo); }
 .skill-advanced     { background: var(--green-pale); color: var(--green-dark); }
-.skill-expert       { background: #fdf4ff; color: #7e22ce; }
+.skill-expert       { background: #FFF0EE; color: #7e22ce; }
 .skill-bar-wrap { display: flex; align-items: center; gap: 10px; }
 .skill-bar { flex: 1; height: 6px; background: var(--gray-100); border-radius: 999px; overflow: hidden; }
 .skill-bar-fill { height: 100%; border-radius: 999px; }
@@ -65,6 +65,26 @@
 .about-text { font-size: 0.9rem; color: var(--gray-700); line-height: 1.75; }
 .info-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .info-chip { display: flex; align-items: center; gap: 5px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 8px; padding: 6px 12px; font-size: 0.8rem; color: var(--gray-600); }
+
+@media (max-width: 640px) {
+  .overview-banner { flex-direction: column; align-items: flex-start; padding: 20px; gap: 12px; }
+  .banner-actions { width: 100%; display: flex; gap: 8px; }
+  .banner-actions .btn { flex: 1; justify-content: center; }
+  .cert-cards { grid-template-columns: 1fr; }
+  .timeline-item { gap: 10px; }
+  .timeline-item .btn-xs { padding: 3px 7px; font-size: .7rem; }
+}
+@media (max-width: 480px) {
+  .overview-banner { padding: 16px; border-radius: var(--radius-lg); }
+  .banner-text h2 { font-size: 1.1rem; }
+  .banner-text p  { font-size: .8rem; }
+  .skill-pill { font-size: .75rem; padding: 4px 10px; }
+  .timeline-dot { width: 30px; height: 30px; font-size: .85rem; }
+  .timeline-item:not(:last-child)::before { left: 14px; }
+  .cert-card { padding: 12px; }
+  .cert-icon { width: 34px; height: 34px; font-size: 1rem; }
+  .info-chip { font-size: .74rem; padding: 4px 9px; }
+}
 {% endblock %}
 
 {% block main_content %}
@@ -109,6 +129,29 @@
       {% if profile.expected_salary %}<div class="info-chip">&#128181; ${{ profile.expected_salary }}/mo</div>{% endif %}
       {% if profile.date_of_birth %}<div class="info-chip">&#127874; {{ profile.date_of_birth|date:"M d, Y" }}</div>{% endif %}
     </div>
+
+    {% if profile.address %}
+    <div style="margin-top:14px;">
+      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);margin-bottom:6px;">Address</div>
+      <div style="font-size:.875rem;color:var(--gray-700);line-height:1.6;display:flex;align-items:flex-start;gap:8px;">
+        <span style="color:var(--blue);flex-shrink:0;margin-top:1px;">&#128205;</span>
+        <span>{{ profile.address|linebreaksbr }}</span>
+      </div>
+    </div>
+    {% endif %}
+
+    {% with langs=profile.get_languages_list %}{% if langs %}
+    <div style="margin-top:14px;">
+      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);margin-bottom:8px;">Languages</div>
+      <div style="display:flex;flex-wrap:wrap;gap:7px;">
+        {% for lang in langs %}
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:999px;background:var(--blue-pale);color:var(--blue-dark);font-size:.78rem;font-weight:700;border:1.5px solid rgba(232,69,48,.15);">
+          &#127760; {{ lang }}
+        </span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}{% endwith %}
   </div>
 </div>
 
@@ -142,7 +185,7 @@
             {% if skill.proficiency == 'beginner' %}#0ea5e9
             {% elif skill.proficiency == 'intermediate' %}{{ '' }}var(--indigo)
             {% elif skill.proficiency == 'advanced' %}var(--green)
-            {% else %}#8b5cf6{% endif %};"></div>
+            {% else %}#F07060{% endif %};"></div>
         </div>
       </div>
       {% endfor %}

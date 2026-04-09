@@ -14,7 +14,7 @@ def _require_recruiter(request):
         return None
     profile, _ = RecruiterProfile.objects.get_or_create(
         user=request.user,
-        defaults={'company_name': request.user.get_full_name() or request.user.username},
+        defaults={'company_name': 'My Company'},
     )
     return profile
 
@@ -35,16 +35,43 @@ def company_panel(request):
     from django.db.models import Avg
 
     job_ids = list(profile.jobs.values_list('id', flat=True))
+    apps = Application.objects.filter(job_id__in=job_ids)
+
     avg = Feedback.objects.filter(
         application__job_id__in=job_ids, feedback_type=Feedback.TYPE_C2CO
     ).aggregate(avg=Avg('rating'))['avg']
+
+    # Assessment counts
+    try:
+        from assessments.models import Assessment, AssessmentAttempt
+        assessments_sent = Assessment.objects.filter(application__job_id__in=job_ids).count()
+        assessments_completed = AssessmentAttempt.objects.filter(
+            assessment__application__job_id__in=job_ids, is_completed=True
+        ).count()
+    except Exception:
+        assessments_sent = 0
+        assessments_completed = 0
+
     stats = {
-        'active_jobs':   profile.jobs.filter(status=JobPost.STATUS_ACTIVE).count(),
-        'total_applied': Application.objects.filter(job_id__in=job_ids).count(),
-        'shortlisted':   Application.objects.filter(job_id__in=job_ids, status='shortlisted').count(),
-        'avg_rating':    round(avg, 1) if avg else None,
+        'active_jobs':           profile.jobs.filter(status=JobPost.STATUS_ACTIVE).count(),
+        'total_applied':         apps.count(),
+        'pending':               apps.filter(status='pending').count(),
+        'reviewed':              apps.filter(status='reviewed').count(),
+        'shortlisted':           apps.filter(status='shortlisted').count(),
+        'rejected':              apps.filter(status='rejected').count(),
+        'hired':                 apps.filter(status='hired').count(),
+        'assessments_sent':      assessments_sent,
+        'assessments_completed': assessments_completed,
+        'avg_rating':            round(avg, 1) if avg else None,
     }
-    return render(request, 'recruiter/panel.html', {'profile': profile, 'stats': stats})
+
+    recent_apps = apps.select_related('job', 'applicant').order_by('-applied_at')[:6]
+
+    return render(request, 'recruiter/panel.html', {
+        'profile':     profile,
+        'stats':       stats,
+        'recent_apps': recent_apps,
+    })
 
 
 # ---------------------------------------------------------------------------
